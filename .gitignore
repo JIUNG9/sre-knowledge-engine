@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.next/
+dist/
+out/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Turbo
+.turbo/
+
+# Go
+apps/api/aegis-api
+apps/api/tmp/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+# Docker
+docker-compose.override.yml
+
+# Test coverage
+coverage/
+htmlcov/
+.coverage
+
+# Logs
+*.log
+logs/
+
+# Plan files (internal)
+PLAN.md

@@ -1,0 +1,66 @@
+name: Bug Report
+description: Report a bug in Aegis
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill out the information below.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of the bug.
+      placeholder: What happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: Module
+      description: Which module is affected?
+      options:
+        - Log Explorer
+        - SLO/SLI Dashboard
+        - FinOps
+        - Incident Management
+        - Security Dashboard
+        - Deployment Tracker
+        - On-Call & Runbooks
+        - Service Catalog
+        - API
+        - AI Engine
+        - Other
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Any relevant environment details.
+      placeholder: |
+        - OS: macOS 15.0
+        - Browser: Chrome 131
+        - Aegis version: 0.1.0
+        - Deployment: Docker Compose / Helm

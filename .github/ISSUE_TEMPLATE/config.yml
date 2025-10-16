@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question / Discussion
+    url: https://github.com/JIUNG9/aegis/discussions
+    about: Ask questions and discuss Aegis features
+  - name: Discord Community
+    url: https://discord.gg/aegis
+    about: Chat with the community in real time

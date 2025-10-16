@@ -1,0 +1,23 @@
+# Aegis CODEOWNERS
+# These owners are automatically requested for PR review
+
+# Default — project lead reviews everything
+* @JIUNG9
+
+# Frontend
+apps/web/ @JIUNG9
+packages/ui/ @JIUNG9
+
+# API
+apps/api/ @JIUNG9
+
+# AI Engine
+apps/ai-engine/ @JIUNG9
+
+# Infrastructure & Deployment
+deploy/ @JIUNG9
+.github/workflows/ @JIUNG9
+
+# Documentation
+docs/ @JIUNG9
+*.md @JIUNG9

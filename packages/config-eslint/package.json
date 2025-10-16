@@ -1,0 +1,13 @@
+{
+  "name": "@aegis/config-eslint",
+  "version": "0.1.0",
+  "private": true,
+  "files": ["index.js"],
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
+    "typescript-eslint": "^8.0.0",
+    "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-react-hooks": "^5.0.0"
+  }
+}

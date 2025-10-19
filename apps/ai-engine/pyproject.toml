@@ -1,0 +1,26 @@
+[project]
+name = "aegis-ai-engine"
+version = "0.1.0"
+description = "AI-Native DevSecOps Command Center — AI Engine"
+requires-python = ">=3.12"
+license = "MIT"
+readme = "README.md"
+authors = [
+    { name = "Aegis Contributors" },
+]
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "anthropic>=0.42.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "httpx>=0.28.0",
+    "python-dotenv>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["agents*", "mcp*", "models*", "routers*"]

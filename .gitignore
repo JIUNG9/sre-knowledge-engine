@@ -48,7 +48,7 @@ htmlcov/
 
 # Logs
 *.log
-logs/
+/logs/
 
 # Plan files (internal)
 PLAN.md

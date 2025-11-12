@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Shield,
   Search,
@@ -41,7 +43,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const [activeItem, setActiveItem] = React.useState("/logs")
+  const pathname = usePathname()
 
   return (
     <aside
@@ -68,11 +70,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       <ScrollArea className="flex-1 py-2">
         <nav className="flex flex-col gap-0.5 px-2">
           {navItems.map((item) => {
-            const isActive = activeItem === item.href
-            const buttonContent = (
-              <button
+            const isActive = pathname === item.href
+            const linkContent = (
+              <Link
                 key={item.href}
-                onClick={() => setActiveItem(item.href)}
+                href={item.href}
                 className={cn(
                   "group flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-150 outline-none",
                   "hover:bg-surface-hover hover:text-foreground",
@@ -92,13 +94,13 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 {!collapsed && (
                   <span className="truncate">{item.label}</span>
                 )}
-              </button>
+              </Link>
             )
 
             if (collapsed) {
               return (
                 <Tooltip key={item.href}>
-                  <TooltipTrigger render={buttonContent} />
+                  <TooltipTrigger render={linkContent} />
                   <TooltipContent side="right">
                     {item.label}
                   </TooltipContent>
@@ -106,7 +108,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               )
             }
 
-            return buttonContent
+            return linkContent
           })}
         </nav>
       </ScrollArea>

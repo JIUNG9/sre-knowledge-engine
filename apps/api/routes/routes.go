@@ -70,9 +70,19 @@ func Setup(app *fiber.App, logger *zap.Logger) {
 
 	// SLOs.
 	slo := authenticated.Group("/slo")
-	slo.Get("/", handlers.ListSLOs)
 	slo.Get("/summary", handlers.GetSLOSummary)
+	slo.Get("/", handlers.ListSLOs)
+	slo.Post("/", handlers.CreateSLO)
 	slo.Get("/:id", handlers.GetSLO)
+	slo.Put("/:id", handlers.UpdateSLO)
+	slo.Delete("/:id", handlers.DeleteSLO)
+	slo.Get("/:id/budget", handlers.GetSLOErrorBudget)
+
+	// Services.
+	services := authenticated.Group("/services")
+	services.Get("/", handlers.ListServices)
+	services.Get("/:id", handlers.GetService)
+	services.Get("/:id/slos", handlers.GetServiceSLOs)
 
 	// Ingestion endpoints (separate from authenticated routes for external sources).
 	ingest := api.Group("/ingest")

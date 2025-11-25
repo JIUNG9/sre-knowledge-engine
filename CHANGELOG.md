@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-11-25
+
+### Added
+
+- SLO/SLI Dashboard with error budget visualization and burn rate tracking
+- SLO overview grid with meeting/at-risk/breaching status indicators
+- Error budget burn-down chart (Recharts area with color transitions)
+- SLO detail view with burn rate trend and event annotations
+- Create/edit SLO form with service, target, window, and SLI type selection
+- Time window toggle (Weekly/Monthly/Quarterly/Annually)
+- Service health grid with aggregate status and sparkline trends
+- Full SLO CRUD API (list, get, create, update, delete)
+- Error budget time series API for charting
+- Service catalog API with health status
+
 ## [0.2.0] - 2025-11-08
 
 ### Added

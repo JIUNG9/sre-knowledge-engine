@@ -84,6 +84,15 @@ func Setup(app *fiber.App, logger *zap.Logger) {
 	services.Get("/:id", handlers.GetService)
 	services.Get("/:id/slos", handlers.GetServiceSLOs)
 
+	// FinOps (Cloud Cost Management).
+	finops := authenticated.Group("/finops")
+	finops.Get("/summary", handlers.GetFinOpsSummary)
+	finops.Get("/costs", handlers.GetFinOpsCosts)
+	finops.Get("/trends", handlers.GetFinOpsTrends)
+	finops.Get("/anomalies", handlers.GetFinOpsAnomalies)
+	finops.Get("/budgets", handlers.GetFinOpsBudgets)
+	finops.Get("/kubernetes", handlers.GetFinOpsKubernetes)
+
 	// Ingestion endpoints (separate from authenticated routes for external sources).
 	ingest := api.Group("/ingest")
 	ingest.Post("/logs", ingestHandlers.IngestLogs)

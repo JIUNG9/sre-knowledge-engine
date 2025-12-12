@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-12-12
+
+### Added
+
+- FinOps Dashboard with real-time cloud cost tracking
+- Cost overview: monthly spend, MoM change, provider breakdown
+- Cost by service table with trend sparklines and sorting
+- Cost anomaly detection with severity-based cards
+- Budget tracker with projected end-of-month spend
+- Kubernetes cost allocation by namespace with idle resource metrics
+- Cost trend comparison chart (MoM, QoQ) with daily granularity
+- FinOps API: summary, costs, trends, anomalies, budgets, K8s costs
+
 ## [0.3.0] - 2025-11-25
 
 ### Added

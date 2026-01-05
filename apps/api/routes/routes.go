@@ -51,10 +51,19 @@ func Setup(app *fiber.App, logger *zap.Logger) {
 
 	// Incidents.
 	incidents := authenticated.Group("/incidents")
+	incidents.Get("/stats", handlers.GetIncidentStats)
 	incidents.Get("/", handlers.ListIncidents)
 	incidents.Get("/:id", handlers.GetIncident)
 	incidents.Post("/", handlers.CreateIncident)
 	incidents.Put("/:id", handlers.UpdateIncident)
+	incidents.Post("/:id/timeline", handlers.AddTimelineEvent)
+	incidents.Post("/:id/acknowledge", handlers.AcknowledgeIncident)
+	incidents.Post("/:id/resolve", handlers.ResolveIncident)
+
+	// Alerts.
+	alerts := authenticated.Group("/alerts")
+	alerts.Get("/", handlers.ListAlerts)
+	alerts.Get("/feed", handlers.GetAlertFeed)
 
 	// Logs — query endpoints.
 	logs := authenticated.Group("/logs")

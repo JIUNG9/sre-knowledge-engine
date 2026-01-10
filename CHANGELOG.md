@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-01-10
+
+### Added
+
+- Incident Management MVP with full lifecycle workflow
+- Incident list with severity/status filtering and card/table view toggle
+- Incident detail panel with chronological timeline visualization
+- Create incident form with severity, service, and assignee selection
+- Real-time alert feed sidebar with SigNoz/Datadog/Prometheus source badges
+- Incident timeline events (acknowledge, status change, notes, escalate)
+- Alert ingestion from Prometheus Alertmanager webhook format
+- Alert deduplication via fingerprint matching
+- Incident statistics (active counts by severity, MTTR, resolution rate)
+
 ## [0.4.0] - 2025-12-12
 
 ### Added

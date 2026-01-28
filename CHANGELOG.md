@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-01-28
+
+### Added
+
+- Claude API integration for AI-powered incident investigation
+- LangGraph-based IncidentOrchestrator with multi-step investigation pipeline
+- MCP server with tool execution, audit logging, and approval model
+- RemediationAgent for context-aware fix proposals (kubectl, terraform, config, code)
+- Token tracking service with per-investigation cost estimation
+- AI investigation panel in incident detail (summary, RCA, confidence score)
+- Terminal-style investigation chat showing tool calls and AI reasoning
+- Remediation steps UI with approve/reject and risk level badges
+- MCP tool badges showing which tools were used
+- MCP management API (list tools, execute, audit log, stats)
+
 ## [0.5.0] - 2026-01-10
 
 ### Added

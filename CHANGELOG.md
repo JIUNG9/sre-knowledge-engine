@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-02-15
+
+### Added
+
+- Slack approval workflow for AI-powered auto-remediation
+- Slack client with Block Kit message formatting (incident alerts, approval requests)
+- Interactive approve/reject/info buttons per remediation step
+- Webhook handler for Slack interactive message callbacks
+- Request signature verification for webhook security
+- Frontend Slack approval status component with step-by-step progress
+- Resolution notification posted to channel after successful remediation
+- Approval audit trail tracking
+
 ## [0.6.0] - 2026-01-28
 
 ### Added

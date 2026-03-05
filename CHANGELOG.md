@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-03-05
+
+### Added
+
+- Security Dashboard with vulnerability scanning integration (Trivy, Snyk, Grype)
+- Compliance tracking for CIS, SOC2, ISO27001 benchmarks
+- RBAC audit view connected to Keycloak OIDC
+- Deployment Tracker with DORA metrics (all four key metrics)
+- Performance ratings (Elite/High/Medium/Low) per DORA metric
+- Deployment timeline with success/failed/rollback status tracking
+- Deploy frequency and lead time charts
+
 ## [0.7.0] - 2026-02-15
 
 ### Added

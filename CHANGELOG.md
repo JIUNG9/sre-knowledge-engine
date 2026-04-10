@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-04-10
+
+### Production Release
+
+Aegis v1.0.0 — AI-Native DevSecOps Command Center is production-ready.
+
+### Highlights
+
+- 8 fully functional dashboard modules
+- Claude API-powered incident investigation with MCP tools
+- Slack approval workflow for auto-remediation
+- Terminal-inspired dark-first UI with 6 color presets
+- Go + Fiber API gateway with ClickHouse log storage
+- Python FastAPI AI engine with LangGraph orchestration
+- Docker Compose + Helm chart for deployment
+- Comprehensive project documentation and ADRs
+
+### All Modules
+
+- **Log Explorer**: ClickHouse-powered full-text search, real-time streaming, security log view
+- **SLO/SLI Dashboard**: Error budgets, burn rate tracking, weekly-to-annual views
+- **FinOps**: Cloud cost tracking, anomaly detection, K8s cost allocation, budget management
+- **Incident Management**: Full lifecycle with AI investigation, timeline, alert feed
+- **Security**: Vulnerability scanning (Trivy/Snyk/Grype), compliance, RBAC audit
+- **Deployments**: DORA metrics (all 4), deployment timeline, rollback tracking
+- **On-Call & Runbooks**: Rotation schedules, escalation policies, runbook library
+- **Service Catalog**: Service registry, health scorecards, dependency mapping
+
 ## [0.9.0] - 2026-03-22
 
 ### Added

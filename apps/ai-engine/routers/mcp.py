@@ -37,7 +37,7 @@ class AuditEntry(BaseModel):
 @router.get("/tools")
 async def list_tools():
     """List all available MCP tools with their schemas."""
-    tools = mcp_server.get_all_tools()
+    tools = mcp_server.get_tools()
     return {
         "tools": tools,
         "total": len(tools),
@@ -110,7 +110,7 @@ async def get_audit_log(limit: int = 50):
 @router.get("/stats")
 async def get_mcp_stats():
     """Get MCP server statistics."""
-    tools = mcp_server.get_all_tools()
+    tools = mcp_server.get_tools()
     return {
         "total_tools": len(tools),
         "read_tools": len([t for t in tools if not t.get("requires_approval", False)]),

@@ -29,13 +29,13 @@ function StatCard({ label, value, sub, icon: Icon, color, pulse }: StatCardProps
         <Icon className="size-4" style={{ color }} />
       </div>
       <div className="min-w-0">
-        <p className="font-mono text-[10px] text-muted-foreground">{label}</p>
+        <p className="font-mono text-xs text-muted-foreground">{label}</p>
         <div className="flex items-baseline gap-1.5">
           <span className="font-mono text-lg font-semibold text-foreground">
             {value}
           </span>
           {sub && (
-            <span className="font-mono text-[10px] text-muted-foreground">
+            <span className="font-mono text-xs text-muted-foreground">
               {sub}
             </span>
           )}
@@ -60,7 +60,7 @@ function SeverityMiniCount({
         className={cn("inline-block size-2 rounded-full", count > 0 && severity === "critical" && "animate-pulse")}
         style={{ backgroundColor: color }}
       />
-      <span className="font-mono text-[10px] text-muted-foreground">
+      <span className="font-mono text-xs text-muted-foreground">
         {count} {severity}
       </span>
     </div>
@@ -151,7 +151,7 @@ export function IncidentStats() {
       </div>
       {/* Severity breakdown mini row */}
       <div className="flex items-center gap-3 px-1">
-        <span className="font-mono text-[10px] text-muted-foreground/60">
+        <span className="font-mono text-xs text-muted-foreground/60">
           Active by severity:
         </span>
         <SeverityMiniCount severity="critical" count={severityCounts.critical} color="#FF4444" />

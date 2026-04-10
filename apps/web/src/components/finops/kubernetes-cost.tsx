@@ -100,10 +100,10 @@ function NamespaceTooltip({ active, payload }: NamespaceTooltipProps) {
       <p className="mb-1 font-mono font-medium text-foreground">
         {ns.namespace}: {formatCurrency(ns.cost)}/mo
       </p>
-      <p className="font-mono text-[10px] text-muted-foreground">
+      <p className="font-mono text-xs text-muted-foreground">
         CPU: {ns.cpuUsed}/{ns.cpuRequested} cores ({cpuUtil}% utilized)
       </p>
-      <p className="font-mono text-[10px] text-muted-foreground">
+      <p className="font-mono text-xs text-muted-foreground">
         Mem: {ns.memUsed}/{ns.memRequested} GB ({memUtil}% utilized)
       </p>
     </div>
@@ -142,7 +142,7 @@ function IdleWasteIndicator() {
   return (
     <div className="grid grid-cols-2 gap-3">
       <div className="rounded-lg border border-border/50 p-3 text-center">
-        <p className="font-mono text-[10px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           CPU Waste
         </p>
         <p
@@ -151,12 +151,12 @@ function IdleWasteIndicator() {
         >
           {cpuWaste}%
         </p>
-        <p className="font-mono text-[9px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           {totalCpuUsed}/{totalCpuRequested} cores used
         </p>
       </div>
       <div className="rounded-lg border border-border/50 p-3 text-center">
-        <p className="font-mono text-[10px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           Memory Waste
         </p>
         <p
@@ -165,7 +165,7 @@ function IdleWasteIndicator() {
         >
           {memWaste}%
         </p>
-        <p className="font-mono text-[9px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           {totalMemUsed}/{totalMemRequested} GB used
         </p>
       </div>
@@ -192,15 +192,15 @@ export function KubernetesCost() {
       <CardContent className="pt-3">
         <Tabs defaultValue="namespaces">
           <TabsList variant="line" className="mb-3">
-            <TabsTrigger value="namespaces" className="font-mono text-[11px]">
+            <TabsTrigger value="namespaces" className="font-mono text-xs">
               Namespaces
             </TabsTrigger>
-            <TabsTrigger value="pods" className="font-mono text-[11px]">
+            <TabsTrigger value="pods" className="font-mono text-xs">
               Pods
             </TabsTrigger>
             <TabsTrigger
               value="recommendations"
-              className="font-mono text-[11px]"
+              className="font-mono text-xs"
             >
               Optimize
             </TabsTrigger>
@@ -253,20 +253,20 @@ export function KubernetesCost() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="font-mono text-[10px]">Pod</TableHead>
-                  <TableHead className="font-mono text-[10px]">
+                  <TableHead className="font-mono text-xs">Pod</TableHead>
+                  <TableHead className="font-mono text-xs">
                     Namespace
                   </TableHead>
-                  <TableHead className="font-mono text-[10px]">
+                  <TableHead className="font-mono text-xs">
                     Deployment
                   </TableHead>
-                  <TableHead className="text-right font-mono text-[10px]">
+                  <TableHead className="text-right font-mono text-xs">
                     $/day
                   </TableHead>
-                  <TableHead className="text-right font-mono text-[10px]">
+                  <TableHead className="text-right font-mono text-xs">
                     CPU Waste
                   </TableHead>
-                  <TableHead className="text-right font-mono text-[10px]">
+                  <TableHead className="text-right font-mono text-xs">
                     Mem Waste
                   </TableHead>
                 </TableRow>
@@ -274,21 +274,21 @@ export function KubernetesCost() {
               <TableBody>
                 {K8S_POD_COSTS.map((pod) => (
                   <TableRow key={pod.id}>
-                    <TableCell className="font-mono text-[11px] text-foreground">
+                    <TableCell className="font-mono text-xs text-foreground">
                       {pod.pod}
                     </TableCell>
-                    <TableCell className="font-mono text-[11px] text-muted-foreground">
+                    <TableCell className="font-mono text-xs text-muted-foreground">
                       {pod.namespace}
                     </TableCell>
-                    <TableCell className="font-mono text-[11px] text-muted-foreground">
+                    <TableCell className="font-mono text-xs text-muted-foreground">
                       {pod.deployment}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-[11px] font-medium text-foreground">
+                    <TableCell className="text-right font-mono text-xs font-medium text-foreground">
                       ${pod.costPerDay.toFixed(2)}
                     </TableCell>
                     <TableCell className="text-right">
                       <span
-                        className="font-mono text-[11px] font-medium"
+                        className="font-mono text-xs font-medium"
                         style={{ color: getWasteColor(pod.cpuWaste) }}
                       >
                         {pod.cpuWaste}%
@@ -296,7 +296,7 @@ export function KubernetesCost() {
                     </TableCell>
                     <TableCell className="text-right">
                       <span
-                        className="font-mono text-[11px] font-medium"
+                        className="font-mono text-xs font-medium"
                         style={{ color: getWasteColor(pod.memWaste) }}
                       >
                         {pod.memWaste}%
@@ -313,7 +313,7 @@ export function KubernetesCost() {
             <div className="space-y-3">
               {/* Total savings summary */}
               <div className="rounded-lg border border-[#00FF8830] bg-[#00FF8808] p-3 text-center">
-                <p className="font-mono text-[10px] text-muted-foreground">
+                <p className="font-mono text-xs text-muted-foreground">
                   Total Potential Savings
                 </p>
                 <p className="font-mono text-2xl font-bold text-[#00FF88]">
@@ -349,14 +349,14 @@ export function KubernetesCost() {
                         >
                           {rec.type}
                         </Badge>
-                        <span className="font-mono text-[10px] text-muted-foreground">
+                        <span className="font-mono text-xs text-muted-foreground">
                           {rec.namespace}
                         </span>
                       </div>
-                      <p className="mt-1 font-mono text-[10px] leading-relaxed text-muted-foreground">
+                      <p className="mt-1 font-mono text-xs leading-relaxed text-muted-foreground">
                         {rec.description}
                       </p>
-                      <p className="mt-1 font-mono text-[10px] font-medium text-[#00FF88]">
+                      <p className="mt-1 font-mono text-xs font-medium text-[#00FF88]">
                         Est. savings: {formatCurrency(rec.estimatedSavings)}/mo
                       </p>
                     </div>

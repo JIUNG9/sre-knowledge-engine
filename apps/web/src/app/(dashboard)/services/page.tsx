@@ -60,7 +60,7 @@ export default function ServicesPage() {
           return (
             <Card
               key={service.name}
-              className={`border-border/50 ${config.border} bg-[#0D0D12] p-4 hover:border-[#00FF88]/30 cursor-pointer transition-colors`}
+              className={`border-border/50 ${config.border} bg-card p-4 hover:border-[#00FF88]/30 cursor-pointer transition-colors`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
@@ -92,9 +92,9 @@ export default function ServicesPage() {
 
               {service.dependencies.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1">
-                  <span className="font-mono text-[10px] text-muted-foreground">deps:</span>
+                  <span className="font-mono text-xs text-muted-foreground">deps:</span>
                   {service.dependencies.map((dep) => (
-                    <Badge key={dep} variant="outline" className="font-mono text-[10px]">
+                    <Badge key={dep} variant="outline" className="font-mono text-xs">
                       {dep}
                     </Badge>
                   ))}

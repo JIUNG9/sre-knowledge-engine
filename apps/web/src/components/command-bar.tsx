@@ -28,8 +28,8 @@ export function CommandBar() {
             className="h-8 bg-muted/50 pl-3 pr-16 font-mono text-xs placeholder:text-muted-foreground/60 focus-visible:border-primary/40 focus-visible:ring-primary/20"
             readOnly
           />
-          <kbd className="pointer-events-none absolute top-1/2 right-2 flex h-5 -translate-y-1/2 items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">
-            <span className="text-[11px]">&#8984;</span>K
+          <kbd className="pointer-events-none absolute top-1/2 right-2 flex h-5 -translate-y-1/2 items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-xs text-muted-foreground">
+            <span className="text-xs">&#8984;</span>K
           </kbd>
         </div>
       </div>

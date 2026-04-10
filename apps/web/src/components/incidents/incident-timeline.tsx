@@ -93,7 +93,7 @@ function TimelineNode({ event, isLast }: TimelineNodeProps) {
             {event.actor}
           </span>
           <span
-            className="rounded-sm px-1 py-0.5 font-mono text-[9px] font-medium"
+            className="rounded-sm px-1 py-0.5 font-mono text-xs font-medium"
             style={{
               backgroundColor: `${config.color}15`,
               color: config.color,
@@ -102,7 +102,7 @@ function TimelineNode({ event, isLast }: TimelineNodeProps) {
             {config.label}
           </span>
           <span
-            className="font-mono text-[10px] text-muted-foreground"
+            className="font-mono text-xs text-muted-foreground"
             title={formatAbsoluteTime(event.timestamp)}
           >
             {formatTimestamp(event.timestamp)}
@@ -116,7 +116,7 @@ function TimelineNode({ event, isLast }: TimelineNodeProps) {
             {Object.entries(event.metadata).map(([k, v]) => (
               <span
                 key={k}
-                className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground"
+                className="rounded-sm bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground"
               >
                 {k}: {v}
               </span>

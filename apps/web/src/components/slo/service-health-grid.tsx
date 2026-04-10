@@ -124,7 +124,7 @@ function ServiceHealthCard({
         <div className="flex items-center justify-between">
           <Badge
             variant="outline"
-            className="font-mono text-[9px]"
+            className="font-mono text-xs"
             style={{
               borderColor: `${config.color}30`,
               color: config.color,
@@ -132,7 +132,7 @@ function ServiceHealthCard({
           >
             {config.label}
           </Badge>
-          <div className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
+          <div className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
             <span className="text-[#00FF88]">{service.slosMeeting}</span>
             <span>/</span>
             <span>{service.sloCount}</span>

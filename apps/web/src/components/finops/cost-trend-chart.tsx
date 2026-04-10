@@ -94,7 +94,7 @@ function ComparisonTooltip({ active, payload, label }: ComparisonTooltipProps) {
       {payload.map((entry) => (
         <p
           key={entry.dataKey}
-          className="font-mono text-[11px] font-medium"
+          className="font-mono text-xs font-medium"
           style={{ color: entry.color }}
         >
           {entry.dataKey === "current" ? "Current" : "Previous"}:{" "}
@@ -153,7 +153,7 @@ export function CostTrendChart() {
               if (v) setGranularity(v as "daily" | "weekly" | "monthly")
             }}
           >
-            <SelectTrigger size="sm" className="font-mono text-[11px]">
+            <SelectTrigger size="sm" className="font-mono text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -167,10 +167,10 @@ export function CostTrendChart() {
       <CardContent className="pt-3">
         <Tabs defaultValue="comparison">
           <TabsList variant="line" className="mb-3">
-            <TabsTrigger value="comparison" className="font-mono text-[11px]">
+            <TabsTrigger value="comparison" className="font-mono text-xs">
               Month vs Month
             </TabsTrigger>
-            <TabsTrigger value="trend" className="font-mono text-[11px]">
+            <TabsTrigger value="trend" className="font-mono text-xs">
               Trend
             </TabsTrigger>
           </TabsList>

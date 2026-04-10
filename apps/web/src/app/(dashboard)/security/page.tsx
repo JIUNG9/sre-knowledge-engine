@@ -55,28 +55,28 @@ export default function SecurityPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <Card className="border-border/50 bg-[#0D0D12] p-4">
+        <Card className="border-border/50 bg-card p-4">
           <div className="flex items-center gap-2">
             <Bug className="h-4 w-4 text-red-400" />
             <span className="font-mono text-xs text-muted-foreground">Critical</span>
           </div>
           <p className="mt-2 font-mono text-2xl font-bold text-red-400">{criticalCount}</p>
         </Card>
-        <Card className="border-border/50 bg-[#0D0D12] p-4">
+        <Card className="border-border/50 bg-card p-4">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-orange-400" />
             <span className="font-mono text-xs text-muted-foreground">High</span>
           </div>
           <p className="mt-2 font-mono text-2xl font-bold text-orange-400">{highCount}</p>
         </Card>
-        <Card className="border-border/50 bg-[#0D0D12] p-4">
+        <Card className="border-border/50 bg-card p-4">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-[#00FF88]" />
             <span className="font-mono text-xs text-muted-foreground">Compliance</span>
           </div>
           <p className="mt-2 font-mono text-2xl font-bold text-[#00FF88]">{complianceScore}%</p>
         </Card>
-        <Card className="border-border/50 bg-[#0D0D12] p-4">
+        <Card className="border-border/50 bg-card p-4">
           <div className="flex items-center gap-2">
             <Lock className="h-4 w-4 text-cyan-400" />
             <span className="font-mono text-xs text-muted-foreground">Total Vulns</span>
@@ -86,7 +86,7 @@ export default function SecurityPage() {
       </div>
 
       <Tabs defaultValue="vulnerabilities">
-        <TabsList className="bg-[#0D0D12]">
+        <TabsList className="bg-card">
           <TabsTrigger value="vulnerabilities" className="font-mono text-xs">Vulnerabilities</TabsTrigger>
           <TabsTrigger value="compliance" className="font-mono text-xs">Compliance</TabsTrigger>
           <TabsTrigger value="rbac" className="font-mono text-xs">RBAC Audit</TabsTrigger>
@@ -94,8 +94,8 @@ export default function SecurityPage() {
 
         <TabsContent value="vulnerabilities" className="mt-4 space-y-2">
           {vulnerabilities.map((vuln) => (
-            <div key={vuln.id} className="flex items-center gap-3 rounded border border-border/50 bg-[#0D0D12] p-3">
-              <Badge variant="outline" className={`font-mono text-[10px] ${severityColors[vuln.severity]}`}>
+            <div key={vuln.id} className="flex items-center gap-3 rounded border border-border/50 bg-card p-3">
+              <Badge variant="outline" className={`font-mono text-xs ${severityColors[vuln.severity]}`}>
                 {vuln.severity.toUpperCase()}
               </Badge>
               <div className="flex-1 min-w-0">
@@ -125,10 +125,10 @@ export default function SecurityPage() {
             <Progress value={complianceScore} className="h-2" />
           </div>
           {complianceChecks.map((check, i) => (
-            <div key={i} className="flex items-center gap-3 rounded border border-border/50 bg-[#0D0D12] p-3">
+            <div key={i} className="flex items-center gap-3 rounded border border-border/50 bg-card p-3">
               <div className={`h-2 w-2 rounded-full ${check.status === "pass" ? "bg-green-400" : check.status === "fail" ? "bg-red-400" : "bg-amber-400"}`} />
               <span className="flex-1 font-mono text-sm">{check.name}</span>
-              <Badge variant="outline" className="font-mono text-[10px]">{check.category}</Badge>
+              <Badge variant="outline" className="font-mono text-xs">{check.category}</Badge>
               <span className={`font-mono text-xs ${check.status === "pass" ? "text-green-400" : check.status === "fail" ? "text-red-400" : "text-amber-400"}`}>
                 {check.status.toUpperCase()}
               </span>
@@ -137,7 +137,7 @@ export default function SecurityPage() {
         </TabsContent>
 
         <TabsContent value="rbac" className="mt-4">
-          <div className="rounded border border-border/50 bg-[#0D0D12] p-6 text-center">
+          <div className="rounded border border-border/50 bg-card p-6 text-center">
             <Eye className="mx-auto h-8 w-8 text-muted-foreground" />
             <p className="mt-2 font-mono text-sm text-muted-foreground">
               RBAC audit connected to Keycloak OIDC. 24 users, 6 roles, 3 teams.

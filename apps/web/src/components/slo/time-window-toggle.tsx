@@ -24,7 +24,7 @@ export function TimeWindowToggle({ value, onChange }: TimeWindowToggleProps) {
         variant={value === "all" ? "secondary" : "ghost"}
         size="xs"
         className={cn(
-          "font-mono text-[11px]",
+          "font-mono text-xs",
           value === "all" && "bg-primary/15 text-primary"
         )}
         onClick={() => onChange("all")}
@@ -37,7 +37,7 @@ export function TimeWindowToggle({ value, onChange }: TimeWindowToggleProps) {
           variant={value === w.value ? "secondary" : "ghost"}
           size="xs"
           className={cn(
-            "font-mono text-[11px]",
+            "font-mono text-xs",
             value === w.value && "bg-primary/15 text-primary"
           )}
           onClick={() => onChange(w.value)}

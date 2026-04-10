@@ -105,7 +105,7 @@ function SeverityBadge({ severity }: { severity: IncidentSeverity }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-bold"
+        "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-xs font-bold"
       )}
       style={{
         borderColor: `${config.color}30`,
@@ -127,7 +127,7 @@ function StatusChip({ status }: { status: IncidentStatus }) {
   const config = getStatusConfig(status)
   return (
     <span
-      className="rounded-sm px-1.5 py-0.5 font-mono text-[10px] font-medium transition-colors"
+      className="rounded-sm px-1.5 py-0.5 font-mono text-xs font-medium transition-colors"
       style={{
         backgroundColor: `${config.color}15`,
         color: config.color,
@@ -172,14 +172,14 @@ function IncidentCard({
             <SeverityBadge severity={incident.severity} />
             <StatusChip status={incident.status} />
           </div>
-          <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+          <span className="shrink-0 font-mono text-xs text-muted-foreground">
             {incident.id}
           </span>
         </div>
         <p className="truncate font-mono text-xs font-medium text-foreground">
           {incident.title}
         </p>
-        <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
           <span>{incident.service}</span>
           <span className="text-border">|</span>
           <span className="flex items-center gap-1">
@@ -188,7 +188,7 @@ function IncidentCard({
           </span>
           <span className="text-border">|</span>
           <span>{formatDuration(incident.createdAt, incident.resolvedAt)}</span>
-          <span className="ml-auto text-[9px]">{formatUpdated(incident.updatedAt)}</span>
+          <span className="ml-auto text-xs">{formatUpdated(incident.updatedAt)}</span>
         </div>
       </CardContent>
     </Card>
@@ -271,7 +271,7 @@ export function IncidentList() {
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Filter className="size-3" />
-                  <span className="font-mono text-[10px]">Filters:</span>
+                  <span className="font-mono text-xs">Filters:</span>
                 </div>
 
                 {/* Status */}
@@ -281,7 +281,7 @@ export function IncidentList() {
                     if (v) setStatusFilter(v as StatusFilterValue)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-[11px]">
+                  <SelectTrigger size="sm" className="font-mono text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -301,7 +301,7 @@ export function IncidentList() {
                     if (v) setSeverityFilter(v as SeverityFilterValue)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-[11px]">
+                  <SelectTrigger size="sm" className="font-mono text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -320,7 +320,7 @@ export function IncidentList() {
                     if (v) setServiceFilter(v)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-[11px]">
+                  <SelectTrigger size="sm" className="font-mono text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -340,7 +340,7 @@ export function IncidentList() {
                     if (v) setAssigneeFilter(v)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-[11px]">
+                  <SelectTrigger size="sm" className="font-mono text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -356,7 +356,7 @@ export function IncidentList() {
                 {/* Sort */}
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <ArrowUpDown className="size-3" />
-                  <span className="font-mono text-[10px]">Sort:</span>
+                  <span className="font-mono text-xs">Sort:</span>
                 </div>
                 <Select
                   value={sortBy}
@@ -364,7 +364,7 @@ export function IncidentList() {
                     if (v) setSortBy(v as SortOption)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-[11px]">
+                  <SelectTrigger size="sm" className="font-mono text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -374,7 +374,7 @@ export function IncidentList() {
                   </SelectContent>
                 </Select>
 
-                <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+                <span className="ml-auto font-mono text-xs text-muted-foreground">
                   {filtered.length} incident{filtered.length !== 1 ? "s" : ""}
                 </span>
               </div>
@@ -389,7 +389,7 @@ export function IncidentList() {
                   <Button
                     variant="ghost"
                     size="xs"
-                    className="font-mono text-[11px]"
+                    className="font-mono text-xs"
                     onClick={() => {
                       setStatusFilter("all")
                       setSeverityFilter("all")
@@ -406,25 +406,25 @@ export function IncidentList() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="w-20 font-mono text-[10px]">
+                        <TableHead className="w-20 font-mono text-xs">
                           Severity
                         </TableHead>
-                        <TableHead className="font-mono text-[10px]">
+                        <TableHead className="font-mono text-xs">
                           Title
                         </TableHead>
-                        <TableHead className="font-mono text-[10px]">
+                        <TableHead className="font-mono text-xs">
                           Service
                         </TableHead>
-                        <TableHead className="font-mono text-[10px]">
+                        <TableHead className="font-mono text-xs">
                           Status
                         </TableHead>
-                        <TableHead className="font-mono text-[10px]">
+                        <TableHead className="font-mono text-xs">
                           Assignee
                         </TableHead>
-                        <TableHead className="w-20 font-mono text-[10px]">
+                        <TableHead className="w-20 font-mono text-xs">
                           Duration
                         </TableHead>
-                        <TableHead className="w-20 font-mono text-[10px]">
+                        <TableHead className="w-20 font-mono text-xs">
                           Updated
                         </TableHead>
                       </TableRow>
@@ -449,27 +449,27 @@ export function IncidentList() {
                                 <p className="truncate font-mono text-xs font-medium text-foreground">
                                   {incident.title}
                                 </p>
-                                <p className="font-mono text-[10px] text-muted-foreground">
+                                <p className="font-mono text-xs text-muted-foreground">
                                   {incident.id}
                                 </p>
                               </div>
                             </TableCell>
-                            <TableCell className="font-mono text-[11px] text-muted-foreground">
+                            <TableCell className="font-mono text-xs text-muted-foreground">
                               {incident.service}
                             </TableCell>
                             <TableCell>
                               <StatusChip status={incident.status} />
                             </TableCell>
-                            <TableCell className="font-mono text-[11px] text-muted-foreground">
+                            <TableCell className="font-mono text-xs text-muted-foreground">
                               {incident.assignee}
                             </TableCell>
-                            <TableCell className="font-mono text-[11px] text-muted-foreground">
+                            <TableCell className="font-mono text-xs text-muted-foreground">
                               {formatDuration(
                                 incident.createdAt,
                                 incident.resolvedAt
                               )}
                             </TableCell>
-                            <TableCell className="font-mono text-[10px] text-muted-foreground">
+                            <TableCell className="font-mono text-xs text-muted-foreground">
                               {formatUpdated(incident.updatedAt)}
                             </TableCell>
                           </TableRow>

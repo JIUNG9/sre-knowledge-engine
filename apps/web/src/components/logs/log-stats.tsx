@@ -28,10 +28,10 @@ function StatItem({
   return (
     <div className="flex items-center gap-1.5">
       <Icon className={cn("size-3", color || "text-muted-foreground/50")} />
-      <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/60">
+      <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/60">
         {label}
       </span>
-      <span className={cn("font-mono text-[11px] font-medium", color || "text-foreground/80")}>
+      <span className={cn("font-mono text-xs font-medium", color || "text-foreground/80")}>
         {value}
       </span>
     </div>
@@ -84,10 +84,10 @@ export function LogStats({
       <div className="h-3 w-px bg-border/30" />
       <div className="flex items-center gap-1.5">
         <Clock className="size-3 text-muted-foreground/50" />
-        <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/60">
+        <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/60">
           Range
         </span>
-        <span className="font-mono text-[11px] font-medium text-foreground/80">
+        <span className="font-mono text-xs font-medium text-foreground/80">
           {timeRange}
         </span>
       </div>
@@ -100,7 +100,7 @@ export function LogStats({
               <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex size-2 rounded-full bg-primary" />
             </span>
-            <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-primary">
+            <span className="font-mono text-xs font-medium uppercase tracking-wider text-primary">
               Live
             </span>
           </div>

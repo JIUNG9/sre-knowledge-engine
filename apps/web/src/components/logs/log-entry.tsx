@@ -28,7 +28,7 @@ function LevelBadge({ level }: { level: LogLevel }) {
   const config = LOG_LEVEL_CONFIG[level]
   return (
     <span
-      className="inline-flex h-[18px] w-[34px] shrink-0 items-center justify-center rounded-sm font-mono text-[10px] font-bold uppercase tracking-wider"
+      className="inline-flex h-[18px] w-[34px] shrink-0 items-center justify-center rounded-sm font-mono text-xs font-bold uppercase tracking-wider"
       style={{
         color: config.color,
         backgroundColor: config.bgColor,
@@ -43,7 +43,7 @@ function ServiceBadge({ service }: { service: string }) {
   return (
     <Badge
       variant="outline"
-      className="h-[18px] shrink-0 truncate rounded-sm border-border/50 px-1.5 font-mono text-[10px] text-muted-foreground"
+      className="h-[18px] shrink-0 truncate rounded-sm border-border/50 px-1.5 font-mono text-xs text-muted-foreground"
     >
       {service}
     </Badge>
@@ -69,7 +69,7 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
     <div
       className={cn(
         "group border-b border-border/30 transition-colors",
-        isEven ? "bg-[#0D0D12]" : "bg-[#0B0B10]",
+        isEven ? "bg-card" : "bg-[#0B0B10]",
         isExpanded && "bg-[#0F0F16]",
         entry.security && "border-l-2 border-l-[#FF4444]/40",
         !entry.security && "border-l-2 border-l-transparent"
@@ -86,7 +86,7 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
             isExpanded && "rotate-90"
           )}
         />
-        <span className="shrink-0 font-mono text-[11px] text-muted-foreground/60">
+        <span className="shrink-0 font-mono text-xs text-muted-foreground/60">
           {formatTimestamp(entry.timestamp)}
         </span>
         <LevelBadge level={entry.level} />
@@ -95,7 +95,7 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
           {entry.message}
         </span>
         {entry.security && (
-          <span className="shrink-0 font-mono text-[9px] font-medium uppercase tracking-widest text-[#FF4444]/70">
+          <span className="shrink-0 font-mono text-xs font-medium uppercase tracking-widest text-[#FF4444]/70">
             sec
           </span>
         )}
@@ -109,7 +109,7 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
             <Button
               variant="outline"
               size="xs"
-              className="gap-1 font-mono text-[10px]"
+              className="gap-1 font-mono text-xs"
               onClick={handleCopy}
             >
               {copied ? (
@@ -123,7 +123,7 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
               <Button
                 variant="outline"
                 size="xs"
-                className="gap-1 font-mono text-[10px]"
+                className="gap-1 font-mono text-xs"
                 onClick={(e) => e.stopPropagation()}
               >
                 <ExternalLink className="size-3" />
@@ -134,7 +134,7 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
 
           {/* Full message */}
           <div className="mb-3">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/50">
+            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/50">
               Message
             </span>
             <p className="mt-1 font-mono text-[12px] leading-relaxed text-foreground/90">
@@ -147,20 +147,20 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
             <div className="mb-3 flex flex-wrap gap-x-6 gap-y-1">
               {entry.traceId && (
                 <div>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/50">
+                  <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/50">
                     Trace ID
                   </span>
-                  <p className="mt-0.5 font-mono text-[11px] text-primary/80">
+                  <p className="mt-0.5 font-mono text-xs text-primary/80">
                     {entry.traceId}
                   </p>
                 </div>
               )}
               {entry.spanId && (
                 <div>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/50">
+                  <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/50">
                     Span ID
                   </span>
-                  <p className="mt-0.5 font-mono text-[11px] text-primary/80">
+                  <p className="mt-0.5 font-mono text-xs text-primary/80">
                     {entry.spanId}
                   </p>
                 </div>
@@ -171,12 +171,12 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
           {/* Attributes table */}
           {entry.attributes && Object.keys(entry.attributes).length > 0 && (
             <div>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/50">
+              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/50">
                 Attributes
               </span>
               <div className="mt-1 grid grid-cols-1 gap-x-6 gap-y-0.5 sm:grid-cols-2 lg:grid-cols-3">
                 {Object.entries(entry.attributes).map(([key, value]) => (
-                  <div key={key} className="flex items-baseline gap-1.5 font-mono text-[11px]">
+                  <div key={key} className="flex items-baseline gap-1.5 font-mono text-xs">
                     <span className="shrink-0 text-muted-foreground/60">{key}:</span>
                     <span className="truncate text-foreground/70">{value}</span>
                   </div>

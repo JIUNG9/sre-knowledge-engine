@@ -76,12 +76,12 @@ export default function DeploymentsPage() {
       {/* DORA Metrics */}
       <div className="grid grid-cols-4 gap-4">
         {Object.entries(doraMetrics).map(([key, metric]) => (
-          <Card key={key} className="border-border/50 bg-[#0D0D12] p-4">
+          <Card key={key} className="border-border/50 bg-card p-4">
             <div className="flex items-center justify-between">
               <span className="font-mono text-xs text-muted-foreground">
                 {key.replace(/([A-Z])/g, " $1").trim()}
               </span>
-              <Badge variant="outline" className={`font-mono text-[10px] ${ratingColors[metric.rating]}`}>
+              <Badge variant="outline" className={`font-mono text-xs ${ratingColors[metric.rating]}`}>
                 {metric.rating}
               </Badge>
             </div>
@@ -97,7 +97,7 @@ export default function DeploymentsPage() {
       </div>
 
       <Tabs defaultValue="timeline">
-        <TabsList className="bg-[#0D0D12]">
+        <TabsList className="bg-card">
           <TabsTrigger value="timeline" className="font-mono text-xs">Timeline</TabsTrigger>
           <TabsTrigger value="frequency" className="font-mono text-xs">Frequency</TabsTrigger>
           <TabsTrigger value="lead-time" className="font-mono text-xs">Lead Time</TabsTrigger>
@@ -105,7 +105,7 @@ export default function DeploymentsPage() {
 
         <TabsContent value="timeline" className="mt-4 space-y-2">
           {recentDeployments.map((deploy) => (
-            <div key={deploy.id} className="flex items-center gap-3 rounded border border-border/50 bg-[#0D0D12] p-3">
+            <div key={deploy.id} className="flex items-center gap-3 rounded border border-border/50 bg-card p-3">
               <div className="flex items-center gap-2">
                 {deploy.status === "success" ? (
                   <CheckCircle2 className="h-4 w-4 text-green-400" />
@@ -118,8 +118,8 @@ export default function DeploymentsPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm font-medium">{deploy.service}</span>
-                  <Badge variant="outline" className="font-mono text-[10px]">{deploy.version}</Badge>
-                  <Badge variant="outline" className={`font-mono text-[10px] ${statusColors[deploy.status]}`}>
+                  <Badge variant="outline" className="font-mono text-xs">{deploy.version}</Badge>
+                  <Badge variant="outline" className={`font-mono text-xs ${statusColors[deploy.status]}`}>
                     {deploy.status}
                   </Badge>
                 </div>
@@ -135,7 +135,7 @@ export default function DeploymentsPage() {
         </TabsContent>
 
         <TabsContent value="frequency" className="mt-4">
-          <Card className="border-border/50 bg-[#0D0D12] p-4">
+          <Card className="border-border/50 bg-card p-4">
             <h3 className="mb-4 font-mono text-sm font-medium">Deployments per Day</h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={deployFrequencyData}>
@@ -149,7 +149,7 @@ export default function DeploymentsPage() {
         </TabsContent>
 
         <TabsContent value="lead-time" className="mt-4">
-          <Card className="border-border/50 bg-[#0D0D12] p-4">
+          <Card className="border-border/50 bg-card p-4">
             <h3 className="mb-4 font-mono text-sm font-medium">Lead Time for Changes (hours)</h3>
             <ResponsiveContainer width="100%" height={250}>
               <AreaChart data={leadTimeData}>

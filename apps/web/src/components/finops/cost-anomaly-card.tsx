@@ -93,7 +93,7 @@ function AnomalyCard({ anomaly }: { anomaly: CostAnomaly }) {
           </div>
           <Badge
             variant="outline"
-            className="font-mono text-[9px]"
+            className="font-mono text-xs"
             style={{
               borderColor: severity.borderColor,
               color: severity.color,
@@ -107,7 +107,7 @@ function AnomalyCard({ anomaly }: { anomaly: CostAnomaly }) {
         {/* Cost comparison */}
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <p className="font-mono text-[10px] text-muted-foreground">
+            <p className="font-mono text-xs text-muted-foreground">
               Expected
             </p>
             <p className="font-mono text-sm font-medium text-foreground">
@@ -115,7 +115,7 @@ function AnomalyCard({ anomaly }: { anomaly: CostAnomaly }) {
             </p>
           </div>
           <div>
-            <p className="font-mono text-[10px] text-muted-foreground">
+            <p className="font-mono text-xs text-muted-foreground">
               Actual
             </p>
             <p
@@ -126,7 +126,7 @@ function AnomalyCard({ anomaly }: { anomaly: CostAnomaly }) {
             </p>
           </div>
           <div>
-            <p className="font-mono text-[10px] text-muted-foreground">
+            <p className="font-mono text-xs text-muted-foreground">
               Deviation
             </p>
             <p className="flex items-center gap-1 font-mono text-sm font-bold text-[#FF4444]">
@@ -137,19 +137,19 @@ function AnomalyCard({ anomaly }: { anomaly: CostAnomaly }) {
         </div>
 
         {/* Description */}
-        <p className="font-mono text-[11px] leading-relaxed text-muted-foreground">
+        <p className="font-mono text-xs leading-relaxed text-muted-foreground">
           {anomaly.description}
         </p>
 
         {/* Footer */}
         <div className="flex items-center justify-between">
-          <span className="font-mono text-[10px] text-muted-foreground/60">
+          <span className="font-mono text-xs text-muted-foreground/60">
             Detected: {formatDetectedTime(anomaly.detectedAt)}
           </span>
           <Button
             variant="ghost"
             size="xs"
-            className="gap-1 font-mono text-[10px]"
+            className="gap-1 font-mono text-xs"
             style={{ color: severity.color }}
           >
             <ExternalLink className="size-3" />
@@ -182,7 +182,7 @@ export function CostAnomalyCards() {
         Cost Anomalies
         <Badge
           variant="outline"
-          className="font-mono text-[9px]"
+          className="font-mono text-xs"
           style={{
             borderColor: "rgba(255,176,32,0.3)",
             color: "#FFB020",

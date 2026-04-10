@@ -43,7 +43,7 @@ function ToolCallBlock({ message }: ToolCallBlockProps) {
       {/* Collapsible header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-[11px] transition-colors hover:bg-muted/20"
+        className="flex w-full items-center gap-2 px-3 py-2 text-left font-mono text-xs transition-colors hover:bg-muted/20"
       >
         {expanded ? (
           <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
@@ -67,20 +67,20 @@ function ToolCallBlock({ message }: ToolCallBlockProps) {
         <div className="border-t border-border/30 px-3 py-2">
           {tool.input && (
             <div className="mb-2">
-              <span className="font-mono text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+              <span className="font-mono text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Input
               </span>
-              <pre className="mt-1 overflow-x-auto whitespace-pre-wrap font-mono text-[10px] leading-relaxed text-[#00B8FF]/80">
+              <pre className="mt-1 overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-[#00B8FF]/80">
                 {tool.input}
               </pre>
             </div>
           )}
           {tool.output && (
             <div>
-              <span className="font-mono text-[9px] font-medium uppercase tracking-wider text-muted-foreground">
+              <span className="font-mono text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Output
               </span>
-              <pre className="mt-1 overflow-x-auto whitespace-pre-wrap font-mono text-[10px] leading-relaxed text-[#00FF88]/80">
+              <pre className="mt-1 overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-relaxed text-[#00FF88]/80">
                 {tool.output}
               </pre>
             </div>
@@ -127,14 +127,14 @@ function MessageItem({ message }: MessageItemProps) {
       {/* Content */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] font-medium text-foreground">
+          <span className="font-mono text-xs font-medium text-foreground">
             {isUser ? "You" : "Aegis AI"}
           </span>
-          <span className="font-mono text-[9px] text-muted-foreground">
+          <span className="font-mono text-xs text-muted-foreground">
             {formatTimestamp(message.timestamp)}
           </span>
         </div>
-        <div className="mt-1 font-mono text-[11px] leading-relaxed text-muted-foreground whitespace-pre-wrap">
+        <div className="mt-1 font-mono text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap">
           {message.content.split("\n").map((line, i) => {
             // Bold markdown sections
             if (line.startsWith("**") && line.endsWith("**")) {
@@ -178,10 +178,10 @@ function ThinkingIndicator() {
         <Bot className="size-3 text-[#00B8FF]" />
       </div>
       <div className="flex items-center gap-2">
-        <span className="font-mono text-[10px] font-medium text-foreground">
+        <span className="font-mono text-xs font-medium text-foreground">
           Aegis AI
         </span>
-        <span className="inline-block font-mono text-[11px] text-[#00B8FF]">
+        <span className="inline-block font-mono text-xs text-[#00B8FF]">
           investigating
           <span className="inline-block animate-pulse">_</span>
         </span>
@@ -229,7 +229,7 @@ export function InvestigationChat({
       {/* Input area */}
       <div className="mt-3 flex items-center gap-2">
         <div className="relative flex-1">
-          <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 font-mono text-[10px] text-[#00B8FF]">
+          <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 font-mono text-xs text-[#00B8FF]">
             &gt;
           </span>
           <Input

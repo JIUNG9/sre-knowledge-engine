@@ -177,7 +177,7 @@ export function LogViewer() {
           {visibleLogs.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground/50">
               <span className="font-mono text-sm">No logs match your filters</span>
-              <span className="font-mono text-[11px]">
+              <span className="font-mono text-xs">
                 Try adjusting your search or filter criteria
               </span>
             </div>
@@ -202,7 +202,7 @@ export function LogViewer() {
             <Button
               variant="default"
               size="sm"
-              className="gap-1.5 font-mono text-[11px] shadow-lg glow-matrix"
+              className="gap-1.5 font-mono text-xs shadow-lg glow-matrix"
               onClick={scrollToBottom}
             >
               <ArrowDown className="size-3" />

@@ -92,12 +92,12 @@ export function SecurityLogView({
     <div className="border-b border-border/50 bg-[#0B0B10] px-4 py-2">
       <div className="mb-2 flex items-center gap-2">
         <Shield className="size-3.5 text-[#FF4444]" />
-        <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-[#FF4444]/80">
+        <span className="font-mono text-xs font-medium uppercase tracking-wider text-[#FF4444]/80">
           Security Events
         </span>
         <Badge
           variant="secondary"
-          className="h-4 min-w-4 rounded-full bg-[#FF4444]/15 px-1 font-mono text-[9px] text-[#FF4444]"
+          className="h-4 min-w-4 rounded-full bg-[#FF4444]/15 px-1 font-mono text-xs text-[#FF4444]"
         >
           {securityLogs.length}
         </Badge>
@@ -114,7 +114,7 @@ export function SecurityLogView({
               key={cat.id}
               onClick={() => onCategorySelect(isActive ? null : cat.id)}
               className={cn(
-                "flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-[11px] outline-none transition-all",
+                "flex items-center gap-1.5 rounded-md border px-2 py-1 font-mono text-xs outline-none transition-all",
                 isActive
                   ? "border-current"
                   : "border-border/50 hover:border-border"
@@ -131,7 +131,7 @@ export function SecurityLogView({
               <Badge
                 variant="secondary"
                 className={cn(
-                  "h-4 min-w-4 rounded-full px-1 font-mono text-[9px]",
+                  "h-4 min-w-4 rounded-full px-1 font-mono text-xs",
                   count > 0
                     ? isActive
                       ? "bg-white/15"

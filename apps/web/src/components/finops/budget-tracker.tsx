@@ -48,7 +48,7 @@ function BudgetRow({ budget }: { budget: TeamBudget }) {
           {isOverBudget && (
             <Badge
               variant="outline"
-              className="gap-0.5 font-mono text-[9px]"
+              className="gap-0.5 font-mono text-xs"
               style={{
                 borderColor: "rgba(255,68,68,0.3)",
                 color: "#FF4444",
@@ -60,7 +60,7 @@ function BudgetRow({ budget }: { budget: TeamBudget }) {
             </Badge>
           )}
         </div>
-        <span className="font-mono text-[10px] text-muted-foreground">
+        <span className="font-mono text-xs text-muted-foreground">
           {formatCurrency(budget.currentSpend)} / {formatCurrency(budget.budget)}
         </span>
       </div>
@@ -108,18 +108,18 @@ function BudgetRow({ budget }: { budget: TeamBudget }) {
       {/* Footer stats */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[10px] text-muted-foreground">
+          <span className="font-mono text-xs text-muted-foreground">
             Used:{" "}
             <span style={{ color: usageColor }}>{budget.usagePercent}%</span>
           </span>
-          <span className="font-mono text-[10px] text-muted-foreground">
+          <span className="font-mono text-xs text-muted-foreground">
             Projected:{" "}
             <span style={{ color: projectedColor }}>
               {formatCurrency(budget.projected)}
             </span>
           </span>
         </div>
-        <span className="font-mono text-[10px] text-muted-foreground/60">
+        <span className="font-mono text-xs text-muted-foreground/60">
           Budget: {formatCurrency(budget.budget)}
         </span>
       </div>
@@ -143,7 +143,7 @@ export function BudgetTracker() {
           {overBudgetCount > 0 && (
             <Badge
               variant="outline"
-              className="font-mono text-[9px]"
+              className="font-mono text-xs"
               style={{
                 borderColor: "rgba(255,68,68,0.3)",
                 color: "#FF4444",

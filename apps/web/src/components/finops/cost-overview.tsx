@@ -59,19 +59,19 @@ function DailySpendTooltip({ active, payload, label }: AreaTooltipProps) {
         Total: {formatCurrency(point.total)}
       </p>
       <div className="mt-1 space-y-0.5">
-        <p className="font-mono text-[10px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           EC2: {formatCurrency(point.ec2)}
         </p>
-        <p className="font-mono text-[10px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           RDS: {formatCurrency(point.rds)}
         </p>
-        <p className="font-mono text-[10px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           EKS: {formatCurrency(point.eks)}
         </p>
-        <p className="font-mono text-[10px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           S3: {formatCurrency(point.s3)}
         </p>
-        <p className="font-mono text-[10px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           Lambda: {formatCurrency(point.lambda)}
         </p>
       </div>
@@ -193,10 +193,10 @@ export function CostOverview() {
                     className="size-2.5 rounded-full"
                     style={{ backgroundColor: p.color }}
                   />
-                  <span className="font-mono text-[11px] text-muted-foreground">
+                  <span className="font-mono text-xs text-muted-foreground">
                     {p.provider}
                   </span>
-                  <span className="ml-auto font-mono text-[11px] font-medium text-foreground">
+                  <span className="ml-auto font-mono text-xs font-medium text-foreground">
                     {formatCurrency(p.cost)}
                   </span>
                 </div>

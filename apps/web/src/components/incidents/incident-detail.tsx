@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import {
   Sheet,
   SheetContent,
@@ -14,10 +15,13 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet"
 import { IncidentTimeline } from "@/components/incidents/incident-timeline"
+import { AIInvestigationPanel } from "@/components/incidents/ai/ai-investigation-panel"
+import { getInvestigationByIncidentId } from "@/lib/mock-data/ai-investigation"
 import type { Incident, IncidentSeverity, IncidentStatus, AlertSource } from "@/lib/mock-data/incidents"
 import {
   AlertTriangle,
   ArrowUpCircle,
+  Bot,
   Clock,
   Edit,
   ExternalLink,
@@ -94,6 +98,20 @@ export function IncidentDetail({
   const sevConfig = getSeverityConfig(incident.severity)
   const statusConfig = getStatusConfig(incident.status)
   const isResolved = incident.status === "resolved"
+  const [aiLoading, setAiLoading] = React.useState(false)
+
+  const investigation = getInvestigationByIncidentId(incident.id)
+
+  function handleInvestigate() {
+    setAiLoading(true)
+    // Simulate investigation delay
+    setTimeout(() => setAiLoading(false), 3000)
+  }
+
+  function handleReinvestigate() {
+    setAiLoading(true)
+    setTimeout(() => setAiLoading(false), 3000)
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -106,7 +124,7 @@ export function IncidentDetail({
             {/* Severity badge */}
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] font-bold",
+                "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-xs font-bold",
                 sevConfig.bg,
                 sevConfig.border
               )}
@@ -119,7 +137,7 @@ export function IncidentDetail({
             </span>
             {/* Status chip */}
             <span
-              className="rounded-sm px-1.5 py-0.5 font-mono text-[10px] font-medium"
+              className="rounded-sm px-1.5 py-0.5 font-mono text-xs font-medium"
               style={{
                 backgroundColor: `${statusConfig.color}15`,
                 color: statusConfig.color,
@@ -128,7 +146,7 @@ export function IncidentDetail({
               {statusConfig.label}
             </span>
             {/* ID */}
-            <span className="font-mono text-[10px] text-muted-foreground">
+            <span className="font-mono text-xs text-muted-foreground">
               {incident.id}
             </span>
           </div>
@@ -143,7 +161,7 @@ export function IncidentDetail({
             {/* Meta row */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div>
-                <p className="font-mono text-[10px] text-muted-foreground">
+                <p className="font-mono text-xs text-muted-foreground">
                   Service
                 </p>
                 <p className="font-mono text-xs font-medium text-foreground">
@@ -151,7 +169,7 @@ export function IncidentDetail({
                 </p>
               </div>
               <div>
-                <p className="font-mono text-[10px] text-muted-foreground">
+                <p className="font-mono text-xs text-muted-foreground">
                   Assignee
                 </p>
                 <p className="font-mono text-xs font-medium text-foreground">
@@ -159,7 +177,7 @@ export function IncidentDetail({
                 </p>
               </div>
               <div>
-                <p className="font-mono text-[10px] text-muted-foreground">
+                <p className="font-mono text-xs text-muted-foreground">
                   Duration
                 </p>
                 <p className="font-mono text-xs font-medium text-foreground">
@@ -169,7 +187,7 @@ export function IncidentDetail({
                 </p>
               </div>
               <div>
-                <p className="font-mono text-[10px] text-muted-foreground">
+                <p className="font-mono text-xs text-muted-foreground">
                   Updated
                 </p>
                 <p className="font-mono text-xs font-medium text-foreground">
@@ -181,23 +199,47 @@ export function IncidentDetail({
             {/* Action buttons */}
             {!isResolved && (
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" className="font-mono text-[11px]">
+                <Button variant="outline" size="sm" className="font-mono text-xs">
                   <Edit className="size-3" />
                   Change Status
                 </Button>
-                <Button variant="outline" size="sm" className="font-mono text-[11px]">
+                <Button variant="outline" size="sm" className="font-mono text-xs">
                   <UserCircle className="size-3" />
                   Assign
                 </Button>
-                <Button variant="outline" size="sm" className="font-mono text-[11px]">
+                <Button variant="outline" size="sm" className="font-mono text-xs">
                   <Clock className="size-3" />
                   Add Note
                 </Button>
-                <Button variant="destructive" size="sm" className="font-mono text-[11px]">
+                <Button variant="destructive" size="sm" className="font-mono text-xs">
                   <ArrowUpCircle className="size-3" />
                   Escalate
                 </Button>
+                {!investigation && !aiLoading && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="font-mono text-xs text-[#00B8FF] hover:bg-[#00B8FF]/10 hover:text-[#00B8FF]"
+                    onClick={handleInvestigate}
+                  >
+                    <Bot className="size-3" />
+                    Investigate with AI
+                  </Button>
+                )}
               </div>
+            )}
+
+            {/* AI Investigate button for resolved incidents that have no investigation */}
+            {isResolved && !investigation && !aiLoading && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="font-mono text-xs text-[#00B8FF] hover:bg-[#00B8FF]/10 hover:text-[#00B8FF]"
+                onClick={handleInvestigate}
+              >
+                <Bot className="size-3" />
+                Investigate with AI
+              </Button>
             )}
 
             <Separator />
@@ -214,7 +256,7 @@ export function IncidentDetail({
                     <Badge
                       key={svc}
                       variant="outline"
-                      className="font-mono text-[10px]"
+                      className="font-mono text-xs"
                     >
                       {svc}
                     </Badge>
@@ -244,7 +286,7 @@ export function IncidentDetail({
                           style={{ backgroundColor: alertSevConfig.color }}
                         />
                         <span
-                          className="rounded-sm px-1 py-0.5 font-mono text-[9px] font-medium"
+                          className="rounded-sm px-1 py-0.5 font-mono text-xs font-medium"
                           style={{
                             backgroundColor: `${srcConfig.color}15`,
                             color: srcConfig.color,
@@ -252,10 +294,10 @@ export function IncidentDetail({
                         >
                           {srcConfig.label}
                         </span>
-                        <span className="flex-1 truncate font-mono text-[11px] text-foreground">
+                        <span className="flex-1 truncate font-mono text-xs text-foreground">
                           {alert.title}
                         </span>
-                        <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                        <span className="shrink-0 font-mono text-xs text-muted-foreground">
                           {alert.service}
                         </span>
                       </div>
@@ -267,17 +309,37 @@ export function IncidentDetail({
 
             <Separator />
 
-            {/* Timeline */}
-            <div>
-              <h3 className="mb-3 flex items-center gap-1.5 font-mono text-xs font-medium text-foreground">
-                <Clock className="size-3" />
-                Timeline
-              </h3>
-              <IncidentTimeline
-                events={incident.timeline}
-                showAddNote={!isResolved}
-              />
-            </div>
+            {/* Tabs: Timeline / AI Investigation */}
+            <Tabs defaultValue="timeline">
+              <TabsList variant="line" className="font-mono text-xs">
+                <TabsTrigger value="timeline" className="font-mono text-xs">
+                  <Clock className="size-3" />
+                  Timeline
+                </TabsTrigger>
+                <TabsTrigger value="ai-investigation" className="font-mono text-xs">
+                  <Bot className="size-3" />
+                  AI Investigation
+                  {investigation && (
+                    <span className="ml-1 inline-block size-1.5 rounded-full bg-[#00B8FF]" />
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="timeline" className="mt-3">
+                <IncidentTimeline
+                  events={incident.timeline}
+                  showAddNote={!isResolved}
+                />
+              </TabsContent>
+
+              <TabsContent value="ai-investigation" className="mt-3">
+                <AIInvestigationPanel
+                  investigation={investigation ?? null}
+                  isLoading={aiLoading}
+                  onReinvestigate={handleReinvestigate}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         </ScrollArea>
       </SheetContent>

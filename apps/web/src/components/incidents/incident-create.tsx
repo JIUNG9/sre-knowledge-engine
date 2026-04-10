@@ -58,7 +58,7 @@ export function IncidentCreate() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button size="sm" className="font-mono text-[11px]">
+          <Button size="sm" className="font-mono text-xs">
             <Plus className="size-3" />
             New Incident
           </Button>
@@ -75,7 +75,7 @@ export function IncidentCreate() {
         <div className="grid gap-3">
           {/* Title */}
           <div>
-            <label className="mb-1 block font-mono text-[10px] text-muted-foreground">
+            <label className="mb-1 block font-mono text-xs text-muted-foreground">
               Title
             </label>
             <Input
@@ -88,7 +88,7 @@ export function IncidentCreate() {
 
           {/* Description */}
           <div>
-            <label className="mb-1 block font-mono text-[10px] text-muted-foreground">
+            <label className="mb-1 block font-mono text-xs text-muted-foreground">
               Description
             </label>
             <Textarea
@@ -101,7 +101,7 @@ export function IncidentCreate() {
 
           {/* Severity */}
           <div>
-            <label className="mb-1 block font-mono text-[10px] text-muted-foreground">
+            <label className="mb-1 block font-mono text-xs text-muted-foreground">
               Severity
             </label>
             <div className="flex gap-1.5">
@@ -111,7 +111,7 @@ export function IncidentCreate() {
                   type="button"
                   onClick={() => setSeverity(opt.value)}
                   className={cn(
-                    "flex-1 rounded-md border px-2 py-1.5 font-mono text-[10px] font-medium transition-all",
+                    "flex-1 rounded-md border px-2 py-1.5 font-mono text-xs font-medium transition-all",
                     severity === opt.value
                       ? "ring-1"
                       : "border-border text-muted-foreground hover:text-foreground"
@@ -135,11 +135,11 @@ export function IncidentCreate() {
 
           {/* Service */}
           <div>
-            <label className="mb-1 block font-mono text-[10px] text-muted-foreground">
+            <label className="mb-1 block font-mono text-xs text-muted-foreground">
               Service
             </label>
             <Select value={service} onValueChange={(v) => { if (v) setService(v) }}>
-              <SelectTrigger size="sm" className="w-full font-mono text-[11px]">
+              <SelectTrigger size="sm" className="w-full font-mono text-xs">
                 <SelectValue placeholder="Select service..." />
               </SelectTrigger>
               <SelectContent>
@@ -154,11 +154,11 @@ export function IncidentCreate() {
 
           {/* Assignee */}
           <div>
-            <label className="mb-1 block font-mono text-[10px] text-muted-foreground">
+            <label className="mb-1 block font-mono text-xs text-muted-foreground">
               Assignee
             </label>
             <Select value={assignee} onValueChange={(v) => { if (v) setAssignee(v) }}>
-              <SelectTrigger size="sm" className="w-full font-mono text-[11px]">
+              <SelectTrigger size="sm" className="w-full font-mono text-xs">
                 <SelectValue placeholder="Assign to..." />
               </SelectTrigger>
               <SelectContent>
@@ -172,7 +172,7 @@ export function IncidentCreate() {
           </div>
 
           {/* Status note */}
-          <p className="font-mono text-[10px] text-muted-foreground/60">
+          <p className="font-mono text-xs text-muted-foreground/60">
             Initial status will be set to <strong className="text-[#FF4444]">Open</strong>.
           </p>
         </div>
@@ -181,14 +181,14 @@ export function IncidentCreate() {
           <Button
             variant="outline"
             size="sm"
-            className="font-mono text-[11px]"
+            className="font-mono text-xs"
             onClick={() => setOpen(false)}
           >
             Cancel
           </Button>
           <Button
             size="sm"
-            className="font-mono text-[11px]"
+            className="font-mono text-xs"
             disabled={!title.trim() || !service}
             onClick={handleCreate}
           >

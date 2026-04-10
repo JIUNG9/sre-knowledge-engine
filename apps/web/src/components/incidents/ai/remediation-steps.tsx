@@ -100,7 +100,7 @@ function StepItem({ step, onApprove, onReject }: StepItemProps) {
         {/* Step number */}
         <span
           className={cn(
-            "flex size-5 shrink-0 items-center justify-center rounded-full font-mono text-[10px] font-bold",
+            "flex size-5 shrink-0 items-center justify-center rounded-full font-mono text-xs font-bold",
             step.approval === "approved"
               ? "bg-[#00FF88]/20 text-[#00FF88]"
               : step.approval === "rejected"
@@ -126,7 +126,7 @@ function StepItem({ step, onApprove, onReject }: StepItemProps) {
             {/* Risk badge */}
             <span
               className={cn(
-                "inline-flex shrink-0 items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] font-bold",
+                "inline-flex shrink-0 items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-xs font-bold",
                 riskConfig.bg,
                 riskConfig.border
               )}
@@ -137,14 +137,14 @@ function StepItem({ step, onApprove, onReject }: StepItemProps) {
             </span>
           </div>
 
-          <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+          <p className="mt-1 font-mono text-xs text-muted-foreground">
             {step.estimatedImpact}
           </p>
 
           {/* Command preview toggle */}
           <button
             onClick={() => setExpanded(!expanded)}
-            className="mt-2 flex items-center gap-1 font-mono text-[10px] text-muted-foreground transition-colors hover:text-foreground"
+            className="mt-2 flex items-center gap-1 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             {expanded ? (
               <ChevronDown className="size-3" />
@@ -157,7 +157,7 @@ function StepItem({ step, onApprove, onReject }: StepItemProps) {
           {/* Collapsible command block */}
           {expanded && (
             <div className="mt-2 overflow-x-auto rounded-md bg-[#0A0A0A] p-3">
-              <pre className="font-mono text-[11px] leading-relaxed text-[#00FF88]/90">
+              <pre className="font-mono text-xs leading-relaxed text-[#00FF88]/90">
                 <code>{step.command}</code>
               </pre>
             </div>
@@ -169,7 +169,7 @@ function StepItem({ step, onApprove, onReject }: StepItemProps) {
               <Button
                 variant="outline"
                 size="xs"
-                className="font-mono text-[10px] text-[#00FF88] hover:bg-[#00FF88]/10 hover:text-[#00FF88]"
+                className="font-mono text-xs text-[#00FF88] hover:bg-[#00FF88]/10 hover:text-[#00FF88]"
                 onClick={() => onApprove(step.id)}
               >
                 <Check className="size-3" />
@@ -178,7 +178,7 @@ function StepItem({ step, onApprove, onReject }: StepItemProps) {
               <Button
                 variant="outline"
                 size="xs"
-                className="font-mono text-[10px] text-[#FF4444] hover:bg-[#FF4444]/10 hover:text-[#FF4444]"
+                className="font-mono text-xs text-[#FF4444] hover:bg-[#FF4444]/10 hover:text-[#FF4444]"
                 onClick={() => onReject(step.id)}
               >
                 <X className="size-3" />
@@ -190,7 +190,7 @@ function StepItem({ step, onApprove, onReject }: StepItemProps) {
           {/* Approval status */}
           {step.approval !== "pending" && (
             <div
-              className="mt-2 flex items-center gap-1 font-mono text-[10px]"
+              className="mt-2 flex items-center gap-1 font-mono text-xs"
               style={{ color: approvalConfig.color }}
             >
               {approvalConfig.icon && <approvalConfig.icon className="size-3" />}
@@ -249,7 +249,7 @@ export function RemediationSteps({ steps: initialSteps, className }: Remediation
           <h4 className="font-mono text-xs font-medium text-foreground">
             Remediation Steps ({steps.length})
           </h4>
-          <div className="flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+          <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
             {approvedCount > 0 && (
               <span className="text-[#00FF88]">{approvedCount} approved</span>
             )}
@@ -265,7 +265,7 @@ export function RemediationSteps({ steps: initialSteps, className }: Remediation
             <Button
               variant="outline"
               size="xs"
-              className="font-mono text-[10px] text-[#00FF88] hover:bg-[#00FF88]/10 hover:text-[#00FF88]"
+              className="font-mono text-xs text-[#00FF88] hover:bg-[#00FF88]/10 hover:text-[#00FF88]"
               onClick={handleApproveAll}
             >
               <CheckCheck className="size-3" />
@@ -274,7 +274,7 @@ export function RemediationSteps({ steps: initialSteps, className }: Remediation
             <Button
               variant="outline"
               size="xs"
-              className="font-mono text-[10px] text-[#FF4444] hover:bg-[#FF4444]/10 hover:text-[#FF4444]"
+              className="font-mono text-xs text-[#FF4444] hover:bg-[#FF4444]/10 hover:text-[#FF4444]"
               onClick={handleRejectAll}
             >
               <XCircle className="size-3" />

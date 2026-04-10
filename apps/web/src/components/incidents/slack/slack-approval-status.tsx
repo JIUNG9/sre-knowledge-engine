@@ -71,7 +71,7 @@ export function SlackApprovalStatus({
         {steps.map((step) => (
           <div
             key={step.id}
-            className="flex items-center gap-3 rounded border border-border/50 bg-[#0D0D12] p-3 font-mono text-xs"
+            className="flex items-center gap-3 rounded border border-border/50 bg-card p-3 font-mono text-xs"
           >
             {statusIcons[step.status]}
             <div className="flex-1 min-w-0">
@@ -79,7 +79,7 @@ export function SlackApprovalStatus({
                 <span className="truncate">{step.description}</span>
                 <Badge
                   variant="outline"
-                  className={`text-[10px] ${riskColors[step.riskLevel]}`}
+                  className={`text-xs ${riskColors[step.riskLevel]}`}
                 >
                   {step.riskLevel}
                 </Badge>

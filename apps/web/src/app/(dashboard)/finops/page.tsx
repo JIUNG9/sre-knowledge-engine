@@ -19,7 +19,7 @@ export default function FinOpsPage() {
         <h1 className="font-heading text-sm font-semibold text-foreground text-glow">
           FinOps Dashboard
         </h1>
-        <span className="font-mono text-[10px] text-muted-foreground">
+        <span className="font-mono text-xs text-muted-foreground">
           Cloud Cost Management
         </span>
       </div>

@@ -168,7 +168,7 @@ function SloCard({ slo, onClick }: SloCardProps) {
             <p className="truncate font-mono text-xs font-medium text-foreground">
               {slo.name}
             </p>
-            <p className="font-mono text-[10px] text-muted-foreground">
+            <p className="font-mono text-xs text-muted-foreground">
               {slo.service}
             </p>
           </div>
@@ -180,7 +180,7 @@ function SloCard({ slo, onClick }: SloCardProps) {
           <span className="font-mono text-lg font-semibold text-foreground">
             {formatCurrentValue(slo)}
           </span>
-          <span className="font-mono text-[10px] text-muted-foreground">
+          <span className="font-mono text-xs text-muted-foreground">
             / {formatTarget(slo)}
           </span>
         </div>
@@ -188,11 +188,11 @@ function SloCard({ slo, onClick }: SloCardProps) {
         {/* Error Budget Bar */}
         <div>
           <div className="mb-1 flex items-center justify-between">
-            <span className="font-mono text-[10px] text-muted-foreground">
+            <span className="font-mono text-xs text-muted-foreground">
               Error Budget
             </span>
             <span
-              className="font-mono text-[10px] font-medium"
+              className="font-mono text-xs font-medium"
               style={{ color: budgetColor }}
             >
               {slo.errorBudgetRemaining}%
@@ -218,7 +218,7 @@ function SloCard({ slo, onClick }: SloCardProps) {
           {/* Burn rate */}
           <Badge
             variant="outline"
-            className="gap-0.5 font-mono text-[9px]"
+            className="gap-0.5 font-mono text-xs"
             style={{
               borderColor: `${burnRateConfig.color}30`,
               color: burnRateConfig.color,
@@ -229,12 +229,12 @@ function SloCard({ slo, onClick }: SloCardProps) {
           </Badge>
 
           {/* Window */}
-          <Badge variant="outline" className="font-mono text-[9px]">
+          <Badge variant="outline" className="font-mono text-xs">
             {slo.window}
           </Badge>
 
           {/* SLI type */}
-          <Badge variant="outline" className="font-mono text-[9px]">
+          <Badge variant="outline" className="font-mono text-xs">
             {getSliTypeLabel(slo.sliType)}
           </Badge>
         </div>
@@ -301,7 +301,7 @@ export function SloOverview() {
           <h1 className="font-heading text-sm font-semibold text-foreground text-glow">
             SLO Dashboard
           </h1>
-          <div className="flex items-center gap-2 font-mono text-[10px]">
+          <div className="flex items-center gap-2 font-mono text-xs">
             <span className="flex items-center gap-1 text-[#00FF88]">
               <CheckCircle2 className="size-3" />
               {meetingCount} meeting
@@ -335,7 +335,7 @@ export function SloOverview() {
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Filter className="size-3" />
-              <span className="font-mono text-[10px]">Filters:</span>
+              <span className="font-mono text-xs">Filters:</span>
             </div>
 
             {/* SLI Type filter */}
@@ -343,7 +343,7 @@ export function SloOverview() {
               value={sliTypeFilter}
               onValueChange={(v) => { if (v) setSliTypeFilter(v as SliType | "all") }}
             >
-              <SelectTrigger size="sm" className="font-mono text-[11px]">
+              <SelectTrigger size="sm" className="font-mono text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -360,7 +360,7 @@ export function SloOverview() {
               value={statusFilter}
               onValueChange={(v) => { if (v) setStatusFilter(v as StatusFilter) }}
             >
-              <SelectTrigger size="sm" className="font-mono text-[11px]">
+              <SelectTrigger size="sm" className="font-mono text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -373,13 +373,13 @@ export function SloOverview() {
             {/* Sort */}
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <ArrowUpDown className="size-3" />
-              <span className="font-mono text-[10px]">Sort:</span>
+              <span className="font-mono text-xs">Sort:</span>
             </div>
             <Select
               value={sortBy}
               onValueChange={(v) => { if (v) setSortBy(v as SortOption) }}
             >
-              <SelectTrigger size="sm" className="font-mono text-[11px]">
+              <SelectTrigger size="sm" className="font-mono text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -392,7 +392,7 @@ export function SloOverview() {
             </Select>
 
             {/* Result count */}
-            <span className="ml-auto font-mono text-[10px] text-muted-foreground">
+            <span className="ml-auto font-mono text-xs text-muted-foreground">
               {filtered.length} SLO{filtered.length !== 1 ? "s" : ""}
             </span>
           </div>
@@ -407,7 +407,7 @@ export function SloOverview() {
               <Button
                 variant="ghost"
                 size="xs"
-                className="font-mono text-[11px]"
+                className="font-mono text-xs"
                 onClick={() => {
                   setWindowFilter("all")
                   setSliTypeFilter("all")

@@ -127,7 +127,7 @@ function ProviderBadge({ provider }: { provider: string }) {
   return (
     <Badge
       variant="outline"
-      className="font-mono text-[9px]"
+      className="font-mono text-xs"
       style={{ borderColor: `${color}40`, color }}
     >
       {provider}
@@ -176,7 +176,7 @@ export function CostByService() {
       className={cn("cursor-pointer select-none hover:text-foreground", className)}
       onClick={() => handleSort(field)}
     >
-      <span className="flex items-center gap-1 font-mono text-[10px]">
+      <span className="flex items-center gap-1 font-mono text-xs">
         {children}
         <ArrowUpDown
           className={cn(
@@ -214,7 +214,7 @@ export function CostByService() {
               <SortableHead field="changePercent" className="text-right">
                 Change
               </SortableHead>
-              <TableHead className="font-mono text-[10px]">Trend</TableHead>
+              <TableHead className="font-mono text-xs">Trend</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

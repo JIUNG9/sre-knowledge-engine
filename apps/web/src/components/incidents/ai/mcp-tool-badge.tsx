@@ -91,7 +91,7 @@ export function MCPToolBadge({
       <Tooltip>
         <TooltipTrigger
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-sm border px-1.5 py-0.5 font-mono text-[10px] transition-colors",
+            "inline-flex items-center gap-1.5 rounded-sm border px-1.5 py-0.5 font-mono text-xs transition-colors",
             config.bg,
             config.border,
             className

@@ -25,6 +25,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 const navItems = [
   { label: "Log Explorer", icon: Search, href: "/logs" },
@@ -131,10 +132,15 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </Button>
       </div>
 
+      {/* Language switcher */}
+      <div className="px-2 py-1">
+        <LanguageSwitcher collapsed={collapsed} />
+      </div>
+
       {/* Version footer */}
       {!collapsed && (
         <div className="px-3 pb-2">
-          <span className="font-mono text-[10px] text-muted-foreground/50">
+          <span className="font-mono text-xs text-muted-foreground/50">
             v0.1.0
           </span>
         </div>

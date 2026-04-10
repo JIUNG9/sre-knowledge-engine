@@ -69,7 +69,7 @@ function MultiSelectCheckbox({
           <Button
             variant="outline"
             size="sm"
-            className="gap-1.5 font-mono text-[11px]"
+            className="gap-1.5 font-mono text-xs"
           />
         }
       >
@@ -77,7 +77,7 @@ function MultiSelectCheckbox({
         {selectedCount > 0 && (
           <Badge
             variant="secondary"
-            className="h-4 min-w-4 rounded-full px-1 font-mono text-[9px]"
+            className="h-4 min-w-4 rounded-full px-1 font-mono text-xs"
           >
             {selectedCount}
           </Badge>
@@ -110,7 +110,7 @@ function MultiSelectCheckbox({
                 {renderItem ? (
                   renderItem(item, selected)
                 ) : (
-                  <span className="truncate font-mono text-[11px]">{item}</span>
+                  <span className="truncate font-mono text-xs">{item}</span>
                 )}
               </button>
             )
@@ -187,8 +187,8 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateFilter("search", e.target.value)}
             className="h-8 bg-[#0A0A0F] pl-8 pr-16 font-mono text-[12px] placeholder:text-muted-foreground/40 focus-visible:border-primary/40 focus-visible:ring-primary/20 focus-visible:shadow-[0_0_12px_rgba(0,255,136,0.1)]"
           />
-          <kbd className="pointer-events-none absolute top-1/2 right-2 flex h-5 -translate-y-1/2 items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-[10px] text-muted-foreground/50">
-            <span className="text-[11px]">&#8984;</span>K
+          <kbd className="pointer-events-none absolute top-1/2 right-2 flex h-5 -translate-y-1/2 items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-xs text-muted-foreground/50">
+            <span className="text-xs">&#8984;</span>K
           </kbd>
         </div>
       </div>
@@ -204,7 +204,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
           renderItem={(item) => {
             const config = LOG_LEVEL_CONFIG[item as LogLevel]
             return (
-              <span className="flex items-center gap-1.5 font-mono text-[11px]">
+              <span className="flex items-center gap-1.5 font-mono text-xs">
                 <span
                   className="inline-block size-2 rounded-full"
                   style={{ backgroundColor: config.color }}
@@ -230,7 +230,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 font-mono text-[11px]"
+                className="gap-1.5 font-mono text-xs"
               />
             }
           >
@@ -248,7 +248,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
                   filters.timeRange === range.value && "bg-primary/10 text-primary"
                 )}
               >
-                <span className="font-mono text-[11px]">{range.label}</span>
+                <span className="font-mono text-xs">{range.label}</span>
                 {filters.timeRange === range.value && (
                   <Check className="ml-auto size-3 text-primary" />
                 )}
@@ -264,7 +264,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
           variant={filters.liveTail ? "default" : "outline"}
           size="sm"
           className={cn(
-            "gap-1.5 font-mono text-[11px]",
+            "gap-1.5 font-mono text-xs",
             filters.liveTail && "bg-primary/15 text-primary hover:bg-primary/20"
           )}
           onClick={() => updateFilter("liveTail", !filters.liveTail)}
@@ -288,7 +288,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
           variant={filters.security ? "default" : "outline"}
           size="sm"
           className={cn(
-            "gap-1.5 font-mono text-[11px]",
+            "gap-1.5 font-mono text-xs",
             filters.security && "bg-[#FF4444]/15 text-[#FF4444] hover:bg-[#FF4444]/20"
           )}
           onClick={() => updateFilter("security", !filters.security)}
@@ -304,7 +304,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 font-mono text-[11px]"
+                className="gap-1.5 font-mono text-xs"
               />
             }
           >
@@ -314,7 +314,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
           </PopoverTrigger>
           <PopoverContent className="w-64 p-1" align="start">
             <div className="mb-1 px-2 py-1">
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground/60">
+              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/60">
                 Saved Queries
               </span>
             </div>
@@ -324,10 +324,10 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
                 onClick={() => applySavedQuery(query)}
                 className="flex w-full flex-col gap-0.5 rounded-md px-2 py-1.5 text-left outline-none hover:bg-muted/50"
               >
-                <span className="font-mono text-[11px] font-medium text-foreground/90">
+                <span className="font-mono text-xs font-medium text-foreground/90">
                   {query.name}
                 </span>
-                <span className="font-mono text-[10px] text-muted-foreground/60">
+                <span className="font-mono text-xs text-muted-foreground/60">
                   {query.description}
                 </span>
               </button>
@@ -343,7 +343,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1 font-mono text-[11px] text-muted-foreground hover:text-foreground"
+            className="gap-1 font-mono text-xs text-muted-foreground hover:text-foreground"
             onClick={clearFilters}
           >
             <X className="size-3" />
@@ -359,7 +359,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
             <Badge
               key={level}
               variant="secondary"
-              className="h-5 gap-1 rounded-sm px-1.5 font-mono text-[10px]"
+              className="h-5 gap-1 rounded-sm px-1.5 font-mono text-xs"
             >
               <span
                 className="inline-block size-1.5 rounded-full"
@@ -378,7 +378,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
             <Badge
               key={service}
               variant="secondary"
-              className="h-5 gap-1 rounded-sm px-1.5 font-mono text-[10px]"
+              className="h-5 gap-1 rounded-sm px-1.5 font-mono text-xs"
             >
               {service}
               <button
@@ -392,7 +392,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
           {filters.security && (
             <Badge
               variant="secondary"
-              className="h-5 gap-1 rounded-sm bg-[#FF4444]/10 px-1.5 font-mono text-[10px] text-[#FF4444]"
+              className="h-5 gap-1 rounded-sm bg-[#FF4444]/10 px-1.5 font-mono text-xs text-[#FF4444]"
             >
               <Shield className="size-2.5" />
               Security

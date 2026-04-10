@@ -50,7 +50,7 @@ function ConfidenceMeter({ score }: ConfidenceMeterProps) {
         />
       </div>
       <span
-        className="font-mono text-[11px] font-bold"
+        className="font-mono text-xs font-bold"
         style={{ color }}
       >
         {score}%
@@ -72,7 +72,7 @@ function TokenUsageDisplay({ usage }: TokenUsageDisplayProps) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-muted-foreground">
+    <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-muted-foreground">
       <span>
         <span className="text-foreground/60">in:</span> {formatTokens(usage.input)}
       </span>
@@ -103,10 +103,10 @@ function InvestigationLoading() {
         <span>Investigating</span>
         <span className="inline-block animate-pulse">_</span>
       </div>
-      <p className="mt-2 font-mono text-[10px] text-muted-foreground">
+      <p className="mt-2 font-mono text-xs text-muted-foreground">
         Querying logs, metrics, traces, and runbooks...
       </p>
-      <div className="mt-4 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+      <div className="mt-4 flex items-center gap-2 font-mono text-xs text-muted-foreground">
         <Clock className="size-3 animate-spin" />
         <span>Elapsed: analyzing...</span>
       </div>
@@ -147,7 +147,7 @@ export function AIInvestigationPanel({
         <p className="mt-3 font-mono text-xs text-muted-foreground">
           No AI investigation has been run for this incident.
         </p>
-        <p className="mt-1 font-mono text-[10px] text-muted-foreground/60">
+        <p className="mt-1 font-mono text-xs text-muted-foreground/60">
           Click &quot;Investigate with AI&quot; to start an analysis.
         </p>
       </div>
@@ -160,16 +160,16 @@ export function AIInvestigationPanel({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4">
           <div>
-            <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
               Confidence
             </span>
             <ConfidenceMeter score={investigation.confidenceScore} />
           </div>
           <div>
-            <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
               Duration
             </span>
-            <div className="flex items-center gap-1 font-mono text-[11px] text-foreground">
+            <div className="flex items-center gap-1 font-mono text-xs text-foreground">
               <Zap className="size-3 text-[#FFB020]" />
               {investigation.durationSeconds}s
             </div>
@@ -178,7 +178,7 @@ export function AIInvestigationPanel({
         <Button
           variant="outline"
           size="xs"
-          className="font-mono text-[10px]"
+          className="font-mono text-xs"
           onClick={onReinvestigate}
         >
           <RefreshCw className="size-3" />
@@ -209,16 +209,16 @@ export function AIInvestigationPanel({
         </button>
         {summaryExpanded && (
           <div className="mt-2 space-y-3 pl-5">
-            <p className="font-mono text-[11px] leading-relaxed text-muted-foreground">
+            <p className="font-mono text-xs leading-relaxed text-muted-foreground">
               {investigation.summary}
             </p>
 
             {/* Root cause */}
             <div>
-              <span className="font-mono text-[9px] uppercase tracking-wider text-[#FF8C00]">
+              <span className="font-mono text-xs uppercase tracking-wider text-[#FF8C00]">
                 Root Cause
               </span>
-              <p className="mt-1 rounded-md border border-[#FF8C00]/20 bg-[#FF8C00]/5 px-3 py-2 font-mono text-[11px] leading-relaxed text-foreground/80">
+              <p className="mt-1 rounded-md border border-[#FF8C00]/20 bg-[#FF8C00]/5 px-3 py-2 font-mono text-xs leading-relaxed text-foreground/80">
                 {investigation.rootCause}
               </p>
             </div>
@@ -226,7 +226,7 @@ export function AIInvestigationPanel({
             {/* Affected services */}
             {investigation.affectedServices.length > 0 && (
               <div>
-                <span className="flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+                <span className="flex items-center gap-1 font-mono text-xs uppercase tracking-wider text-muted-foreground">
                   <Server className="size-2.5" />
                   Affected Services
                 </span>
@@ -235,7 +235,7 @@ export function AIInvestigationPanel({
                     <Badge
                       key={svc}
                       variant="outline"
-                      className="font-mono text-[10px]"
+                      className="font-mono text-xs"
                     >
                       {svc}
                     </Badge>
@@ -284,11 +284,11 @@ export function AIInvestigationPanel({
 
       {/* Tabs: Remediation / Chat */}
       <Tabs defaultValue="remediation">
-        <TabsList variant="line" className="font-mono text-[11px]">
-          <TabsTrigger value="remediation" className="font-mono text-[11px]">
+        <TabsList variant="line" className="font-mono text-xs">
+          <TabsTrigger value="remediation" className="font-mono text-xs">
             Remediation
           </TabsTrigger>
-          <TabsTrigger value="chat" className="font-mono text-[11px]">
+          <TabsTrigger value="chat" className="font-mono text-xs">
             Investigation Log
           </TabsTrigger>
         </TabsList>

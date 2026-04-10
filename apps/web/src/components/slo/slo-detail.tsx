@@ -173,18 +173,18 @@ export function SloDetail({ slo, open, onOpenChange }: SloDetailProps) {
             </DialogTitle>
           </div>
           <div className="flex flex-wrap items-center gap-2 pt-1">
-            <Badge variant="outline" className="font-mono text-[10px]">
+            <Badge variant="outline" className="font-mono text-xs">
               {slo.service}
             </Badge>
-            <Badge variant="outline" className="font-mono text-[10px]">
+            <Badge variant="outline" className="font-mono text-xs">
               {slo.sliType}
             </Badge>
-            <Badge variant="outline" className="font-mono text-[10px]">
+            <Badge variant="outline" className="font-mono text-xs">
               {slo.window}
             </Badge>
             <Badge
               className={cn(
-                "font-mono text-[10px]",
+                "font-mono text-xs",
                 statusConfig.bgClass,
                 statusConfig.textClass,
                 "border-0"
@@ -201,7 +201,7 @@ export function SloDetail({ slo, open, onOpenChange }: SloDetailProps) {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {/* Current Value */}
             <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="font-mono text-[10px] text-muted-foreground">
+              <p className="font-mono text-xs text-muted-foreground">
                 Current
               </p>
               <p className="font-mono text-lg font-semibold text-foreground">
@@ -210,7 +210,7 @@ export function SloDetail({ slo, open, onOpenChange }: SloDetailProps) {
             </div>
             {/* Target */}
             <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="font-mono text-[10px] text-muted-foreground">
+              <p className="font-mono text-xs text-muted-foreground">
                 Target
               </p>
               <p className="font-mono text-lg font-semibold text-foreground">
@@ -219,7 +219,7 @@ export function SloDetail({ slo, open, onOpenChange }: SloDetailProps) {
             </div>
             {/* Error Budget */}
             <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="font-mono text-[10px] text-muted-foreground">
+              <p className="font-mono text-xs text-muted-foreground">
                 Error Budget
               </p>
               <p
@@ -231,7 +231,7 @@ export function SloDetail({ slo, open, onOpenChange }: SloDetailProps) {
             </div>
             {/* Burn Rate */}
             <div className="rounded-lg border border-border bg-muted/30 p-3">
-              <p className="font-mono text-[10px] text-muted-foreground">
+              <p className="font-mono text-xs text-muted-foreground">
                 Burn Rate
               </p>
               <div className="flex items-center gap-1.5">
@@ -263,7 +263,7 @@ export function SloDetail({ slo, open, onOpenChange }: SloDetailProps) {
                   boxShadow: `0 0 12px ${budgetColor}40`,
                 }}
               />
-              <div className="absolute inset-0 flex items-center justify-center font-mono text-[10px] font-bold text-foreground">
+              <div className="absolute inset-0 flex items-center justify-center font-mono text-xs font-bold text-foreground">
                 {slo.errorBudgetRemaining}% remaining
               </div>
             </div>
@@ -389,13 +389,13 @@ export function SloDetail({ slo, open, onOpenChange }: SloDetailProps) {
                           event.type === "incident" ? "#FF4444" : "#00FF88",
                       }}
                     />
-                    <span className="font-mono text-[10px] text-muted-foreground">
+                    <span className="font-mono text-xs text-muted-foreground">
                       {event.date}
                     </span>
                     <Badge
                       variant="outline"
                       className={cn(
-                        "font-mono text-[9px]",
+                        "font-mono text-xs",
                         event.type === "incident"
                           ? "border-[#FF4444]/30 text-[#FF4444]"
                           : "border-[#00FF88]/30 text-[#00FF88]"

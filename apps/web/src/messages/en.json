@@ -1,0 +1,70 @@
+{
+  "nav": {
+    "logs": "Log Explorer",
+    "slo": "SLO Dashboard",
+    "finops": "FinOps",
+    "incidents": "Incidents",
+    "security": "Security",
+    "deployments": "Deployments",
+    "oncall": "On-Call",
+    "services": "Service Catalog",
+    "iam": "IAM Audit",
+    "settings": "Settings"
+  },
+  "common": {
+    "search": "Search...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "configure": "Configure",
+    "test": "Test Connection",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "error": "Error",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "healthy": "Healthy",
+    "degraded": "Degraded",
+    "down": "Down",
+    "critical": "Critical",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "setup": {
+    "welcome": "Welcome to Aegis",
+    "subtitle": "Let's set up your DevSecOps command center",
+    "steps": {
+      "ai": "AI Engine",
+      "cloud": "Cloud Accounts",
+      "integrations": "Integrations",
+      "team": "Team",
+      "review": "Review",
+      "complete": "Complete"
+    },
+    "claudeKey": "Claude API Key",
+    "claudeDescription": "Aegis uses Claude AI to power incident investigation, log analysis, cost optimization, and more.",
+    "testConnection": "Test Connection",
+    "continue": "Continue",
+    "skip": "Skip for now",
+    "addAccount": "Add Account",
+    "connectTools": "Connect Your Tools",
+    "setupTeam": "Set Up Your Team",
+    "aiReview": "AI System Review",
+    "runAnalysis": "Run Initial Analysis",
+    "estimatedCost": "Estimated cost",
+    "complete": "Aegis is Ready!",
+    "openDashboard": "Open Dashboard"
+  },
+  "status": {
+    "activeIncidents": "Active Incidents",
+    "slosMeeting": "SLOs Meeting",
+    "monthlyCost": "Monthly Cost",
+    "mttr": "MTTR",
+    "deployFrequency": "Deploy Frequency",
+    "leadTime": "Lead Time",
+    "changeFailureRate": "Change Failure Rate"
+  }
+}

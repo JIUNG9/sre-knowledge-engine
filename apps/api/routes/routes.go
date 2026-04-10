@@ -46,6 +46,28 @@ func Setup(app *fiber.App, logger *zap.Logger) {
 	api.Get("/health", handlers.HealthCheck)
 	api.Get("/ready", handlers.ReadinessCheck)
 
+	// Setup endpoints (no auth required — setup happens before auth is configured).
+	setup := api.Group("/setup")
+	setup.Get("/status", handlers.GetSetupStatus)
+	setup.Post("/config", handlers.SaveConfig)
+	setup.Post("/complete", handlers.CompleteSetup)
+	setup.Post("/test-connection", handlers.TestConnection)
+
+	// Cloud accounts (no auth required during setup).
+	accounts := api.Group("/accounts")
+	accounts.Get("/", handlers.ListAccounts)
+	accounts.Post("/", handlers.CreateAccount)
+	accounts.Put("/:id", handlers.UpdateAccount)
+	accounts.Delete("/:id", handlers.DeleteAccount)
+	accounts.Post("/:id/test", handlers.TestAccountConnection)
+
+	// Integrations (no auth required during setup).
+	integrations := api.Group("/integrations")
+	integrations.Get("/", handlers.ListIntegrations)
+	integrations.Put("/:id", handlers.UpdateIntegration)
+	integrations.Post("/:id/test", handlers.TestIntegrationConnection)
+	integrations.Delete("/:id", handlers.DisconnectIntegration)
+
 	// Authenticated routes.
 	authenticated := api.Group("", middleware.Auth())
 

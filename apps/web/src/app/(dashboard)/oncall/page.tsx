@@ -81,7 +81,7 @@ export default function OnCallPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm font-medium">{rb.title}</span>
-                  <Badge variant="outline" className="font-mono text-[10px]">{rb.steps} steps</Badge>
+                  <Badge variant="outline" className="font-mono text-xs">{rb.steps} steps</Badge>
                 </div>
                 <div className="mt-1 flex items-center gap-3 font-mono text-xs text-muted-foreground">
                   <span>{rb.service}</span>

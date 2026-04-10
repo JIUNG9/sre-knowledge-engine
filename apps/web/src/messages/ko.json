@@ -1,0 +1,70 @@
+{
+  "nav": {
+    "logs": "로그 탐색기",
+    "slo": "SLO 대시보드",
+    "finops": "FinOps",
+    "incidents": "인시던트",
+    "security": "보안",
+    "deployments": "배포",
+    "oncall": "온콜",
+    "services": "서비스 카탈로그",
+    "iam": "IAM 감사",
+    "settings": "설정"
+  },
+  "common": {
+    "search": "검색...",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "create": "생성",
+    "configure": "설정",
+    "test": "연결 테스트",
+    "connected": "연결됨",
+    "disconnected": "연결 해제",
+    "error": "오류",
+    "loading": "로딩 중...",
+    "noData": "데이터가 없습니다",
+    "healthy": "정상",
+    "degraded": "저하",
+    "down": "장애",
+    "critical": "심각",
+    "high": "높음",
+    "medium": "보통",
+    "low": "낮음"
+  },
+  "setup": {
+    "welcome": "Aegis에 오신 것을 환영합니다",
+    "subtitle": "DevSecOps 커맨드 센터를 설정해 보겠습니다",
+    "steps": {
+      "ai": "AI 엔진",
+      "cloud": "클라우드 계정",
+      "integrations": "통합",
+      "team": "팀",
+      "review": "검토",
+      "complete": "완료"
+    },
+    "claudeKey": "Claude API 키",
+    "claudeDescription": "Aegis는 Claude AI를 사용하여 인시던트 조사, 로그 분석, 비용 최적화 등을 수행합니다.",
+    "testConnection": "연결 테스트",
+    "continue": "계속",
+    "skip": "건너뛰기",
+    "addAccount": "계정 추가",
+    "connectTools": "도구 연결",
+    "setupTeam": "팀 설정",
+    "aiReview": "AI 시스템 검토",
+    "runAnalysis": "초기 분석 실행",
+    "estimatedCost": "예상 비용",
+    "complete": "Aegis 준비 완료!",
+    "openDashboard": "대시보드 열기"
+  },
+  "status": {
+    "activeIncidents": "활성 인시던트",
+    "slosMeeting": "SLO 달성 현황",
+    "monthlyCost": "월간 비용",
+    "mttr": "평균 복구 시간",
+    "deployFrequency": "배포 빈도",
+    "leadTime": "리드 타임",
+    "changeFailureRate": "변경 실패율"
+  }
+}

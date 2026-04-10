@@ -103,20 +103,20 @@ function AlertItem({ alert, onCreateIncident }: AlertItemProps) {
               {srcConfig.abbr}
             </span>
             {/* Time */}
-            <span className="font-mono text-[10px] text-muted-foreground">
+            <span className="font-mono text-xs text-muted-foreground">
               {formatTimeAgo(alert.firedAt)}
             </span>
             {/* Linked indicator */}
             {isLinked && (
-              <span className="font-mono text-[9px] text-primary">
+              <span className="font-mono text-xs text-primary">
                 <LinkIcon className="inline size-2.5" /> {alert.incidentId}
               </span>
             )}
           </div>
-          <p className="mt-0.5 truncate font-mono text-[11px] text-foreground">
+          <p className="mt-0.5 truncate font-mono text-xs text-foreground">
             {alert.title}
           </p>
-          <p className="font-mono text-[10px] text-muted-foreground">
+          <p className="font-mono text-xs text-muted-foreground">
             {alert.service}
           </p>
         </div>
@@ -178,7 +178,7 @@ export function AlertFeed({ className }: AlertFeedProps) {
           </span>
         </div>
         {unlinkedCount > 0 && (
-          <Badge variant="outline" className="font-mono text-[9px]">
+          <Badge variant="outline" className="font-mono text-xs">
             {unlinkedCount} unlinked
           </Badge>
         )}

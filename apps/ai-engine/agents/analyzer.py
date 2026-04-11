@@ -159,11 +159,11 @@ class LogAnalyzer:
         # return json.loads(raw)
 
         total = len(logs)
-        error_logs = [l for l in logs if l.get("level", "").lower() in ("error", "critical")]
-        warn_logs = [l for l in logs if l.get("level", "").lower() == "warning"]
+        error_logs = [e for e in logs if e.get("level", "").lower() in ("error", "critical")]
+        warn_logs = [w for w in logs if w.get("level", "").lower() == "warning"]
 
         # Aggregate error messages into patterns
-        error_messages = [l.get("message", "unknown") for l in error_logs]
+        error_messages = [e.get("message", "unknown") for e in error_logs]
         error_counts = Counter(error_messages)
         error_patterns = [
             {"pattern": msg, "count": cnt, "severity": "error"}
@@ -171,7 +171,7 @@ class LogAnalyzer:
         ]
 
         # Extract services from the log batch
-        services = {l.get("service", "unknown") for l in logs}
+        services = {e.get("service", "unknown") for e in logs}
 
         # Build key events from error/critical entries (deduplicated, capped)
         seen_messages: set[str] = set()
@@ -313,14 +313,14 @@ class LogAnalyzer:
 
         # Detect new/rare error messages
         error_messages = [
-            l.get("message", "") for l in logs
-            if l.get("level", "").lower() in ("error", "critical")
+            e.get("message", "") for e in logs
+            if e.get("level", "").lower() in ("error", "critical")
         ]
         msg_counts = Counter(error_messages)
         for msg, count in msg_counts.items():
             if count == 1 and msg:
                 entry = next(
-                    (l for l in logs if l.get("message") == msg),
+                    (e for e in logs if e.get("message") == msg),
                     {},
                 )
                 anomalies.append({

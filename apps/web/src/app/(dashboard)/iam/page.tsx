@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useAccountStore } from "@/lib/stores/account-store"
+import { AccountFilter } from "@/components/account-filter"
 import {
   mockIAMRoles,
   mockLeastPrivilegeRecommendations,
@@ -737,7 +737,7 @@ function AccessMatrixTab({
 // ── Main Page ──────────────────────────────────────────────────
 
 export default function IAMAuditPage() {
-  const activeAccountId = useAccountStore((s) => s.activeAccountId)
+  const [accountFilter, setAccountFilter] = React.useState<string | null>(null)
 
   return (
     <ScrollArea className="flex-1">
@@ -754,6 +754,9 @@ export default function IAMAuditPage() {
             Last scan: 15m ago
           </Badge>
         </div>
+
+        {/* Account filter chips */}
+        <AccountFilter value={accountFilter} onChange={setAccountFilter} />
 
         {/* Tabs */}
         <Tabs defaultValue="roles">
@@ -786,19 +789,19 @@ export default function IAMAuditPage() {
           </TabsList>
 
           <TabsContent value="roles" className="mt-5">
-            <RolesOverviewTab accountFilter={activeAccountId} />
+            <RolesOverviewTab accountFilter={accountFilter} />
           </TabsContent>
 
           <TabsContent value="least-privilege" className="mt-5">
-            <LeastPrivilegeTab accountFilter={activeAccountId} />
+            <LeastPrivilegeTab accountFilter={accountFilter} />
           </TabsContent>
 
           <TabsContent value="cloudtrail" className="mt-5">
-            <CloudTrailTab accountFilter={activeAccountId} />
+            <CloudTrailTab accountFilter={accountFilter} />
           </TabsContent>
 
           <TabsContent value="access-matrix" className="mt-5">
-            <AccessMatrixTab accountFilter={activeAccountId} />
+            <AccessMatrixTab accountFilter={accountFilter} />
           </TabsContent>
         </Tabs>
       </div>

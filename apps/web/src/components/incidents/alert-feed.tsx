@@ -75,15 +75,15 @@ function AlertItem({ alert, onCreateIncident }: AlertItemProps) {
   return (
     <div
       className={cn(
-        "group relative rounded-md px-2.5 py-2 transition-colors hover:bg-surface-hover",
+        "group relative rounded-md px-4 py-3 transition-colors hover:bg-surface-hover",
         alert.severity === "critical" && "bg-[#FF4444]/[0.03]"
       )}
     >
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-3">
         {/* Severity dot */}
         <span
           className={cn(
-            "mt-1.5 inline-block size-1.5 shrink-0 rounded-full",
+            "mt-1.5 inline-block size-3 shrink-0 rounded-full",
             alert.severity === "critical" && "animate-pulse"
           )}
           style={{ backgroundColor: sevColor }}
@@ -91,10 +91,10 @@ function AlertItem({ alert, onCreateIncident }: AlertItemProps) {
 
         {/* Content */}
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {/* Source badge */}
             <span
-              className="rounded-sm px-1 py-0.5 font-mono text-[8px] font-bold uppercase"
+              className="rounded-sm px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase"
               style={{
                 backgroundColor: `${srcConfig.color}15`,
                 color: srcConfig.color,
@@ -109,11 +109,11 @@ function AlertItem({ alert, onCreateIncident }: AlertItemProps) {
             {/* Linked indicator */}
             {isLinked && (
               <span className="font-mono text-xs text-primary">
-                <LinkIcon className="inline size-2.5" /> {alert.incidentId}
+                <LinkIcon className="inline size-3" /> {alert.incidentId}
               </span>
             )}
           </div>
-          <p className="mt-0.5 truncate font-mono text-xs text-foreground">
+          <p className="mt-1 truncate font-mono text-sm text-foreground">
             {alert.title}
           </p>
           <p className="font-mono text-xs text-muted-foreground">
@@ -167,18 +167,18 @@ export function AlertFeed({ className }: AlertFeedProps) {
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Radio className="size-3.5 text-primary" />
-            <span className="absolute -top-0.5 -right-0.5 size-1.5 animate-pulse rounded-full bg-primary" />
+            <Radio className="size-4 text-primary" />
+            <span className="absolute -top-0.5 -right-0.5 size-2 animate-pulse rounded-full bg-primary" />
           </div>
-          <span className="font-mono text-xs font-medium text-foreground">
+          <span className="font-mono text-sm font-medium text-foreground">
             Alert Feed
           </span>
         </div>
         {unlinkedCount > 0 && (
-          <Badge variant="outline" className="font-mono text-xs">
+          <Badge variant="outline" className="px-2 py-0.5 font-mono text-xs">
             {unlinkedCount} unlinked
           </Badge>
         )}

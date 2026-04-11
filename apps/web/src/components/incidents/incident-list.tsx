@@ -105,7 +105,7 @@ function SeverityBadge({ severity }: { severity: IncidentSeverity }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 font-mono text-xs font-bold"
+        "inline-flex h-8 w-20 items-center justify-center gap-1.5 rounded-sm border px-3 py-1.5 font-mono text-xs font-bold"
       )}
       style={{
         borderColor: `${config.color}30`,
@@ -114,7 +114,7 @@ function SeverityBadge({ severity }: { severity: IncidentSeverity }) {
       }}
     >
       {severity === "critical" && (
-        <span className="inline-block size-2.5 animate-pulse rounded-full bg-[#FF4444]" />
+        <span className="inline-block size-3 animate-pulse rounded-full bg-[#FF4444]" />
       )}
       {config.label}
     </span>
@@ -158,37 +158,36 @@ function IncidentCard({
 
   return (
     <Card
-      size="sm"
       className={cn(
         "cursor-pointer transition-all hover:bg-surface-hover",
-        isCritical && "ring-1 ring-[#FF4444]/20",
-        isCritical && "shadow-[0_0_20px_rgba(255,68,68,0.08)]"
+        isCritical && "ring-1 ring-[#FF4444]/30",
+        isCritical && "shadow-[0_0_30px_rgba(255,68,68,0.12)]"
       )}
       onClick={onClick}
     >
-      <CardContent className="grid gap-2 pt-0">
+      <CardContent className="grid gap-3 p-6">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
             <SeverityBadge severity={incident.severity} />
             <StatusChip status={incident.status} />
           </div>
-          <span className="shrink-0 font-mono text-xs text-muted-foreground">
+          <span className="shrink-0 font-mono text-sm text-muted-foreground">
             {incident.id}
           </span>
         </div>
-        <p className="truncate font-mono text-xs font-medium text-foreground">
+        <p className="truncate font-mono text-sm font-medium text-foreground">
           {incident.title}
         </p>
-        <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-muted-foreground">
           <span>{incident.service}</span>
           <span className="text-border">|</span>
           <span className="flex items-center gap-1">
-            <UserCircle className="size-2.5" />
+            <UserCircle className="size-3" />
             {incident.assignee}
           </span>
           <span className="text-border">|</span>
           <span>{formatDuration(incident.createdAt, incident.resolvedAt)}</span>
-          <span className="ml-auto text-xs">{formatUpdated(incident.updatedAt)}</span>
+          <span className="ml-auto text-sm">{formatUpdated(incident.updatedAt)}</span>
         </div>
       </CardContent>
     </Card>
@@ -281,7 +280,7 @@ export function IncidentList() {
                     if (v) setStatusFilter(v as StatusFilterValue)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-xs">
+                  <SelectTrigger className="h-10 font-mono text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -301,7 +300,7 @@ export function IncidentList() {
                     if (v) setSeverityFilter(v as SeverityFilterValue)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-xs">
+                  <SelectTrigger className="h-10 font-mono text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -320,7 +319,7 @@ export function IncidentList() {
                     if (v) setServiceFilter(v)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-xs">
+                  <SelectTrigger className="h-10 font-mono text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -340,7 +339,7 @@ export function IncidentList() {
                     if (v) setAssigneeFilter(v)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-xs">
+                  <SelectTrigger className="h-10 font-mono text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -355,8 +354,8 @@ export function IncidentList() {
 
                 {/* Sort */}
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <ArrowUpDown className="size-3" />
-                  <span className="font-mono text-xs">Sort:</span>
+                  <ArrowUpDown className="size-4" />
+                  <span className="font-mono text-sm">Sort:</span>
                 </div>
                 <Select
                   value={sortBy}
@@ -364,7 +363,7 @@ export function IncidentList() {
                     if (v) setSortBy(v as SortOption)
                   }}
                 >
-                  <SelectTrigger size="sm" className="font-mono text-xs">
+                  <SelectTrigger className="h-10 font-mono text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -374,7 +373,7 @@ export function IncidentList() {
                   </SelectContent>
                 </Select>
 
-                <span className="ml-auto font-mono text-xs text-muted-foreground">
+                <span className="ml-auto font-mono text-sm text-muted-foreground">
                   {filtered.length} incident{filtered.length !== 1 ? "s" : ""}
                 </span>
               </div>
@@ -436,8 +435,8 @@ export function IncidentList() {
                           <TableRow
                             key={incident.id}
                             className={cn(
-                              "cursor-pointer",
-                              isCritical && "bg-[#FF4444]/[0.02]"
+                              "h-14 cursor-pointer",
+                              isCritical && "bg-[#FF4444]/[0.04] shadow-[inset_0_0_20px_rgba(255,68,68,0.06)]"
                             )}
                             onClick={() => setSelectedIncident(incident)}
                           >
@@ -480,7 +479,7 @@ export function IncidentList() {
                 </div>
               ) : (
                 /* ---- Card View ---- */
-                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                   {filtered.map((incident) => (
                     <IncidentCard
                       key={incident.id}
@@ -495,7 +494,7 @@ export function IncidentList() {
         </div>
 
         {/* Alert Feed Sidebar - hidden on small screens */}
-        <div className="hidden w-72 shrink-0 border-l border-border lg:flex xl:w-80">
+        <div className="hidden w-80 shrink-0 border-l border-border lg:flex xl:w-[360px]">
           <AlertFeed className="h-full w-full rounded-none border-0" />
         </div>
       </div>

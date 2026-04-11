@@ -18,24 +18,24 @@ interface StatCardProps {
 
 function StatCard({ label, value, sub, icon: Icon, color, pulse }: StatCardProps) {
   return (
-    <div className="flex items-center gap-4 rounded-lg bg-card px-4 py-4 ring-1 ring-foreground/10">
+    <div className="flex items-center gap-4 rounded-lg bg-card px-6 py-5 ring-1 ring-foreground/10">
       <div
         className={cn(
-          "flex size-10 items-center justify-center rounded-md",
+          "flex size-12 items-center justify-center rounded-md",
           pulse && "animate-pulse"
         )}
         style={{ backgroundColor: color ? `${color}15` : undefined }}
       >
-        <Icon className="size-5" style={{ color }} />
+        <Icon className="size-6" style={{ color }} />
       </div>
       <div className="min-w-0">
         <p className="font-mono text-sm text-muted-foreground">{label}</p>
-        <div className="flex items-baseline gap-1.5">
-          <span className="font-mono text-3xl font-bold text-foreground">
+        <div className="flex items-baseline gap-2">
+          <span className="font-mono text-4xl font-bold text-foreground">
             {value}
           </span>
           {sub && (
-            <span className="font-mono text-xs text-muted-foreground">
+            <span className="font-mono text-sm text-muted-foreground">
               {sub}
             </span>
           )}
@@ -55,12 +55,12 @@ function SeverityMiniCount({
   color: string
 }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1.5">
       <span
         className={cn("inline-block size-3 rounded-full", count > 0 && severity === "critical" && "animate-pulse")}
         style={{ backgroundColor: color }}
       />
-      <span className="font-mono text-xs text-muted-foreground">
+      <span className="font-mono text-sm text-muted-foreground">
         {count} {severity}
       </span>
     </div>
@@ -119,8 +119,8 @@ export function IncidentStats() {
       : 0
 
   return (
-    <div className="space-y-2">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
         <StatCard
           label="Active Incidents"
           value={active.length}
@@ -150,8 +150,8 @@ export function IncidentStats() {
         />
       </div>
       {/* Severity breakdown mini row */}
-      <div className="flex items-center gap-3 px-1">
-        <span className="font-mono text-xs text-muted-foreground/60">
+      <div className="flex items-center gap-4 px-1">
+        <span className="font-mono text-sm text-muted-foreground/60">
           Active by severity:
         </span>
         <SeverityMiniCount severity="critical" count={severityCounts.critical} color="#FF4444" />

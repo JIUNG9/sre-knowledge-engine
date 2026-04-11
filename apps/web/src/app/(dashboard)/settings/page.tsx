@@ -8,6 +8,10 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip as RechartsTooltip,
   XAxis,
@@ -71,7 +75,14 @@ import {
   XCircle,
   AlertCircle,
   Wrench,
+  Zap,
+  Sparkles,
+  Check,
+  AlertTriangle,
+  DollarSign,
+  TrendingDown,
 } from "lucide-react"
+import { useAIStore, type AIMode } from "@/lib/stores/ai-store"
 import { cn } from "@/lib/utils"
 
 // =============================================================================
@@ -97,6 +108,21 @@ const moduleUsage = [
   { module: "FinOps", tokens: 142000, color: "#FFB020" },
   { module: "Incidents", tokens: 210000, color: "#A855F7" },
   { module: "Security", tokens: 96000, color: "#FF6B6B" },
+]
+
+// --- Daily spend (30 days) ---
+
+const dailySpendData = Array.from({ length: 30 }, (_, i) => ({
+  date: `Apr ${i + 1}`,
+  spend: Number((Math.random() * 0.45 + 0.05).toFixed(2)),
+}))
+
+// --- Spend by mode ---
+
+const spendByMode = [
+  { mode: "Eco", spend: 1.24, color: "#00BFFF" },
+  { mode: "Standard", spend: 2.68, color: "#00FF88" },
+  { mode: "Deep", spend: 0.9, color: "#A855F7" },
 ]
 
 // --- Integrations ---
@@ -840,9 +866,118 @@ function ModuleTooltip({ active, payload }: ModuleTooltipProps) {
   )
 }
 
+// --- Mode selection card data ---
+
+const AI_MODES = [
+  {
+    id: "eco" as AIMode,
+    label: "Eco",
+    model: "Haiku 4.5",
+    icon: Zap,
+    color: "#00BFFF",
+    inputCost: "$1",
+    outputCost: "$5",
+    features: [
+      "Fast responses <2s",
+      "Cached prompts",
+      "2K max output tokens",
+    ],
+    bestFor: "Best for: monitoring, status checks",
+    tagline: "10x cheaper than Standard",
+  },
+  {
+    id: "standard" as AIMode,
+    label: "Standard",
+    model: "Sonnet 4.6",
+    icon: Brain,
+    color: "#00FF88",
+    inputCost: "$3",
+    outputCost: "$15",
+    features: [
+      "Balanced speed & quality",
+      "Full tool-use support",
+      "8K max output tokens",
+    ],
+    bestFor: "Best for: investigations, analysis",
+    tagline: "Recommended for daily use",
+  },
+  {
+    id: "deep" as AIMode,
+    label: "Deep Analysis",
+    model: "Opus 4.6",
+    icon: Sparkles,
+    color: "#A855F7",
+    inputCost: "$5",
+    outputCost: "$25",
+    features: [
+      "Deepest reasoning",
+      "Unlimited tool calls",
+      "No output limit",
+    ],
+    bestFor: "Best for: initial setup, critical incidents",
+    tagline: "Use sparingly — 5x Standard cost",
+  },
+]
+
+// --- Spend tooltip ---
+
+interface SpendTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    value: number
+    payload: { date: string; spend: number }
+  }>
+}
+
+function SpendTooltip({ active, payload }: SpendTooltipProps) {
+  if (!active || !payload || !payload.length) return null
+  const item = payload[0].payload
+  return (
+    <div className="rounded-md border border-border bg-popover px-3 py-2 text-xs shadow-lg">
+      <p className="mb-1 font-mono text-muted-foreground">{item.date}</p>
+      <p className="font-mono font-medium text-foreground">
+        ${item.spend.toFixed(2)}
+      </p>
+    </div>
+  )
+}
+
+interface ModeTooltipProps {
+  active?: boolean
+  payload?: Array<{
+    value: number
+    payload: { mode: string; spend: number }
+  }>
+}
+
+function ModeTooltip({ active, payload }: ModeTooltipProps) {
+  if (!active || !payload || !payload.length) return null
+  const item = payload[0].payload
+  return (
+    <div className="rounded-md border border-border bg-popover px-3 py-2 text-xs shadow-lg">
+      <p className="font-mono font-medium text-foreground">
+        {item.mode}: ${item.spend.toFixed(2)}
+      </p>
+    </div>
+  )
+}
+
 function AITokensTab() {
   const [showKey, setShowKey] = React.useState(false)
-  const monthlyBudget = 15.0
+  const {
+    aiMode,
+    setAIMode,
+    monthlyBudget,
+    monthlySpent,
+    setMonthlyBudget,
+    autoDowngradeThreshold,
+    setAutoDowngradeThreshold,
+    notificationThresholds,
+    toggleNotificationThreshold,
+  } = useAIStore()
+
+  const usagePercent = Math.min((monthlySpent / monthlyBudget) * 100, 100)
+  const budgetResetDate = "May 1, 2026"
 
   return (
     <div className="space-y-6">
@@ -887,6 +1022,296 @@ function AITokensTab() {
         </CardContent>
       </Card>
 
+      {/* ================================================================== */}
+      {/* Mode Selection Cards                                                */}
+      {/* ================================================================== */}
+
+      <div>
+        <h2 className="mb-1 font-heading text-lg font-semibold text-foreground">
+          AI Mode
+        </h2>
+        <p className="mb-4 font-mono text-xs text-muted-foreground">
+          Choose the Claude model for AI-powered features across all modules
+        </p>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {AI_MODES.map((mode) => {
+            const Icon = mode.icon
+            const isActive = aiMode === mode.id
+
+            return (
+              <button
+                key={mode.id}
+                onClick={() => setAIMode(mode.id)}
+                className={cn(
+                  "group relative flex flex-col rounded-xl border p-5 text-left transition-all duration-200",
+                  isActive
+                    ? "border-transparent"
+                    : "border-border/50 hover:border-border"
+                )}
+                style={
+                  isActive
+                    ? {
+                        boxShadow: `0 0 24px ${mode.color}20, inset 0 1px 0 ${mode.color}10, 0 0 0 2px ${mode.color}`,
+                      }
+                    : undefined
+                }
+              >
+                {/* Active badge */}
+                {isActive && (
+                  <Badge
+                    className="absolute top-3 right-3 gap-1 border-0 font-mono text-[10px]"
+                    style={{
+                      backgroundColor: `${mode.color}20`,
+                      color: mode.color,
+                    }}
+                  >
+                    <Check className="size-2.5" />
+                    Active
+                  </Badge>
+                )}
+
+                {/* Icon & title */}
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="flex size-9 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: `${mode.color}15` }}
+                  >
+                    <Icon
+                      className="size-4.5"
+                      style={{ color: mode.color }}
+                    />
+                  </div>
+                  <div>
+                    <p className="font-heading text-sm font-semibold text-foreground">
+                      {mode.label}
+                    </p>
+                    <p className="font-mono text-[10px] text-muted-foreground">
+                      {mode.model}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pricing */}
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span
+                    className="font-mono text-xl font-bold"
+                    style={{ color: mode.color }}
+                  >
+                    {mode.inputCost}
+                  </span>
+                  <span className="font-mono text-[10px] text-muted-foreground">
+                    / {mode.outputCost} per 1M tokens
+                  </span>
+                </div>
+
+                {/* Features */}
+                <ul className="mt-3 space-y-1.5">
+                  {mode.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-center gap-2 font-mono text-xs text-muted-foreground"
+                    >
+                      <Check
+                        className="size-3 shrink-0"
+                        style={{ color: mode.color }}
+                      />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Best for */}
+                <Separator className="my-3" />
+                <p className="font-mono text-[11px] font-medium text-foreground">
+                  {mode.bestFor}
+                </p>
+                <p
+                  className="mt-1 font-mono text-[10px]"
+                  style={{ color: mode.color }}
+                >
+                  {mode.tagline}
+                </p>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ================================================================== */}
+      {/* Budget Guardrails                                                   */}
+      {/* ================================================================== */}
+
+      <Card size="sm">
+        <CardHeader className="border-b">
+          <CardTitle className="flex items-center gap-2 text-muted-foreground">
+            <Shield className="size-4 text-primary" />
+            Budget Guardrails
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6 pt-5">
+          {/* Monthly budget input */}
+          <div className="flex items-center gap-4">
+            <div className="space-y-1.5">
+              <Label className="font-mono text-xs">Monthly Budget (USD)</Label>
+              <p className="font-mono text-[10px] text-muted-foreground">
+                Maximum AI spend per calendar month
+              </p>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <div className="relative">
+                <DollarSign className="absolute left-2.5 top-1/2 size-3 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="number"
+                  value={monthlyBudget}
+                  onChange={(e) =>
+                    setMonthlyBudget(Number(e.target.value) || 0)
+                  }
+                  className="w-28 pl-7 font-mono text-sm"
+                  step="1.00"
+                  min="0"
+                />
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Auto-downgrade threshold */}
+          <div className="flex items-center gap-4">
+            <div className="space-y-1.5">
+              <Label className="font-mono text-xs">
+                <TrendingDown className="mr-1.5 inline size-3" />
+                Auto-Downgrade Threshold
+              </Label>
+              <p className="font-mono text-[10px] text-muted-foreground">
+                Switches to Eco mode to preserve budget
+              </p>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <Input
+                type="number"
+                value={autoDowngradeThreshold}
+                onChange={(e) =>
+                  setAutoDowngradeThreshold(Number(e.target.value) || 0)
+                }
+                className="w-20 font-mono text-sm"
+                min="0"
+                max="100"
+              />
+              <span className="font-mono text-xs text-muted-foreground">%</span>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Notification thresholds */}
+          <div>
+            <Label className="font-mono text-xs">
+              Notification Thresholds
+            </Label>
+            <p className="mt-1 mb-3 font-mono text-[10px] text-muted-foreground">
+              Get alerted when spend reaches these levels
+            </p>
+            <div className="flex gap-2">
+              {[50, 80, 100].map((threshold) => {
+                const active = notificationThresholds.includes(threshold)
+                return (
+                  <button
+                    key={threshold}
+                    onClick={() => toggleNotificationThreshold(threshold)}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-mono text-xs font-medium transition-all",
+                      active
+                        ? "border-primary/40 bg-primary/10 text-primary"
+                        : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground"
+                    )}
+                  >
+                    {active && <Check className="size-3" />}
+                    {threshold}%
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Current usage progress */}
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <Label className="font-mono text-xs">Current Usage</Label>
+              <span className="font-mono text-xs text-muted-foreground">
+                ${monthlySpent.toFixed(2)} / ${monthlyBudget.toFixed(2)}
+              </span>
+            </div>
+            <div className="relative h-3 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${usagePercent}%`,
+                  backgroundColor:
+                    usagePercent >= 100
+                      ? "#FF4444"
+                      : usagePercent >= 80
+                        ? "#FFB020"
+                        : "#00FF88",
+                }}
+              />
+            </div>
+            <p className="mt-1.5 font-mono text-[10px] text-muted-foreground">
+              {usagePercent.toFixed(0)}% of monthly budget used
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ================================================================== */}
+      {/* Budget Exhaustion Warning                                           */}
+      {/* ================================================================== */}
+
+      <Card
+        size="sm"
+        className="border-[#FF4444]/20 bg-[#FF4444]/5"
+      >
+        <CardContent className="pt-4">
+          <div className="flex items-start gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#FF4444]/15">
+              <AlertTriangle className="size-4 text-[#FF4444]" />
+            </div>
+            <div className="flex-1">
+              <p className="font-heading text-sm font-semibold text-[#FF4444]">
+                When Budget is Exhausted
+              </p>
+              <p className="mt-1 font-mono text-xs text-muted-foreground">
+                Token budget exhausted. Resets on{" "}
+                <span className="font-medium text-foreground">
+                  {budgetResetDate}
+                </span>
+                .
+              </p>
+              <ul className="mt-3 space-y-2">
+                <li className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+                  <Zap className="size-3 shrink-0 text-[#00BFFF]" />
+                  Switch to Eco mode (may still work within remaining tokens)
+                </li>
+                <li className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+                  <CheckCircle2 className="size-3 shrink-0 text-[#00FF88]" />
+                  All dashboard data still works — only AI features are paused
+                </li>
+                <li className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
+                  <RefreshCw className="size-3 shrink-0 text-[#FFB020]" />
+                  Increase budget or wait for monthly reset
+                </li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* ================================================================== */}
+      {/* Usage History                                                       */}
+      {/* ================================================================== */}
+
       {/* Usage summary cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card size="sm">
@@ -910,7 +1335,7 @@ function AITokensTab() {
             <div className="flex items-center gap-2">
               <BarChart3 className="size-4 text-[#00BFFF]" />
               <span className="font-mono text-xs text-muted-foreground">
-                Cost
+                Total Cost
               </span>
             </div>
             <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-foreground">
@@ -930,12 +1355,12 @@ function AITokensTab() {
               </span>
             </div>
             <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-[#00FF88]">
-              ${(monthlyBudget - TOKEN_MONTHLY_COST).toFixed(2)}
+              ${Math.max(monthlyBudget - TOKEN_MONTHLY_COST, 0).toFixed(2)}
             </p>
             <p className="mt-1 font-mono text-xs text-muted-foreground">
-              {(
-                ((monthlyBudget - TOKEN_MONTHLY_COST) / monthlyBudget) *
-                100
+              {Math.max(
+                ((monthlyBudget - TOKEN_MONTHLY_COST) / monthlyBudget) * 100,
+                0
               ).toFixed(0)}
               % remaining
             </p>
@@ -943,56 +1368,23 @@ function AITokensTab() {
         </Card>
       </div>
 
-      {/* Monthly budget setting */}
+      {/* Daily spend line chart */}
       <Card size="sm">
         <CardHeader className="border-b">
           <CardTitle className="text-muted-foreground">
-            Monthly Budget
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-4">
-          <div className="flex items-center gap-3">
-            <Label className="font-mono text-xs">Monthly Limit (USD)</Label>
-            <Input
-              type="number"
-              defaultValue="15.00"
-              className="w-32 font-mono text-sm"
-              step="0.50"
-            />
-            <Button size="sm" className="font-mono text-xs">
-              Update
-            </Button>
-            <div className="ml-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5 font-mono text-xs text-muted-foreground"
-              >
-                <RefreshCw className="size-3" />
-                Reset Monthly Counter
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Token usage chart */}
-      <Card size="sm">
-        <CardHeader className="border-b">
-          <CardTitle className="text-muted-foreground">
-            Token Usage (Last 30 Days)
+            Daily Spend (Last 30 Days)
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4">
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={tokenUsageData}
+              <LineChart
+                data={dailySpendData}
                 margin={{ top: 8, right: 8, left: -10, bottom: 0 }}
               >
                 <defs>
                   <linearGradient
-                    id="tokenGrad"
+                    id="spendGrad"
                     x1="0"
                     y1="0"
                     x2="0"
@@ -1000,12 +1392,12 @@ function AITokensTab() {
                   >
                     <stop
                       offset="0%"
-                      stopColor="#A855F7"
+                      stopColor="#00FF88"
                       stopOpacity={0.25}
                     />
                     <stop
                       offset="100%"
-                      stopColor="#A855F7"
+                      stopColor="#00FF88"
                       stopOpacity={0.02}
                     />
                   </linearGradient>
@@ -1026,75 +1418,141 @@ function AITokensTab() {
                   tick={{ fontSize: 9, fill: "rgba(255,255,255,0.4)" }}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(val: number) => `${(val / 1000).toFixed(0)}K`}
+                  tickFormatter={(val: number) => `$${val.toFixed(2)}`}
                 />
-                <RechartsTooltip content={<TokenTooltip />} />
-                <Area
+                <RechartsTooltip content={<SpendTooltip />} />
+                <Line
                   type="monotone"
-                  dataKey="tokens"
-                  stroke="#A855F7"
+                  dataKey="spend"
+                  stroke="#00FF88"
                   strokeWidth={2}
-                  fill="url(#tokenGrad)"
                   dot={false}
                   activeDot={{
                     r: 4,
-                    fill: "#A855F7",
+                    fill: "#00FF88",
                     stroke: "rgba(10,10,15,0.8)",
                     strokeWidth: 2,
                   }}
                 />
-              </AreaChart>
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
 
-      {/* Usage by module */}
-      <Card size="sm">
-        <CardHeader className="border-b">
-          <CardTitle className="text-muted-foreground">
-            Usage by Module
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-4">
-          <div className="h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={moduleUsage}
-                margin={{ top: 0, right: 20, left: 10, bottom: 0 }}
-                layout="vertical"
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="rgba(255,255,255,0.05)"
-                  horizontal={false}
-                />
-                <XAxis
-                  type="number"
-                  tick={{ fontSize: 9, fill: "rgba(255,255,255,0.4)" }}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(val: number) => `${(val / 1000).toFixed(0)}K`}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="module"
-                  tick={{ fontSize: 11, fill: "rgba(255,255,255,0.7)" }}
-                  tickLine={false}
-                  axisLine={false}
-                  width={70}
-                />
-                <RechartsTooltip content={<ModuleTooltip />} />
-                <Bar dataKey="tokens" radius={[0, 4, 4, 0]} barSize={20}>
-                  {moduleUsage.map((entry) => (
-                    <Cell key={entry.module} fill={entry.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Spend by module + Spend by mode — side by side */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Spend by module bar chart */}
+        <Card size="sm">
+          <CardHeader className="border-b">
+            <CardTitle className="text-muted-foreground">
+              Usage by Module
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={moduleUsage}
+                  margin={{ top: 0, right: 20, left: 10, bottom: 0 }}
+                  layout="vertical"
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.05)"
+                    horizontal={false}
+                  />
+                  <XAxis
+                    type="number"
+                    tick={{
+                      fontSize: 9,
+                      fill: "rgba(255,255,255,0.4)",
+                    }}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(val: number) =>
+                      `${(val / 1000).toFixed(0)}K`
+                    }
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="module"
+                    tick={{
+                      fontSize: 11,
+                      fill: "rgba(255,255,255,0.7)",
+                    }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={70}
+                  />
+                  <RechartsTooltip content={<ModuleTooltip />} />
+                  <Bar
+                    dataKey="tokens"
+                    radius={[0, 4, 4, 0]}
+                    barSize={20}
+                  >
+                    {moduleUsage.map((entry) => (
+                      <Cell key={entry.module} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Spend by mode donut chart */}
+        <Card size="sm">
+          <CardHeader className="border-b">
+            <CardTitle className="text-muted-foreground">
+              Spend by Mode
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-6">
+              <div className="size-[180px] shrink-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={spendByMode}
+                      dataKey="spend"
+                      nameKey="mode"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={45}
+                      outerRadius={70}
+                      strokeWidth={0}
+                    >
+                      {spendByMode.map((entry) => (
+                        <Cell key={entry.mode} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip content={<ModeTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-col gap-3">
+                {spendByMode.map((entry) => (
+                  <div key={entry.mode} className="flex items-center gap-3">
+                    <div
+                      className="size-3 rounded-full"
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <div>
+                      <p className="font-mono text-xs font-medium text-foreground">
+                        {entry.mode}
+                      </p>
+                      <p className="font-mono text-[10px] text-muted-foreground">
+                        ${entry.spend.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

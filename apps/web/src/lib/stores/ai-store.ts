@@ -3,6 +3,8 @@
 import { create } from "zustand"
 import { type ChatMessage, mockMessages } from "@/lib/mock-data/ai-chat"
 
+export type AIMode = "eco" | "standard" | "deep"
+
 interface AIState {
   isOpen: boolean
   messages: ChatMessage[]
@@ -11,11 +13,20 @@ interface AIState {
   sessionCost: number
   budget: number
   isLoading: boolean
+  aiMode: AIMode
+  monthlyBudget: number
+  monthlySpent: number
+  autoDowngradeThreshold: number
+  notificationThresholds: number[]
   togglePanel: () => void
   openPanel: () => void
   closePanel: () => void
   sendMessage: (message: string) => void
   setModule: (module: string) => void
+  setAIMode: (mode: AIMode) => void
+  setMonthlyBudget: (budget: number) => void
+  setAutoDowngradeThreshold: (threshold: number) => void
+  toggleNotificationThreshold: (threshold: number) => void
 }
 
 export const useAIStore = create<AIState>((set, get) => ({
@@ -26,6 +37,11 @@ export const useAIStore = create<AIState>((set, get) => ({
   sessionCost: 0.05,
   budget: 5.0,
   isLoading: false,
+  aiMode: "standard",
+  monthlyBudget: 10.0,
+  monthlySpent: 4.82,
+  autoDowngradeThreshold: 80,
+  notificationThresholds: [50, 80, 100],
 
   togglePanel: () => set((state) => ({ isOpen: !state.isOpen })),
   openPanel: () => set({ isOpen: true }),
@@ -73,4 +89,18 @@ export const useAIStore = create<AIState>((set, get) => ({
   },
 
   setModule: (module: string) => set({ currentModule: module }),
+  setAIMode: (mode: AIMode) => set({ aiMode: mode }),
+  setMonthlyBudget: (budget: number) => set({ monthlyBudget: budget }),
+  setAutoDowngradeThreshold: (threshold: number) =>
+    set({ autoDowngradeThreshold: threshold }),
+  toggleNotificationThreshold: (threshold: number) =>
+    set((state) => {
+      const current = state.notificationThresholds
+      if (current.includes(threshold)) {
+        return { notificationThresholds: current.filter((t) => t !== threshold) }
+      }
+      return {
+        notificationThresholds: [...current, threshold].sort((a, b) => a - b),
+      }
+    }),
 }))

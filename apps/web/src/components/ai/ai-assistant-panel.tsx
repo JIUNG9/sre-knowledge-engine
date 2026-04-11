@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { X, Sparkles, Send, Loader2 } from "lucide-react"
+import { X, Sparkles, Send, Loader2, Zap, Brain } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useAIStore } from "@/lib/stores/ai-store"
+import { useAIStore, type AIMode } from "@/lib/stores/ai-store"
 import { AIChatMessage } from "@/components/ai/ai-chat-message"
 import { SystemSummary } from "@/components/ai/system-summary"
 
@@ -20,6 +20,8 @@ export function AIAssistantPanel() {
     sessionCost,
     isLoading,
     sendMessage,
+    aiMode,
+    setAIMode,
   } = useAIStore()
 
   const [input, setInput] = React.useState("")
@@ -118,6 +120,34 @@ export function AIAssistantPanel() {
             <X className="size-4" />
             <span className="sr-only">Close AI panel</span>
           </Button>
+        </div>
+
+        {/* Mode toggle */}
+        <div className="shrink-0 border-b border-border/50 px-4 py-2">
+          <div className="flex items-center gap-1 rounded-lg bg-muted/50 p-0.5">
+            {(
+              [
+                { mode: "eco" as AIMode, label: "Eco", icon: Zap, color: "#00BFFF" },
+                { mode: "standard" as AIMode, label: "Standard", icon: Brain, color: "#00FF88" },
+                { mode: "deep" as AIMode, label: "Deep", icon: Sparkles, color: "#A855F7" },
+              ] as const
+            ).map(({ mode, label, icon: Icon, color }) => (
+              <button
+                key={mode}
+                onClick={() => setAIMode(mode)}
+                className={cn(
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 font-mono text-[11px] font-medium transition-all",
+                  aiMode === mode
+                    ? "bg-background shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+                style={aiMode === mode ? { color } : undefined}
+              >
+                <Icon className="size-3" />
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* System summary */}

@@ -14,19 +14,19 @@ export default function FinOpsPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <DollarSign className="size-4 text-primary" />
-        <h1 className="font-heading text-sm font-semibold text-foreground text-glow">
+      <div className="flex items-center gap-3 border-b border-border px-6 py-4">
+        <DollarSign className="size-5 text-primary" />
+        <h1 className="font-heading text-xl font-semibold text-foreground text-glow">
           FinOps Dashboard
         </h1>
-        <span className="font-mono text-xs text-muted-foreground">
+        <span className="font-mono text-sm text-muted-foreground">
           Cloud Cost Management
         </span>
       </div>
 
       {/* Scrollable content */}
       <ScrollArea className="flex-1">
-        <div className="space-y-6 p-4">
+        <div className="space-y-6 p-6">
           {/* Cost Overview Cards + Charts */}
           <CostOverview />
 

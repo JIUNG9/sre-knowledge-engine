@@ -119,7 +119,7 @@ export function CostOverview() {
   const isIncrease = MOM_CHANGE_PERCENT > 0
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
       {/* Total Monthly Spend */}
       <Card size="sm">
         <CardHeader className="border-b">
@@ -130,7 +130,7 @@ export function CostOverview() {
         </CardHeader>
         <CardContent className="pt-4">
           <div className="flex items-baseline gap-2">
-            <span className="font-mono text-3xl font-bold tracking-tight text-foreground">
+            <span className="font-mono text-4xl font-bold tracking-tight text-foreground">
               {formatCurrency(TOTAL_CURRENT_MONTH)}
             </span>
           </div>
@@ -165,7 +165,7 @@ export function CostOverview() {
         </CardHeader>
         <CardContent className="pt-3">
           <div className="flex items-center gap-4">
-            <div className="size-[100px] shrink-0">
+            <div className="size-[120px] shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -214,7 +214,7 @@ export function CostOverview() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-3">
-          <div className="h-[140px]">
+          <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={DAILY_COSTS}
@@ -291,7 +291,7 @@ export function CostOverview() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-3">
-          <div className="h-[160px]">
+          <div className="h-[220px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={TOP_SERVICES}

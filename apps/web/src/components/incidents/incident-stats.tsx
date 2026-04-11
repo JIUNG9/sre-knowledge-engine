@@ -18,20 +18,20 @@ interface StatCardProps {
 
 function StatCard({ label, value, sub, icon: Icon, color, pulse }: StatCardProps) {
   return (
-    <div className="flex items-center gap-3 rounded-lg bg-card px-3 py-2.5 ring-1 ring-foreground/10">
+    <div className="flex items-center gap-4 rounded-lg bg-card px-4 py-4 ring-1 ring-foreground/10">
       <div
         className={cn(
-          "flex size-8 items-center justify-center rounded-md",
+          "flex size-10 items-center justify-center rounded-md",
           pulse && "animate-pulse"
         )}
         style={{ backgroundColor: color ? `${color}15` : undefined }}
       >
-        <Icon className="size-4" style={{ color }} />
+        <Icon className="size-5" style={{ color }} />
       </div>
       <div className="min-w-0">
-        <p className="font-mono text-xs text-muted-foreground">{label}</p>
+        <p className="font-mono text-sm text-muted-foreground">{label}</p>
         <div className="flex items-baseline gap-1.5">
-          <span className="font-mono text-lg font-semibold text-foreground">
+          <span className="font-mono text-3xl font-bold text-foreground">
             {value}
           </span>
           {sub && (
@@ -57,7 +57,7 @@ function SeverityMiniCount({
   return (
     <div className="flex items-center gap-1">
       <span
-        className={cn("inline-block size-2 rounded-full", count > 0 && severity === "critical" && "animate-pulse")}
+        className={cn("inline-block size-3 rounded-full", count > 0 && severity === "critical" && "animate-pulse")}
         style={{ backgroundColor: color }}
       />
       <span className="font-mono text-xs text-muted-foreground">
@@ -120,7 +120,7 @@ export function IncidentStats() {
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           label="Active Incidents"
           value={active.length}

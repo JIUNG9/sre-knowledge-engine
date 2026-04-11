@@ -105,7 +105,7 @@ function SeverityBadge({ severity }: { severity: IncidentSeverity }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 font-mono text-xs font-bold"
+        "inline-flex items-center gap-1.5 rounded-sm border px-2 py-1 font-mono text-xs font-bold"
       )}
       style={{
         borderColor: `${config.color}30`,
@@ -114,7 +114,7 @@ function SeverityBadge({ severity }: { severity: IncidentSeverity }) {
       }}
     >
       {severity === "critical" && (
-        <span className="inline-block size-1.5 animate-pulse rounded-full bg-[#FF4444]" />
+        <span className="inline-block size-2.5 animate-pulse rounded-full bg-[#FF4444]" />
       )}
       {config.label}
     </span>
@@ -230,9 +230,9 @@ export function IncidentList() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-4">
         <div className="flex items-center gap-3">
-          <h1 className="font-heading text-sm font-semibold text-foreground text-glow">
+          <h1 className="font-heading text-xl font-semibold text-foreground text-glow">
             Incident Management
           </h1>
         </div>
@@ -263,7 +263,7 @@ export function IncidentList() {
         {/* Main content area */}
         <div className="flex flex-1 flex-col overflow-hidden">
           <ScrollArea className="flex-1">
-            <div className="space-y-4 p-4">
+            <div className="space-y-5 p-6">
               {/* Stats */}
               <IncidentStats />
 
@@ -446,30 +446,30 @@ export function IncidentList() {
                             </TableCell>
                             <TableCell>
                               <div className="min-w-0">
-                                <p className="truncate font-mono text-xs font-medium text-foreground">
+                                <p className="truncate font-mono text-sm font-medium text-foreground">
                                   {incident.title}
                                 </p>
-                                <p className="font-mono text-xs text-muted-foreground">
+                                <p className="font-mono text-sm text-muted-foreground">
                                   {incident.id}
                                 </p>
                               </div>
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-muted-foreground">
+                            <TableCell className="font-mono text-sm text-muted-foreground">
                               {incident.service}
                             </TableCell>
                             <TableCell>
                               <StatusChip status={incident.status} />
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-muted-foreground">
+                            <TableCell className="font-mono text-sm text-muted-foreground">
                               {incident.assignee}
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-muted-foreground">
+                            <TableCell className="font-mono text-sm text-muted-foreground">
                               {formatDuration(
                                 incident.createdAt,
                                 incident.resolvedAt
                               )}
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-muted-foreground">
+                            <TableCell className="font-mono text-sm text-muted-foreground">
                               {formatUpdated(incident.updatedAt)}
                             </TableCell>
                           </TableRow>
@@ -480,7 +480,7 @@ export function IncidentList() {
                 </div>
               ) : (
                 /* ---- Card View ---- */
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                   {filtered.map((incident) => (
                     <IncidentCard
                       key={incident.id}

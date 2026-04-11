@@ -165,22 +165,22 @@ function SloCard({ slo, onClick }: SloCardProps) {
         {/* Header: service + status */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate font-mono text-xs font-medium text-foreground">
+            <p className="truncate font-mono text-sm font-medium text-foreground">
               {slo.name}
             </p>
-            <p className="font-mono text-xs text-muted-foreground">
+            <p className="font-mono text-sm text-muted-foreground">
               {slo.service}
             </p>
           </div>
-          <StatusIcon className="size-4 shrink-0" style={{ color: statusConfig.color }} />
+          <StatusIcon className="size-5 shrink-0" style={{ color: statusConfig.color }} />
         </div>
 
         {/* Current vs Target */}
-        <div className="flex items-baseline gap-1.5">
-          <span className="font-mono text-lg font-semibold text-foreground">
+        <div className="flex items-baseline gap-2">
+          <span className="font-mono text-2xl font-bold text-foreground">
             {formatCurrentValue(slo)}
           </span>
-          <span className="font-mono text-xs text-muted-foreground">
+          <span className="font-mono text-sm text-muted-foreground">
             / {formatTarget(slo)}
           </span>
         </div>
@@ -198,7 +198,7 @@ function SloCard({ slo, onClick }: SloCardProps) {
               {slo.errorBudgetRemaining}%
             </span>
           </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-3 overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
@@ -211,7 +211,7 @@ function SloCard({ slo, onClick }: SloCardProps) {
         </div>
 
         {/* Sparkline */}
-        <ErrorBudgetSparkline data={slo.errorBudgetData} height={32} />
+        <ErrorBudgetSparkline data={slo.errorBudgetData} height={48} />
 
         {/* Footer: badges */}
         <div className="flex flex-wrap items-center gap-1">
@@ -296,9 +296,9 @@ export function SloOverview() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-4">
         <div className="flex items-center gap-3">
-          <h1 className="font-heading text-sm font-semibold text-foreground text-glow">
+          <h1 className="font-heading text-xl font-semibold text-foreground text-glow">
             SLO Dashboard
           </h1>
           <div className="flex items-center gap-2 font-mono text-xs">
@@ -324,7 +324,7 @@ export function SloOverview() {
 
       {/* Scrollable content */}
       <ScrollArea className="flex-1">
-        <div className="space-y-4 p-4">
+        <div className="space-y-6 p-6">
           {/* Service Health Grid */}
           <ServiceHealthGrid
             selectedService={selectedService}
@@ -419,7 +419,7 @@ export function SloOverview() {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((slo) => (
                 <SloCard
                   key={slo.id}

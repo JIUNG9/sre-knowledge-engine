@@ -50,16 +50,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <aside
       className={cn(
         "relative flex h-full flex-col border-r border-border bg-sidebar transition-all duration-300 ease-in-out",
-        collapsed ? "w-[52px]" : "w-[220px]"
+        collapsed ? "w-[56px]" : "w-[240px]"
       )}
     >
       {/* Logo */}
-      <div className="flex h-14 items-center gap-2 px-3">
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
-          <Shield className="size-4 text-primary" />
+      <div className="flex h-14 items-center gap-2.5 px-3">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10">
+          <Shield className="size-5 text-primary" />
         </div>
         {!collapsed && (
-          <span className="font-heading text-sm font-semibold tracking-wider text-foreground">
+          <span className="font-heading text-base font-semibold tracking-wider text-foreground">
             AEGIS
           </span>
         )}
@@ -77,7 +77,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "group flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm font-medium transition-all duration-150 outline-none",
+                  "group flex w-full items-center gap-2.5 rounded-md px-2.5 py-2.5 text-sm font-medium transition-all duration-150 outline-none",
                   "hover:bg-surface-hover hover:text-foreground",
                   isActive
                     ? "bg-primary/10 text-primary glow-matrix"
@@ -86,7 +86,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               >
                 <item.icon
                   className={cn(
-                    "size-4 shrink-0 transition-colors",
+                    "size-[18px] shrink-0 transition-colors",
                     isActive
                       ? "text-primary"
                       : "text-muted-foreground group-hover:text-foreground"

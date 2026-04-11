@@ -146,7 +146,7 @@ function IdleWasteIndicator() {
           CPU Waste
         </p>
         <p
-          className="font-mono text-xl font-bold"
+          className="font-mono text-3xl font-bold"
           style={{ color: getWasteColor(Number(cpuWaste)) }}
         >
           {cpuWaste}%
@@ -160,7 +160,7 @@ function IdleWasteIndicator() {
           Memory Waste
         </p>
         <p
-          className="font-mono text-xl font-bold"
+          className="font-mono text-3xl font-bold"
           style={{ color: getWasteColor(Number(memWaste)) }}
         >
           {memWaste}%
@@ -210,7 +210,7 @@ export function KubernetesCost() {
           <TabsContent value="namespaces">
             <div className="space-y-4">
               {/* Namespace bar chart */}
-              <div className="h-[180px]">
+              <div className="h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={K8S_NAMESPACE_COSTS}
@@ -316,7 +316,7 @@ export function KubernetesCost() {
                 <p className="font-mono text-xs text-muted-foreground">
                   Total Potential Savings
                 </p>
-                <p className="font-mono text-2xl font-bold text-[#00FF88]">
+                <p className="font-mono text-3xl font-bold text-[#00FF88]">
                   {formatCurrency(totalSavings)}/mo
                 </p>
               </div>

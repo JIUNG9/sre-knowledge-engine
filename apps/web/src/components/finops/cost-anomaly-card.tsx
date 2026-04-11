@@ -110,7 +110,7 @@ function AnomalyCard({ anomaly }: { anomaly: CostAnomaly }) {
             <p className="font-mono text-xs text-muted-foreground">
               Expected
             </p>
-            <p className="font-mono text-sm font-medium text-foreground">
+            <p className="font-mono text-lg font-medium text-foreground">
               {formatCurrency(anomaly.expected)}
             </p>
           </div>
@@ -119,7 +119,7 @@ function AnomalyCard({ anomaly }: { anomaly: CostAnomaly }) {
               Actual
             </p>
             <p
-              className="font-mono text-sm font-bold"
+              className="font-mono text-lg font-bold"
               style={{ color: severity.color }}
             >
               {formatCurrency(anomaly.actual)}
@@ -129,7 +129,7 @@ function AnomalyCard({ anomaly }: { anomaly: CostAnomaly }) {
             <p className="font-mono text-xs text-muted-foreground">
               Deviation
             </p>
-            <p className="flex items-center gap-1 font-mono text-sm font-bold text-[#FF4444]">
+            <p className="flex items-center gap-1 font-mono text-lg font-bold text-[#FF4444]">
               <TrendingUp className="size-3" />
               +{anomaly.deviation.toFixed(1)}%
             </p>
@@ -177,8 +177,8 @@ export function CostAnomalyCards() {
 
   return (
     <div className="space-y-3">
-      <h2 className="flex items-center gap-2 font-mono text-xs font-medium text-muted-foreground">
-        <AlertTriangle className="size-3.5 text-[#FFB020]" />
+      <h2 className="flex items-center gap-2 font-mono text-lg font-medium text-muted-foreground">
+        <AlertTriangle className="size-5 text-[#FFB020]" />
         Cost Anomalies
         <Badge
           variant="outline"
@@ -191,7 +191,7 @@ export function CostAnomalyCards() {
           {COST_ANOMALIES.length}
         </Badge>
       </h2>
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-5 md:grid-cols-2">
         {COST_ANOMALIES.map((anomaly) => (
           <AnomalyCard key={anomaly.id} anomaly={anomaly} />
         ))}

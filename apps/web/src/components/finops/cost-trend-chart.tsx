@@ -177,7 +177,7 @@ export function CostTrendChart() {
 
           {/* Comparison: current vs previous month overlay */}
           <TabsContent value="comparison">
-            <div className="h-[260px]">
+            <div className="h-[320px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={comparisonData}
@@ -247,7 +247,7 @@ export function CostTrendChart() {
 
           {/* Trend view with granularity toggle */}
           <TabsContent value="trend">
-            <div className="h-[260px]">
+            <div className="h-[320px]">
               {granularity === "daily" && (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart

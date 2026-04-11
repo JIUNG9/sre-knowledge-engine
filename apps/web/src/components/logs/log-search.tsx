@@ -179,13 +179,13 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
       {/* Search bar */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground/50" />
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground/50" />
           <Input
             type="text"
             placeholder="Search logs... (full-text, regex, or KQL)"
             value={filters.search}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateFilter("search", e.target.value)}
-            className="h-8 bg-[#0A0A0F] pl-8 pr-16 font-mono text-[12px] placeholder:text-muted-foreground/40 focus-visible:border-primary/40 focus-visible:ring-primary/20 focus-visible:shadow-[0_0_12px_rgba(0,255,136,0.1)]"
+            className="h-11 bg-[#0A0A0F] pl-9 pr-16 font-mono text-sm placeholder:text-muted-foreground/40 focus-visible:border-primary/40 focus-visible:ring-primary/20 focus-visible:shadow-[0_0_12px_rgba(0,255,136,0.1)]"
           />
           <kbd className="pointer-events-none absolute top-1/2 right-2 flex h-5 -translate-y-1/2 items-center gap-0.5 rounded border border-border bg-muted px-1.5 font-mono text-xs text-muted-foreground/50">
             <span className="text-xs">&#8984;</span>K

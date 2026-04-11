@@ -52,7 +52,7 @@ function TrendSparkline({ data, change }: { data: number[]; change: number }) {
   const color = change < 0 ? "#00FF88" : change > 0 ? "#FF4444" : "#666"
 
   return (
-    <div className="h-[24px] w-[80px]">
+    <div className="h-[32px] w-[100px]">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={chartData}
@@ -229,22 +229,22 @@ export function CostByService() {
                   setSelectedRow(selectedRow === row.id ? null : row.id)
                 }
               >
-                <TableCell className="font-mono text-xs font-medium text-foreground">
+                <TableCell className="font-mono text-sm font-medium text-foreground">
                   {row.service}
                 </TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">
+                <TableCell className="font-mono text-sm text-muted-foreground">
                   {row.team}
                 </TableCell>
-                <TableCell className="font-mono text-xs text-muted-foreground">
+                <TableCell className="font-mono text-sm text-muted-foreground">
                   {row.account}
                 </TableCell>
                 <TableCell>
                   <ProviderBadge provider={row.provider} />
                 </TableCell>
-                <TableCell className="text-right font-mono text-xs font-medium text-foreground">
+                <TableCell className="text-right font-mono text-sm font-medium text-foreground">
                   {formatCurrency(row.currentMonth)}
                 </TableCell>
-                <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                <TableCell className="text-right font-mono text-sm text-muted-foreground">
                   {formatCurrency(row.previousMonth)}
                 </TableCell>
                 <TableCell className="text-right">

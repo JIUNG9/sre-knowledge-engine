@@ -28,7 +28,7 @@ function LevelBadge({ level }: { level: LogLevel }) {
   const config = LOG_LEVEL_CONFIG[level]
   return (
     <span
-      className="inline-flex h-[18px] w-[34px] shrink-0 items-center justify-center rounded-sm font-mono text-xs font-bold uppercase tracking-wider"
+      className="inline-flex h-[22px] w-[42px] shrink-0 items-center justify-center rounded-sm font-mono text-xs font-bold uppercase tracking-wider"
       style={{
         color: config.color,
         backgroundColor: config.bgColor,
@@ -43,7 +43,7 @@ function ServiceBadge({ service }: { service: string }) {
   return (
     <Badge
       variant="outline"
-      className="h-[18px] shrink-0 truncate rounded-sm border-border/50 px-1.5 font-mono text-xs text-muted-foreground"
+      className="h-[22px] shrink-0 truncate rounded-sm border-border/50 px-2 font-mono text-xs text-muted-foreground"
     >
       {service}
     </Badge>
@@ -78,7 +78,7 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
       {/* Compact row */}
       <button
         onClick={onToggle}
-        className="flex w-full items-center gap-2 px-3 py-1.5 text-left outline-none transition-colors hover:bg-white/[0.02]"
+        className="flex w-full items-center gap-2.5 px-4 py-3 text-left outline-none transition-colors hover:bg-white/[0.02]"
       >
         <ChevronRight
           className={cn(
@@ -86,12 +86,12 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
             isExpanded && "rotate-90"
           )}
         />
-        <span className="shrink-0 font-mono text-xs text-muted-foreground/60">
+        <span className="shrink-0 font-mono text-sm text-muted-foreground/60">
           {formatTimestamp(entry.timestamp)}
         </span>
         <LevelBadge level={entry.level} />
         <ServiceBadge service={entry.service} />
-        <span className="min-w-0 flex-1 truncate font-mono text-[12px] text-foreground/80">
+        <span className="min-w-0 flex-1 truncate font-mono text-sm text-foreground/80">
           {entry.message}
         </span>
         {entry.security && (

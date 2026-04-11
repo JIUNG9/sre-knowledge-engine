@@ -50,8 +50,8 @@ export function CommandBar() {
         </h1>
       </div>
 
-      {/* Right: Search + Language + Notifications + User */}
-      <div className="flex items-center gap-1.5">
+      {/* Right: Search + Language + Notifications + User — BIGGER with spacing */}
+      <div className="flex items-center gap-4">
         {/* Search trigger */}
         <Tooltip>
           <TooltipTrigger
@@ -59,23 +59,27 @@ export function CommandBar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-muted-foreground hover:text-foreground"
+                className="size-10 text-muted-foreground hover:text-foreground"
               />
             }
           >
-            <Search className="size-[18px]" />
+            <Search className="size-5" />
             <span className="sr-only">Search</span>
           </TooltipTrigger>
           <TooltipContent>
             Search
-            <kbd className="ml-1.5 rounded border border-border bg-muted px-1 font-mono text-[10px]">
+            <kbd className="ml-1.5 rounded border border-border bg-muted px-1.5 font-mono text-xs">
               &#8984;K
             </kbd>
           </TooltipContent>
         </Tooltip>
 
+        <div className="h-6 w-px bg-border" />
+
         {/* Language Switcher */}
         <LanguageSwitcher />
+
+        <div className="h-6 w-px bg-border" />
 
         {/* Notifications */}
         <Tooltip>
@@ -84,13 +88,13 @@ export function CommandBar() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative text-muted-foreground hover:text-foreground"
+                className="relative size-10 text-muted-foreground hover:text-foreground"
               />
             }
           >
-            <Bell className="size-[18px]" />
+            <Bell className="size-5" />
             {/* Notification badge */}
-            <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+            <span className="absolute top-0.5 right-0.5 flex size-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
               3
             </span>
             <span className="sr-only">Notifications</span>
@@ -102,9 +106,9 @@ export function CommandBar() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-muted-foreground hover:text-foreground"
+          className="size-10 rounded-full bg-muted/50 text-muted-foreground hover:text-foreground"
         >
-          <User className="size-[18px]" />
+          <User className="size-5" />
           <span className="sr-only">User menu</span>
         </Button>
       </div>

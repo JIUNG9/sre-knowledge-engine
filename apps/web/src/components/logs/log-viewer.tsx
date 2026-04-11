@@ -137,7 +137,7 @@ export function LogViewer() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {/* Search and filters */}
+      {/* Sticky filter area: search + filters + presets + chips */}
       <LogSearch filters={filters} onFiltersChange={setFilters} />
 
       {/* Security view (visible when security filter is active) */}
@@ -160,6 +160,23 @@ export function LogViewer() {
         isLiveTail={filters.liveTail}
       />
 
+      {/* Column headers */}
+      <div className="flex items-center gap-3 border-b border-border/30 bg-[#08080D] px-4 py-2">
+        <span className="w-4 shrink-0" /> {/* Chevron spacer */}
+        <span className="w-[120px] shrink-0 font-mono text-xs uppercase tracking-widest text-muted-foreground/30">
+          Timestamp
+        </span>
+        <span className="w-16 shrink-0 font-mono text-xs uppercase tracking-widest text-muted-foreground/30">
+          Level
+        </span>
+        <span className="w-[140px] shrink-0 font-mono text-xs uppercase tracking-widest text-muted-foreground/30">
+          Service
+        </span>
+        <span className="min-w-0 flex-1 font-mono text-xs uppercase tracking-widest text-muted-foreground/30">
+          Message
+        </span>
+      </div>
+
       {/* Log entries */}
       <div className="relative flex-1 overflow-hidden">
         {/* Live tail scanning animation */}
@@ -175,7 +192,7 @@ export function LogViewer() {
           className="h-full overflow-y-auto"
         >
           {visibleLogs.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground/50">
+            <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground/40">
               <span className="font-mono text-sm">No logs match your filters</span>
               <span className="font-mono text-xs">
                 Try adjusting your search or filter criteria
@@ -201,11 +218,11 @@ export function LogViewer() {
           <div className="absolute inset-x-0 bottom-4 flex justify-center">
             <Button
               variant="default"
-              size="sm"
-              className="gap-1.5 font-mono text-xs shadow-lg glow-matrix"
+              size="default"
+              className="gap-2 font-mono text-sm shadow-lg glow-matrix"
               onClick={scrollToBottom}
             >
-              <ArrowDown className="size-3" />
+              <ArrowDown className="size-4" />
               Jump to latest
             </Button>
           </div>

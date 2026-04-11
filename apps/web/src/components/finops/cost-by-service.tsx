@@ -222,7 +222,7 @@ export function CostByService() {
               <TableRow
                 key={row.id}
                 className={cn(
-                  "cursor-pointer transition-colors",
+                  "h-14 cursor-pointer transition-colors",
                   selectedRow === row.id && "bg-primary/5"
                 )}
                 onClick={() =>

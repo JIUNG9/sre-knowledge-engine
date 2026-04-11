@@ -17,9 +17,9 @@ export default function FinOpsPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-border px-6 py-4">
-        <DollarSign className="size-5 text-primary" />
-        <h1 className="font-heading text-xl font-semibold text-foreground text-glow">
+      <div className="flex items-center gap-3 border-b border-border px-8 py-5">
+        <DollarSign className="size-6 text-primary" />
+        <h1 className="font-heading text-2xl font-semibold text-foreground text-glow">
           FinOps Dashboard
         </h1>
         <span className="font-mono text-sm text-muted-foreground">
@@ -29,15 +29,15 @@ export default function FinOpsPage() {
 
       {/* Tabs navigation */}
       <Tabs defaultValue="overview" className="flex flex-1 flex-col overflow-hidden">
-        <div className="border-b border-border px-6 pt-2">
+        <div className="border-b border-border px-8 pt-2">
           <TabsList variant="line">
-            <TabsTrigger value="overview" className="font-mono text-sm">
+            <TabsTrigger value="overview" className="px-5 py-3 font-mono text-base">
               Overview
             </TabsTrigger>
-            <TabsTrigger value="budgets" className="font-mono text-sm">
+            <TabsTrigger value="budgets" className="px-5 py-3 font-mono text-base">
               Budgets
             </TabsTrigger>
-            <TabsTrigger value="rightsizing" className="font-mono text-sm">
+            <TabsTrigger value="rightsizing" className="px-5 py-3 font-mono text-base">
               Right-Sizing
             </TabsTrigger>
           </TabsList>
@@ -46,7 +46,7 @@ export default function FinOpsPage() {
         {/* Scrollable content */}
         <ScrollArea className="flex-1">
           <TabsContent value="overview">
-            <div className="space-y-6 p-6">
+            <div className="space-y-6 p-8">
               {/* Cost Overview Cards + Charts */}
               <CostOverview />
 
@@ -54,7 +54,7 @@ export default function FinOpsPage() {
               <CostAnomalyCards />
 
               {/* Two-column layout: Budget + K8s */}
-              <div className="grid gap-4 xl:grid-cols-2">
+              <div className="grid gap-6 xl:grid-cols-2">
                 <BudgetTracker />
                 <KubernetesCost />
               </div>
@@ -68,13 +68,13 @@ export default function FinOpsPage() {
           </TabsContent>
 
           <TabsContent value="budgets">
-            <div className="p-6">
+            <div className="p-8">
               <BudgetManagement />
             </div>
           </TabsContent>
 
           <TabsContent value="rightsizing">
-            <div className="p-6">
+            <div className="p-8">
               <RightsizingRecommendations />
             </div>
           </TabsContent>

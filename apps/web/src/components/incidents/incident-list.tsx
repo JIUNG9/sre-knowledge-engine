@@ -230,28 +230,28 @@ export function IncidentList() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-8 py-5">
         <div className="flex items-center gap-3">
-          <h1 className="font-heading text-xl font-semibold text-foreground text-glow">
+          <h1 className="font-heading text-2xl font-semibold text-foreground text-glow">
             Incident Management
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* View toggle */}
-          <div className="flex items-center rounded-md bg-muted p-0.5">
+          <div className="flex items-center rounded-md bg-muted p-1">
             <Button
               variant={viewMode === "table" ? "secondary" : "ghost"}
-              size="icon-xs"
+              size="sm"
               onClick={() => setViewMode("table")}
             >
-              <LayoutList className="size-3" />
+              <LayoutList className="size-4" />
             </Button>
             <Button
               variant={viewMode === "cards" ? "secondary" : "ghost"}
-              size="icon-xs"
+              size="sm"
               onClick={() => setViewMode("cards")}
             >
-              <LayoutGrid className="size-3" />
+              <LayoutGrid className="size-4" />
             </Button>
           </div>
           <IncidentCreate />
@@ -263,15 +263,15 @@ export function IncidentList() {
         {/* Main content area */}
         <div className="flex flex-1 flex-col overflow-hidden">
           <ScrollArea className="flex-1">
-            <div className="space-y-5 p-6">
+            <div className="space-y-6 p-8">
               {/* Stats */}
               <IncidentStats />
 
               {/* Filter bar */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <Filter className="size-3" />
-                  <span className="font-mono text-xs">Filters:</span>
+                  <Filter className="size-4" />
+                  <span className="font-mono text-sm">Filters:</span>
                 </div>
 
                 {/* Status */}

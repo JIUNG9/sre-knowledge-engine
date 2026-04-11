@@ -225,7 +225,7 @@ function BudgetRow({ budget }: { budget: BudgetItem }) {
 
       {/* Progress bar */}
       <div className="relative">
-        <div className="h-3 overflow-hidden rounded-full bg-muted">
+        <div className="h-4 overflow-hidden rounded-full bg-muted">
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{
@@ -239,21 +239,21 @@ function BudgetRow({ budget }: { budget: BudgetItem }) {
         {budget.alertThresholds.map((t) => (
           <div
             key={t}
-            className="absolute top-0 h-3 border-r border-dashed border-muted-foreground/30"
+            className="absolute top-0 h-4 border-r border-dashed border-muted-foreground/30"
             style={{ left: `${Math.min(t, 100)}%` }}
           />
         ))}
         {/* Projected line */}
         {projectedPercent <= 150 && (
           <div
-            className="absolute top-0 h-3 border-r-2 border-dashed"
+            className="absolute top-0 h-4 border-r-2 border-dashed"
             style={{
               left: `${Math.min(projectedPercent, 100)}%`,
               borderColor: getProgressColor(projectedPercent),
             }}
           >
             <div
-              className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[9px]"
+              className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[10px]"
               style={{ color: getProgressColor(projectedPercent) }}
             >
               EOM: {projectedPercent.toFixed(0)}%
@@ -429,52 +429,52 @@ export function BudgetManagement() {
   return (
     <div className="space-y-6">
       {/* Summary cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card size="sm">
-          <CardContent className="pt-4">
+      <div className="grid gap-6 md:grid-cols-4">
+        <Card>
+          <CardContent className="p-6">
             <div className="flex items-center gap-2">
-              <Wallet className="size-4 text-primary" />
-              <span className="font-mono text-xs text-muted-foreground">
+              <Wallet className="size-5 text-primary" />
+              <span className="font-mono text-sm text-muted-foreground">
                 Total Budget
               </span>
             </div>
-            <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-foreground">
+            <p className="mt-3 font-mono text-4xl font-bold tracking-tight text-foreground">
               {formatCurrency(totalBudget)}
             </p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
+            <p className="mt-1.5 font-mono text-sm text-muted-foreground">
               {BUDGETS.length} active budgets
             </p>
           </CardContent>
         </Card>
-        <Card size="sm">
-          <CardContent className="pt-4">
+        <Card>
+          <CardContent className="p-6">
             <div className="flex items-center gap-2">
-              <TrendingUp className="size-4 text-[#00BFFF]" />
-              <span className="font-mono text-xs text-muted-foreground">
+              <TrendingUp className="size-5 text-[#00BFFF]" />
+              <span className="font-mono text-sm text-muted-foreground">
                 Current Spend
               </span>
             </div>
-            <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-foreground">
+            <p className="mt-3 font-mono text-4xl font-bold tracking-tight text-foreground">
               {formatCurrency(totalSpend)}
             </p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
+            <p className="mt-1.5 font-mono text-sm text-muted-foreground">
               {((totalSpend / totalBudget) * 100).toFixed(0)}% of total budget
             </p>
           </CardContent>
         </Card>
-        <Card size="sm">
-          <CardContent className="pt-4">
+        <Card>
+          <CardContent className="p-6">
             <div className="flex items-center gap-2">
-              <TrendingUp className="size-4 text-[#A855F7]" />
-              <span className="font-mono text-xs text-muted-foreground">
+              <TrendingUp className="size-5 text-[#A855F7]" />
+              <span className="font-mono text-sm text-muted-foreground">
                 Projected EOM
               </span>
             </div>
-            <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-foreground">
+            <p className="mt-3 font-mono text-4xl font-bold tracking-tight text-foreground">
               {formatCurrency(totalProjected)}
             </p>
             <p
-              className="mt-1 font-mono text-xs"
+              className="mt-1.5 font-mono text-sm"
               style={{
                 color:
                   totalProjected > totalBudget ? "#FF4444" : "#00FF88",
@@ -486,25 +486,25 @@ export function BudgetManagement() {
             </p>
           </CardContent>
         </Card>
-        <Card size="sm">
-          <CardContent className="pt-4">
+        <Card>
+          <CardContent className="p-6">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="size-4 text-[#FFB020]" />
-              <span className="font-mono text-xs text-muted-foreground">
+              <AlertTriangle className="size-5 text-[#FFB020]" />
+              <span className="font-mono text-sm text-muted-foreground">
                 Alerts
               </span>
             </div>
-            <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-foreground">
+            <p className="mt-3 font-mono text-4xl font-bold tracking-tight text-foreground">
               {exceededCount + atRiskCount}
             </p>
-            <div className="mt-1 flex items-center gap-2">
+            <div className="mt-1.5 flex items-center gap-3">
               {exceededCount > 0 && (
-                <span className="font-mono text-xs text-[#FF4444]">
+                <span className="font-mono text-sm text-[#FF4444]">
                   {exceededCount} exceeded
                 </span>
               )}
               {atRiskCount > 0 && (
-                <span className="font-mono text-xs text-[#FFB020]">
+                <span className="font-mono text-sm text-[#FFB020]">
                   {atRiskCount} at risk
                 </span>
               )}
@@ -573,7 +573,7 @@ export function BudgetManagement() {
             <AddBudgetDialog />
           </CardAction>
         </CardHeader>
-        <CardContent className="space-y-3 pt-4">
+        <CardContent className="space-y-4 p-6">
           {BUDGETS.map((budget) => (
             <BudgetRow key={budget.id} budget={budget} />
           ))}

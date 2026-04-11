@@ -189,18 +189,18 @@ export function KubernetesCost() {
           Kubernetes Cost Allocation
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-3">
+      <CardContent className="p-6">
         <Tabs defaultValue="namespaces">
-          <TabsList variant="line" className="mb-3">
-            <TabsTrigger value="namespaces" className="font-mono text-xs">
+          <TabsList variant="line" className="mb-4">
+            <TabsTrigger value="namespaces" className="px-4 py-2.5 font-mono text-sm">
               Namespaces
             </TabsTrigger>
-            <TabsTrigger value="pods" className="font-mono text-xs">
+            <TabsTrigger value="pods" className="px-4 py-2.5 font-mono text-sm">
               Pods
             </TabsTrigger>
             <TabsTrigger
               value="recommendations"
-              className="font-mono text-xs"
+              className="px-4 py-2.5 font-mono text-sm"
             >
               Optimize
             </TabsTrigger>
@@ -210,7 +210,7 @@ export function KubernetesCost() {
           <TabsContent value="namespaces">
             <div className="space-y-4">
               {/* Namespace bar chart */}
-              <div className="h-[260px]">
+              <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={K8S_NAMESPACE_COSTS}

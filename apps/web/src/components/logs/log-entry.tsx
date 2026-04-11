@@ -3,7 +3,6 @@
 import * as React from "react"
 import { ChevronRight, Copy, ExternalLink, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { LogEntry as LogEntryType, LogLevel } from "@/lib/mock-data/logs"
 import { LOG_LEVEL_CONFIG } from "@/lib/mock-data/logs"
@@ -24,11 +23,18 @@ function formatTimestamp(iso: string): string {
   return `${h}:${m}:${s}.${ms}`
 }
 
+function formatDate(iso: string): string {
+  const date = new Date(iso)
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${month}/${day}`
+}
+
 function LevelBadge({ level }: { level: LogLevel }) {
   const config = LOG_LEVEL_CONFIG[level]
   return (
     <span
-      className="inline-flex h-[22px] w-[42px] shrink-0 items-center justify-center rounded-sm font-mono text-xs font-bold uppercase tracking-wider"
+      className="inline-flex h-7 w-16 shrink-0 items-center justify-center rounded-md font-mono text-xs font-bold uppercase tracking-wider"
       style={{
         color: config.color,
         backgroundColor: config.bgColor,
@@ -41,12 +47,9 @@ function LevelBadge({ level }: { level: LogLevel }) {
 
 function ServiceBadge({ service }: { service: string }) {
   return (
-    <Badge
-      variant="outline"
-      className="h-[22px] shrink-0 truncate rounded-sm border-border/50 px-2 font-mono text-xs text-muted-foreground"
-    >
+    <span className="inline-flex h-7 shrink-0 items-center truncate rounded-md bg-[#1A1A25] px-2.5 font-mono text-xs font-medium text-muted-foreground/80">
       {service}
-    </Badge>
+    </span>
   )
 }
 
@@ -68,99 +71,113 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
   return (
     <div
       className={cn(
-        "group border-b border-border/30 transition-colors",
-        isEven ? "bg-card" : "bg-[#0B0B10]",
-        isExpanded && "bg-[#0F0F16]",
-        entry.security && "border-l-2 border-l-[#FF4444]/40",
+        "group border-b border-border/20 transition-colors",
+        isEven ? "bg-[#0B0B10]" : "bg-[#0E0E15]",
+        isExpanded && "bg-[#10101A]",
+        entry.security && "border-l-2 border-l-[#FF4444]/50",
         !entry.security && "border-l-2 border-l-transparent"
       )}
     >
       {/* Compact row */}
       <button
         onClick={onToggle}
-        className="flex w-full items-center gap-2.5 px-4 py-3 text-left outline-none transition-colors hover:bg-white/[0.02]"
+        className="flex w-full items-center gap-3 px-4 py-4 text-left outline-none transition-colors hover:bg-white/[0.02]"
       >
         <ChevronRight
           className={cn(
-            "size-3 shrink-0 text-muted-foreground/50 transition-transform duration-150",
-            isExpanded && "rotate-90"
+            "size-4 shrink-0 text-muted-foreground/40 transition-transform duration-150",
+            isExpanded && "rotate-90 text-muted-foreground/70"
           )}
         />
-        <span className="shrink-0 font-mono text-sm text-muted-foreground/60">
+
+        {/* Timestamp - monospace, right-aligned feel */}
+        <span className="shrink-0 text-right font-mono text-sm tabular-nums text-muted-foreground/50">
+          <span className="text-muted-foreground/30">{formatDate(entry.timestamp)}</span>
+          {" "}
           {formatTimestamp(entry.timestamp)}
         </span>
+
         <LevelBadge level={entry.level} />
         <ServiceBadge service={entry.service} />
-        <span className="min-w-0 flex-1 truncate font-mono text-sm text-foreground/80">
+
+        {/* Message - truncated, 14px */}
+        <span className="min-w-0 flex-1 truncate font-mono text-sm leading-relaxed text-foreground/80">
           {entry.message}
         </span>
+
+        {/* Security indicator */}
         {entry.security && (
-          <span className="shrink-0 font-mono text-xs font-medium uppercase tracking-widest text-[#FF4444]/70">
+          <span className="shrink-0 rounded-md bg-[#FF4444]/10 px-2 py-0.5 font-mono text-xs font-bold uppercase tracking-widest text-[#FF4444]/80">
             sec
           </span>
         )}
+
+        {/* Expand hint on hover */}
+        <span className="shrink-0 font-mono text-xs text-muted-foreground/0 transition-colors group-hover:text-muted-foreground/30">
+          {isExpanded ? "collapse" : "expand"}
+        </span>
       </button>
 
       {/* Expanded details */}
       {isExpanded && (
-        <div className="border-t border-border/20 bg-[#0A0A10] px-4 py-3 pl-8">
+        <div className="border-t border-border/20 bg-[#09090E] px-5 py-4 pl-12">
           {/* Action buttons */}
-          <div className="mb-3 flex items-center gap-2">
+          <div className="mb-4 flex items-center gap-2">
             <Button
               variant="outline"
-              size="xs"
-              className="gap-1 font-mono text-xs"
+              size="sm"
+              className="gap-1.5 font-mono text-xs"
               onClick={handleCopy}
             >
               {copied ? (
-                <Check className="size-3 text-primary" />
+                <Check className="size-3.5 text-primary" />
               ) : (
-                <Copy className="size-3" />
+                <Copy className="size-3.5" />
               )}
               {copied ? "Copied" : "Copy JSON"}
             </Button>
             {entry.traceId && (
               <Button
                 variant="outline"
-                size="xs"
-                className="gap-1 font-mono text-xs"
+                size="sm"
+                className="gap-1.5 font-mono text-xs"
                 onClick={(e) => e.stopPropagation()}
               >
-                <ExternalLink className="size-3" />
+                <ExternalLink className="size-3.5" />
                 View Trace
               </Button>
             )}
           </div>
 
           {/* Full message */}
-          <div className="mb-3">
-            <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/50">
-              Message
+          <div className="mb-4">
+            <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground/40">
+              Full Message
             </span>
-            <p className="mt-1 font-mono text-[12px] leading-relaxed text-foreground/90">
+            <p className="mt-1.5 rounded-md bg-[#0C0C12] p-3 font-mono text-sm leading-relaxed text-foreground/90">
               {entry.message}
             </p>
           </div>
 
           {/* Trace info */}
           {(entry.traceId || entry.spanId) && (
-            <div className="mb-3 flex flex-wrap gap-x-6 gap-y-1">
+            <div className="mb-4 flex flex-wrap gap-x-8 gap-y-2">
               {entry.traceId && (
                 <div>
-                  <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/50">
+                  <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground/40">
                     Trace ID
                   </span>
-                  <p className="mt-0.5 font-mono text-xs text-primary/80">
+                  <p className="mt-1 font-mono text-sm text-primary/80">
                     {entry.traceId}
                   </p>
                 </div>
               )}
               {entry.spanId && (
                 <div>
-                  <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/50">
+                  <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground/40">
                     Span ID
                   </span>
-                  <p className="mt-0.5 font-mono text-xs text-primary/80">
+                  <p className="mt-1 font-mono text-sm text-primary/80">
                     {entry.spanId}
                   </p>
                 </div>
@@ -171,13 +188,13 @@ export function LogEntryRow({ entry, isExpanded, onToggle, isEven }: LogEntryPro
           {/* Attributes table */}
           {entry.attributes && Object.keys(entry.attributes).length > 0 && (
             <div>
-              <span className="font-mono text-xs uppercase tracking-wider text-muted-foreground/50">
+              <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground/40">
                 Attributes
               </span>
-              <div className="mt-1 grid grid-cols-1 gap-x-6 gap-y-0.5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-2 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
                 {Object.entries(entry.attributes).map(([key, value]) => (
-                  <div key={key} className="flex items-baseline gap-1.5 font-mono text-xs">
-                    <span className="shrink-0 text-muted-foreground/60">{key}:</span>
+                  <div key={key} className="flex items-baseline gap-2 font-mono text-sm">
+                    <span className="shrink-0 text-muted-foreground/50">{key}:</span>
                     <span className="truncate text-foreground/70">{value}</span>
                   </div>
                 ))}

@@ -38,29 +38,29 @@ function BudgetRow({ budget }: { budget: TeamBudget }) {
   const isOverBudget = budget.projectedPercent > 100
 
   return (
-    <div className="space-y-2 rounded-lg border border-border/50 p-3">
+    <div className="space-y-3 rounded-lg border border-border/50 p-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs font-medium text-foreground">
+          <span className="font-mono text-sm font-medium text-foreground">
             {budget.team}
           </span>
           {isOverBudget && (
             <Badge
               variant="outline"
-              className="gap-0.5 font-mono text-xs"
+              className="gap-1 font-mono text-xs"
               style={{
                 borderColor: "rgba(255,68,68,0.3)",
                 color: "#FF4444",
                 backgroundColor: "rgba(255,68,68,0.1)",
               }}
             >
-              <AlertTriangle className="size-2.5" />
+              <AlertTriangle className="size-3" />
               Over Budget
             </Badge>
           )}
         </div>
-        <span className="font-mono text-xs text-muted-foreground">
+        <span className="font-mono text-sm text-muted-foreground">
           {formatCurrency(budget.currentSpend)} / {formatCurrency(budget.budget)}
         </span>
       </div>
@@ -68,7 +68,7 @@ function BudgetRow({ budget }: { budget: TeamBudget }) {
       {/* Progress bar with projected overlay */}
       <div className="relative">
         {/* Background track */}
-        <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+        <div className="h-4 overflow-hidden rounded-full bg-muted">
           {/* Current spend bar */}
           <div
             className="h-full rounded-full transition-all duration-500"
@@ -83,14 +83,14 @@ function BudgetRow({ budget }: { budget: TeamBudget }) {
         {/* Projected marker (dotted line) */}
         {budget.projectedPercent <= 150 && (
           <div
-            className="absolute top-0 h-2.5 border-r-2 border-dashed"
+            className="absolute top-0 h-4 border-r-2 border-dashed"
             style={{
               left: `${Math.min(budget.projectedPercent, 100)}%`,
               borderColor: projectedColor,
             }}
           >
             <div
-              className="absolute -top-4 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[8px]"
+              className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[9px]"
               style={{ color: projectedColor }}
             >
               Proj: {budget.projectedPercent.toFixed(0)}%
@@ -100,7 +100,7 @@ function BudgetRow({ budget }: { budget: TeamBudget }) {
 
         {/* 100% budget line marker */}
         <div
-          className="absolute top-0 h-2.5 border-r border-dashed border-muted-foreground/30"
+          className="absolute top-0 h-4 border-r border-dashed border-muted-foreground/30"
           style={{ left: "100%" }}
         />
       </div>
@@ -154,7 +154,7 @@ export function BudgetTracker() {
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 pt-3">
+      <CardContent className="space-y-4 p-6">
         {TEAM_BUDGETS.map((budget) => (
           <BudgetRow key={budget.id} budget={budget} />
         ))}

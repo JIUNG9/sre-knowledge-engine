@@ -100,7 +100,6 @@ function ServiceHealthCard({
 
   return (
     <Card
-      size="sm"
       className={cn(
         "cursor-pointer border-l-2 transition-all hover:bg-surface-hover",
         config.borderClass,
@@ -108,15 +107,15 @@ function ServiceHealthCard({
       )}
       onClick={onClick}
     >
-      <CardContent className="grid gap-2 pt-0">
+      <CardContent className="grid gap-3 p-5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <Server className="size-3 text-muted-foreground" />
-            <span className="font-mono text-xs font-medium text-foreground">
+          <div className="flex items-center gap-2">
+            <Server className="size-4 text-muted-foreground" />
+            <span className="font-mono text-sm font-medium text-foreground">
               {service.name}
             </span>
           </div>
-          <StatusIcon className="size-3.5" style={{ color: config.color }} />
+          <StatusIcon className="size-4" style={{ color: config.color }} />
         </div>
 
         <HealthSparkline data={service.healthTrend} color={config.color} />
@@ -124,7 +123,7 @@ function ServiceHealthCard({
         <div className="flex items-center justify-between">
           <Badge
             variant="outline"
-            className="font-mono text-xs"
+            className="px-2 py-0.5 font-mono text-xs"
             style={{
               borderColor: `${config.color}30`,
               color: config.color,
@@ -132,7 +131,7 @@ function ServiceHealthCard({
           >
             {config.label}
           </Badge>
-          <div className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
+          <div className="flex items-center gap-1 font-mono text-sm text-muted-foreground">
             <span className="text-[#00FF88]">{service.slosMeeting}</span>
             <span>/</span>
             <span>{service.sloCount}</span>
@@ -154,7 +153,7 @@ export function ServiceHealthGrid({
   onServiceSelect,
 }: ServiceHealthGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
       {SERVICES.map((service) => (
         <ServiceHealthCard
           key={service.id}

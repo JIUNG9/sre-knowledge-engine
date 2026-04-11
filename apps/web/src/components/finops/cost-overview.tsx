@@ -119,36 +119,36 @@ export function CostOverview() {
   const isIncrease = MOM_CHANGE_PERCENT > 0
 
   return (
-    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
       {/* Total Monthly Spend */}
-      <Card size="sm">
+      <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2 text-muted-foreground">
-            <DollarSign className="size-4 text-primary" />
+            <DollarSign className="size-5 text-primary" />
             Monthly Spend
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-4">
+        <CardContent className="p-6">
           <div className="flex items-baseline gap-2">
-            <span className="font-mono text-4xl font-bold tracking-tight text-foreground">
+            <span className="font-mono text-5xl font-bold tracking-tight text-foreground">
               {formatCurrency(TOTAL_CURRENT_MONTH)}
             </span>
           </div>
-          <div className="mt-2 flex items-center gap-1.5">
+          <div className="mt-3 flex items-center gap-2">
             {isIncrease ? (
-              <ArrowUp className="size-3.5 text-[#FF4444]" />
+              <ArrowUp className="size-4 text-[#FF4444]" />
             ) : (
-              <ArrowDown className="size-3.5 text-[#00FF88]" />
+              <ArrowDown className="size-4 text-[#00FF88]" />
             )}
             <span
               className={cn(
-                "font-mono text-sm font-medium",
+                "font-mono text-base font-medium",
                 isIncrease ? "text-[#FF4444]" : "text-[#00FF88]"
               )}
             >
               {MOM_CHANGE_PERCENT}%
             </span>
-            <span className="font-mono text-xs text-muted-foreground">
+            <span className="font-mono text-sm text-muted-foreground">
               vs {formatCurrency(TOTAL_PREVIOUS_MONTH)} prev
             </span>
           </div>
@@ -156,16 +156,16 @@ export function CostOverview() {
       </Card>
 
       {/* Cost by Provider (donut) */}
-      <Card size="sm">
+      <Card>
         <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2 text-muted-foreground">
-            <TrendingUp className="size-4 text-primary" />
+            <TrendingUp className="size-5 text-primary" />
             By Provider
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-3">
-          <div className="flex items-center gap-4">
-            <div className="size-[120px] shrink-0">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-5">
+            <div className="size-[140px] shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -186,17 +186,17 @@ export function CostOverview() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               {PROVIDER_COSTS.map((p) => (
                 <div key={p.provider} className="flex items-center gap-2">
                   <div
-                    className="size-2.5 rounded-full"
+                    className="size-3 rounded-full"
                     style={{ backgroundColor: p.color }}
                   />
-                  <span className="font-mono text-xs text-muted-foreground">
+                  <span className="font-mono text-sm text-muted-foreground">
                     {p.provider}
                   </span>
-                  <span className="ml-auto font-mono text-xs font-medium text-foreground">
+                  <span className="ml-auto font-mono text-sm font-medium text-foreground">
                     {formatCurrency(p.cost)}
                   </span>
                 </div>
@@ -207,14 +207,14 @@ export function CostOverview() {
       </Card>
 
       {/* Daily Spend Trend (area chart, spans 2 cols on xl) */}
-      <Card size="sm" className="xl:col-span-2">
+      <Card className="xl:col-span-2">
         <CardHeader className="border-b">
           <CardTitle className="text-muted-foreground">
             Daily Spend (30d)
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-3">
-          <div className="h-[200px]">
+        <CardContent className="p-6">
+          <div className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={DAILY_COSTS}
@@ -284,14 +284,14 @@ export function CostOverview() {
       </Card>
 
       {/* Top 5 Most Expensive Services (horizontal bar chart, spans full width) */}
-      <Card size="sm" className="md:col-span-2 xl:col-span-4">
+      <Card className="md:col-span-2 xl:col-span-4">
         <CardHeader className="border-b">
           <CardTitle className="text-muted-foreground">
             Top 5 Services by Cost
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-3">
-          <div className="h-[220px]">
+        <CardContent className="p-6">
+          <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={TOP_SERVICES}

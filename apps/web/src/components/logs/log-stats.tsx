@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Activity, AlertTriangle, AlertOctagon, Clock, Shield } from "lucide-react"
+import { Activity, AlertTriangle, AlertOctagon, Clock, Shield, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface LogStatsProps {
@@ -14,26 +14,38 @@ interface LogStatsProps {
   isLiveTail: boolean
 }
 
-function StatItem({
+function StatCard({
   icon: Icon,
   label,
   value,
   color,
+  bgColor,
 }: {
   icon: React.ComponentType<{ className?: string }>
   label: string
   value: string | number
   color?: string
+  bgColor?: string
 }) {
   return (
-    <div className="flex items-center gap-2">
-      <Icon className={cn("size-4", color || "text-muted-foreground/50")} />
-      <span className="font-mono text-sm uppercase tracking-wider text-muted-foreground/60">
-        {label}
-      </span>
-      <span className={cn("font-mono text-2xl font-bold", color || "text-foreground/80")}>
-        {value}
-      </span>
+    <div
+      className="flex items-center gap-3 rounded-lg border border-border/30 px-4 py-3"
+      style={{ backgroundColor: bgColor || "rgba(11, 11, 16, 0.5)" }}
+    >
+      <div
+        className="flex size-9 items-center justify-center rounded-md"
+        style={{ backgroundColor: bgColor || "rgba(255, 255, 255, 0.03)" }}
+      >
+        <Icon className={cn("size-5", color || "text-muted-foreground/60")} />
+      </div>
+      <div className="flex flex-col">
+        <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground/50">
+          {label}
+        </span>
+        <span className={cn("font-mono text-xl font-bold leading-tight", color || "text-foreground/90")}>
+          {value}
+        </span>
+      </div>
     </div>
   )
 }
@@ -48,63 +60,67 @@ export function LogStats({
   isLiveTail,
 }: LogStatsProps) {
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-border/50 bg-[#0B0B10] px-5 py-3">
-      <StatItem
+    <div className="flex flex-wrap items-center gap-3 border-b border-border/40 bg-[#0A0A0F] px-5 py-3.5">
+      <StatCard
         icon={Activity}
-        label="Total"
+        label="Total Logs"
         value={totalLogs.toLocaleString()}
       />
-      <div className="h-5 w-px bg-border/30" />
-      <StatItem
+
+      <StatCard
         icon={AlertOctagon}
         label="Errors"
         value={errorCount}
         color="text-[#FF4444]"
+        bgColor="rgba(255, 68, 68, 0.06)"
       />
-      <div className="h-5 w-px bg-border/30" />
-      <StatItem
+
+      <StatCard
         icon={AlertTriangle}
         label="Warnings"
         value={warningCount}
         color="text-[#FFB020]"
+        bgColor="rgba(255, 176, 32, 0.06)"
       />
-      <div className="h-5 w-px bg-border/30" />
-      <StatItem
+
+      <StatCard
         icon={Shield}
         label="Security"
         value={securityCount}
-        color="text-[#FF4444]/80"
+        color="text-[#FF6B6B]"
+        bgColor="rgba(255, 107, 107, 0.06)"
       />
-      <div className="h-5 w-px bg-border/30" />
-      <StatItem
-        icon={Activity}
+
+      <StatCard
+        icon={TrendingUp}
         label="Rate"
         value={`${logsPerSecond}/s`}
       />
-      <div className="h-5 w-px bg-border/30" />
-      <div className="flex items-center gap-2">
-        <Clock className="size-4 text-muted-foreground/50" />
-        <span className="font-mono text-sm uppercase tracking-wider text-muted-foreground/60">
-          Range
-        </span>
-        <span className="font-mono text-sm font-medium text-foreground/80">
-          {timeRange}
-        </span>
+
+      <div className="flex items-center gap-3 rounded-lg border border-border/30 bg-[#0B0B10]/50 px-4 py-3">
+        <div className="flex size-9 items-center justify-center rounded-md bg-white/[0.03]">
+          <Clock className="size-5 text-muted-foreground/60" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground/50">
+            Time Range
+          </span>
+          <span className="font-mono text-sm font-medium leading-tight text-foreground/80">
+            {timeRange}
+          </span>
+        </div>
       </div>
 
       {isLiveTail && (
-        <>
-          <div className="h-3 w-px bg-border/30" />
-          <div className="flex items-center gap-1.5">
-            <span className="relative flex size-3">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75" />
-              <span className="relative inline-flex size-3 rounded-full bg-primary" />
-            </span>
-            <span className="font-mono text-sm font-medium uppercase tracking-wider text-primary">
-              Live
-            </span>
-          </div>
-        </>
+        <div className="flex items-center gap-2.5 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+          <span className="relative flex size-3">
+            <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex size-3 rounded-full bg-primary" />
+          </span>
+          <span className="font-mono text-sm font-bold uppercase tracking-widest text-primary">
+            Live
+          </span>
+        </div>
       )}
     </div>
   )

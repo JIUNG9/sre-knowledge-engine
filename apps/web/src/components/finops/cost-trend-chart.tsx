@@ -164,20 +164,20 @@ export function CostTrendChart() {
           </Select>
         </CardAction>
       </CardHeader>
-      <CardContent className="pt-3">
+      <CardContent className="p-6">
         <Tabs defaultValue="comparison">
-          <TabsList variant="line" className="mb-3">
-            <TabsTrigger value="comparison" className="font-mono text-xs">
+          <TabsList variant="line" className="mb-4">
+            <TabsTrigger value="comparison" className="px-5 py-2.5 font-mono text-sm">
               Month vs Month
             </TabsTrigger>
-            <TabsTrigger value="trend" className="font-mono text-xs">
+            <TabsTrigger value="trend" className="px-5 py-2.5 font-mono text-sm">
               Trend
             </TabsTrigger>
           </TabsList>
 
           {/* Comparison: current vs previous month overlay */}
           <TabsContent value="comparison">
-            <div className="h-[320px]">
+            <div className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={comparisonData}
@@ -247,7 +247,7 @@ export function CostTrendChart() {
 
           {/* Trend view with granularity toggle */}
           <TabsContent value="trend">
-            <div className="h-[320px]">
+            <div className="h-[350px]">
               {granularity === "daily" && (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart

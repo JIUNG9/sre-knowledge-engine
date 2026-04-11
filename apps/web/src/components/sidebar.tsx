@@ -57,7 +57,8 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
-  const { activeAccountId, accounts } = useAccountStore()
+  const { activeAccountId, accounts, setActiveAccount } = useAccountStore()
+  const [accountDropdownOpen, setAccountDropdownOpen] = React.useState(false)
 
   const activeAccount = activeAccountId
     ? accounts.find((a) => a.id === activeAccountId)
@@ -163,25 +164,71 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </div>
       </div>
 
-      {/* Service Account Card */}
+      {/* Service Account Card — INTERACTIVE DROPDOWN */}
       {!collapsed && (
         <div className="px-3 pb-2">
-          <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                Service Account
-              </span>
-              <ChevronDown className="size-3.5 text-muted-foreground" />
-            </div>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="size-2 rounded-full bg-emerald-500" />
-              <span className="text-[15px] font-semibold text-foreground">
-                {activeAccount ? activeAccount.name : "All Accounts"}
-              </span>
-            </div>
-            <div className="mt-0.5 text-xs text-muted-foreground">
-              {awsCount} AWS &middot; {gcpCount} GCP &middot; {azureCount} Azure
-            </div>
+          <div className="group relative">
+            <button
+              onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
+              className="w-full rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-left transition-colors hover:bg-primary/10 hover:border-primary/40"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Service Account
+                </span>
+                <ChevronDown className={cn("size-4 text-primary transition-transform", accountDropdownOpen && "rotate-180")} />
+              </div>
+              <div className="mt-1.5 flex items-center gap-2">
+                <span className="size-2.5 rounded-full bg-emerald-500" />
+                <span className="text-base font-bold text-foreground">
+                  {activeAccount ? activeAccount.name : "All Accounts"}
+                </span>
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                {awsCount} AWS &middot; {gcpCount} GCP &middot; {azureCount} Azure
+              </div>
+            </button>
+
+            {/* Dropdown */}
+            {accountDropdownOpen && (
+              <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-border bg-card p-1.5 shadow-xl">
+                <button
+                  onClick={() => { setActiveAccount(null); setAccountDropdownOpen(false) }}
+                  className={cn(
+                    "flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-surface-hover",
+                    !activeAccountId && "bg-primary/10"
+                  )}
+                >
+                  <span className="size-2.5 rounded-full bg-emerald-500" />
+                  <span className={cn("text-sm font-medium", !activeAccountId ? "text-primary" : "text-foreground")}>
+                    All Accounts
+                  </span>
+                  <span className="ml-auto text-xs text-muted-foreground">{accounts.length}</span>
+                </button>
+                <div className="my-1 h-px bg-border" />
+                {accounts.map((acc) => (
+                  <button
+                    key={acc.id}
+                    onClick={() => { setActiveAccount(acc.id); setAccountDropdownOpen(false) }}
+                    className={cn(
+                      "flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-surface-hover",
+                      activeAccountId === acc.id && "bg-primary/10"
+                    )}
+                  >
+                    <span className={cn("size-2.5 rounded-full", acc.status === "connected" ? "bg-emerald-500" : "bg-red-400")} />
+                    <div className="flex-1 min-w-0">
+                      <span className={cn("text-sm font-medium", activeAccountId === acc.id ? "text-primary" : "text-foreground")}>
+                        {acc.name}
+                      </span>
+                      <span className="ml-2 text-xs text-muted-foreground">{acc.alias}</span>
+                    </div>
+                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase">
+                      {acc.provider}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

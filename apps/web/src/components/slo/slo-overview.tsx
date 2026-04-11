@@ -154,30 +154,29 @@ function SloCard({ slo, onClick }: SloCardProps) {
 
   return (
     <Card
-      size="sm"
       className={cn(
-        "cursor-pointer border-l-2 transition-all hover:bg-surface-hover",
+        "cursor-pointer border-l-4 transition-all hover:bg-surface-hover",
         statusConfig.borderColor
       )}
       onClick={onClick}
     >
-      <CardContent className="grid gap-3 pt-0">
+      <CardContent className="grid gap-4 p-6">
         {/* Header: service + status */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate font-mono text-sm font-medium text-foreground">
+            <p className="truncate font-mono text-base font-medium text-foreground">
               {slo.name}
             </p>
             <p className="font-mono text-sm text-muted-foreground">
               {slo.service}
             </p>
           </div>
-          <StatusIcon className="size-5 shrink-0" style={{ color: statusConfig.color }} />
+          <StatusIcon className="size-6 shrink-0" style={{ color: statusConfig.color }} />
         </div>
 
         {/* Current vs Target */}
         <div className="flex items-baseline gap-2">
-          <span className="font-mono text-2xl font-bold text-foreground">
+          <span className="font-mono text-4xl font-bold text-foreground">
             {formatCurrentValue(slo)}
           </span>
           <span className="font-mono text-sm text-muted-foreground">
@@ -187,18 +186,18 @@ function SloCard({ slo, onClick }: SloCardProps) {
 
         {/* Error Budget Bar */}
         <div>
-          <div className="mb-1 flex items-center justify-between">
-            <span className="font-mono text-xs text-muted-foreground">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="font-mono text-sm text-muted-foreground">
               Error Budget
             </span>
             <span
-              className="font-mono text-xs font-medium"
+              className="font-mono text-sm font-medium"
               style={{ color: budgetColor }}
             >
               {slo.errorBudgetRemaining}%
             </span>
           </div>
-          <div className="h-3 overflow-hidden rounded-full bg-muted">
+          <div className="h-4 overflow-hidden rounded-full bg-muted">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
@@ -211,30 +210,30 @@ function SloCard({ slo, onClick }: SloCardProps) {
         </div>
 
         {/* Sparkline */}
-        <ErrorBudgetSparkline data={slo.errorBudgetData} height={48} />
+        <ErrorBudgetSparkline data={slo.errorBudgetData} height={56} />
 
         {/* Footer: badges */}
-        <div className="flex flex-wrap items-center gap-1">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Burn rate */}
           <Badge
             variant="outline"
-            className="gap-0.5 font-mono text-xs"
+            className="gap-1 px-2.5 py-1 font-mono text-xs"
             style={{
               borderColor: `${burnRateConfig.color}30`,
               color: burnRateConfig.color,
             }}
           >
-            <Gauge className="size-2.5" />
+            <Gauge className="size-3" />
             {burnRateConfig.label}
           </Badge>
 
           {/* Window */}
-          <Badge variant="outline" className="font-mono text-xs">
+          <Badge variant="outline" className="px-2.5 py-1 font-mono text-xs">
             {slo.window}
           </Badge>
 
           {/* SLI type */}
-          <Badge variant="outline" className="font-mono text-xs">
+          <Badge variant="outline" className="px-2.5 py-1 font-mono text-xs">
             {getSliTypeLabel(slo.sliType)}
           </Badge>
         </div>
@@ -296,35 +295,58 @@ export function SloOverview() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-4">
-        <div className="flex items-center gap-3">
-          <h1 className="font-heading text-xl font-semibold text-foreground text-glow">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-8 py-5">
+        <div className="flex items-center gap-4">
+          <h1 className="font-heading text-2xl font-semibold text-foreground text-glow">
             SLO Dashboard
           </h1>
-          <div className="flex items-center gap-2 font-mono text-xs">
-            <span className="flex items-center gap-1 text-[#00FF88]">
-              <CheckCircle2 className="size-3" />
-              {meetingCount} meeting
-            </span>
-            <span className="flex items-center gap-1 text-[#FFB020]">
-              <AlertTriangle className="size-3" />
-              {atRiskCount} at risk
-            </span>
-            <span className="flex items-center gap-1 text-[#FF4444]">
-              <XCircle className="size-3" />
-              {breachingCount} breaching
-            </span>
-          </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <TimeWindowToggle value={windowFilter} onChange={setWindowFilter} />
           <SloForm />
         </div>
       </div>
 
+      {/* Top Stats Row */}
+      <div className="grid grid-cols-3 gap-6 border-b border-border px-8 py-6">
+        <div className="flex items-center gap-4 rounded-lg bg-card px-6 py-5 ring-1 ring-foreground/10">
+          <div className="flex size-12 items-center justify-center rounded-md bg-[#00FF88]/15">
+            <CheckCircle2 className="size-6 text-[#00FF88]" />
+          </div>
+          <div>
+            <p className="font-mono text-sm text-muted-foreground">Meeting SLO</p>
+            <span className="font-mono text-4xl font-bold text-[#00FF88]">
+              {meetingCount}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 rounded-lg bg-card px-6 py-5 ring-1 ring-foreground/10">
+          <div className="flex size-12 items-center justify-center rounded-md bg-[#FFB020]/15">
+            <AlertTriangle className="size-6 text-[#FFB020]" />
+          </div>
+          <div>
+            <p className="font-mono text-sm text-muted-foreground">At Risk</p>
+            <span className="font-mono text-4xl font-bold text-[#FFB020]">
+              {atRiskCount}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 rounded-lg bg-card px-6 py-5 ring-1 ring-foreground/10">
+          <div className="flex size-12 items-center justify-center rounded-md bg-[#FF4444]/15">
+            <XCircle className="size-6 text-[#FF4444]" />
+          </div>
+          <div>
+            <p className="font-mono text-sm text-muted-foreground">Breaching</p>
+            <span className="font-mono text-4xl font-bold text-[#FF4444]">
+              {breachingCount}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Scrollable content */}
       <ScrollArea className="flex-1">
-        <div className="space-y-6 p-6">
+        <div className="space-y-6 p-8">
           {/* Service Health Grid */}
           <ServiceHealthGrid
             selectedService={selectedService}
@@ -332,10 +354,10 @@ export function SloOverview() {
           />
 
           {/* Filter bar */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Filter className="size-3" />
-              <span className="font-mono text-xs">Filters:</span>
+              <Filter className="size-4" />
+              <span className="font-mono text-sm">Filters:</span>
             </div>
 
             {/* SLI Type filter */}
@@ -343,7 +365,7 @@ export function SloOverview() {
               value={sliTypeFilter}
               onValueChange={(v) => { if (v) setSliTypeFilter(v as SliType | "all") }}
             >
-              <SelectTrigger size="sm" className="font-mono text-xs">
+              <SelectTrigger className="h-10 font-mono text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -360,7 +382,7 @@ export function SloOverview() {
               value={statusFilter}
               onValueChange={(v) => { if (v) setStatusFilter(v as StatusFilter) }}
             >
-              <SelectTrigger size="sm" className="font-mono text-xs">
+              <SelectTrigger className="h-10 font-mono text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -372,14 +394,14 @@ export function SloOverview() {
 
             {/* Sort */}
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              <ArrowUpDown className="size-3" />
-              <span className="font-mono text-xs">Sort:</span>
+              <ArrowUpDown className="size-4" />
+              <span className="font-mono text-sm">Sort:</span>
             </div>
             <Select
               value={sortBy}
               onValueChange={(v) => { if (v) setSortBy(v as SortOption) }}
             >
-              <SelectTrigger size="sm" className="font-mono text-xs">
+              <SelectTrigger className="h-10 font-mono text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -392,7 +414,7 @@ export function SloOverview() {
             </Select>
 
             {/* Result count */}
-            <span className="ml-auto font-mono text-xs text-muted-foreground">
+            <span className="ml-auto font-mono text-sm text-muted-foreground">
               {filtered.length} SLO{filtered.length !== 1 ? "s" : ""}
             </span>
           </div>
@@ -419,7 +441,7 @@ export function SloOverview() {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
               {filtered.map((slo) => (
                 <SloCard
                   key={slo.id}

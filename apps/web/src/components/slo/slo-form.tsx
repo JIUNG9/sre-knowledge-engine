@@ -64,8 +64,8 @@ export function SloForm() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button size="sm" className="gap-1.5 font-mono text-xs">
-            <Plus className="size-3.5" />
+          <Button className="gap-2 px-5 py-2.5 font-mono text-sm">
+            <Plus className="size-4" />
             Create SLO
           </Button>
         }

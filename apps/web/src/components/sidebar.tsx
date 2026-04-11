@@ -18,7 +18,6 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -28,10 +27,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import {
-  useAccountStore,
-  type AccountProvider,
-} from "@/lib/stores/account-store"
 
 const mainNavItems = [
   { label: "Log Explorer", icon: Search, href: "/logs" },
@@ -57,25 +52,6 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
-  const { activeAccountId, accounts, setActiveAccount } = useAccountStore()
-  const [accountDropdownOpen, setAccountDropdownOpen] = React.useState(false)
-
-  const activeAccount = activeAccountId
-    ? accounts.find((a) => a.id === activeAccountId)
-    : null
-
-  // Count accounts by provider
-  const providerCounts = accounts.reduce<Record<string, number>>(
-    (acc, account) => {
-      acc[account.provider] = (acc[account.provider] || 0) + 1
-      return acc
-    },
-    {}
-  )
-
-  const awsCount = providerCounts["aws"] || 0
-  const gcpCount = providerCounts["gcp"] || 0
-  const azureCount = providerCounts["azure"] || 0
 
   function renderNavItem(
     item: { label: string; icon: React.ElementType; href: string; badge?: number },
@@ -164,78 +140,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </div>
       </div>
 
-      {/* Service Account Card — INTERACTIVE DROPDOWN */}
-      {!collapsed && (
-        <div className="px-3 pb-2">
-          <div className="group relative">
-            <button
-              onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-              className="w-full rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-left transition-colors hover:bg-primary/10 hover:border-primary/40"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Service Account
-                </span>
-                <ChevronDown className={cn("size-4 text-primary transition-transform", accountDropdownOpen && "rotate-180")} />
-              </div>
-              <div className="mt-1.5 flex items-center gap-2">
-                <span className="size-2.5 rounded-full bg-emerald-500" />
-                <span className="text-base font-bold text-foreground">
-                  {activeAccount ? activeAccount.name : "All Accounts"}
-                </span>
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                {awsCount} AWS &middot; {gcpCount} GCP &middot; {azureCount} Azure
-              </div>
-            </button>
-
-            {/* Dropdown */}
-            {accountDropdownOpen && (
-              <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-border bg-card p-1.5 shadow-xl">
-                <button
-                  onClick={() => { setActiveAccount(null); setAccountDropdownOpen(false) }}
-                  className={cn(
-                    "flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-surface-hover",
-                    !activeAccountId && "bg-primary/10"
-                  )}
-                >
-                  <span className="size-2.5 rounded-full bg-emerald-500" />
-                  <span className={cn("text-sm font-medium", !activeAccountId ? "text-primary" : "text-foreground")}>
-                    All Accounts
-                  </span>
-                  <span className="ml-auto text-xs text-muted-foreground">{accounts.length}</span>
-                </button>
-                <div className="my-1 h-px bg-border" />
-                {accounts.map((acc) => (
-                  <button
-                    key={acc.id}
-                    onClick={() => { setActiveAccount(acc.id); setAccountDropdownOpen(false) }}
-                    className={cn(
-                      "flex w-full items-center gap-2.5 rounded-md px-3 py-2.5 text-left transition-colors hover:bg-surface-hover",
-                      activeAccountId === acc.id && "bg-primary/10"
-                    )}
-                  >
-                    <span className={cn("size-2.5 rounded-full", acc.status === "connected" ? "bg-emerald-500" : "bg-red-400")} />
-                    <div className="flex-1 min-w-0">
-                      <span className={cn("text-sm font-medium", activeAccountId === acc.id ? "text-primary" : "text-foreground")}>
-                        {acc.name}
-                      </span>
-                      <span className="ml-2 text-xs text-muted-foreground">{acc.alias}</span>
-                    </div>
-                    <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground uppercase">
-                      {acc.provider}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       <Separator />
 
-      {/* Main Navigation */}
+      {/* Main Navigation — fills all available space */}
       <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-2">
         {mainNavItems.map((item) => {
           const isActive = pathname === item.href
@@ -245,7 +152,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
       <Separator />
 
-      {/* Bottom section */}
+      {/* Bottom section — Account Mgmt + Settings */}
       <div className="flex flex-col gap-0.5 px-2 py-2">
         {bottomNavItems.map((item) => {
           const isActive = pathname === item.href

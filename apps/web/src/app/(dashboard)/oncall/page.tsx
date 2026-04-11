@@ -1,39 +1,40 @@
 "use client";
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Phone, BookOpen, Calendar, Users, Clock, ArrowUpRight } from "lucide-react";
-
-const currentOnCall = {
-  primary: { name: "June Gu", team: "Platform", since: "2026-03-08T09:00:00Z", until: "2026-03-15T09:00:00Z" },
-  secondary: { name: "SRE Bot", team: "Platform", since: "2026-03-08T09:00:00Z", until: "2026-03-15T09:00:00Z" },
-};
-
-const schedule = [
-  { week: "Mar 1-7", primary: "Team Member A", secondary: "Team Member B" },
-  { week: "Mar 8-14", primary: "June Gu", secondary: "SRE Bot" },
-  { week: "Mar 15-21", primary: "Team Member C", secondary: "Team Member A" },
-  { week: "Mar 22-28", primary: "Team Member B", secondary: "Team Member C" },
-];
-
-const runbooks = [
-  { id: "rb-001", title: "Database Connection Pool Exhaustion", service: "payment-service", lastUsed: "2026-03-02", steps: 5, severity: "critical" },
-  { id: "rb-002", title: "High Memory Usage Alert", service: "api-gateway", lastUsed: "2026-02-28", steps: 4, severity: "high" },
-  { id: "rb-003", title: "Certificate Renewal Procedure", service: "infrastructure", lastUsed: "2026-02-15", steps: 6, severity: "medium" },
-  { id: "rb-004", title: "Kafka Consumer Lag Remediation", service: "notification-service", lastUsed: "2026-02-20", steps: 7, severity: "high" },
-  { id: "rb-005", title: "Redis Cluster Failover", service: "infrastructure", lastUsed: "2026-01-30", steps: 8, severity: "critical" },
-  { id: "rb-006", title: "DNS Resolution Failure", service: "infrastructure", lastUsed: "2026-02-10", steps: 3, severity: "medium" },
-];
-
-const escalationPolicies = [
-  { level: 1, target: "Primary On-Call", delay: "0 min", method: "Slack + PagerDuty" },
-  { level: 2, target: "Secondary On-Call", delay: "5 min", method: "Slack + PagerDuty + Phone" },
-  { level: 3, target: "Team Lead", delay: "15 min", method: "Phone + SMS" },
-  { level: 4, target: "Engineering Manager", delay: "30 min", method: "Phone + SMS + Email" },
-];
+import { MemberManager } from "@/components/oncall/member-manager";
+import { TaskAssignment } from "@/components/oncall/task-assignment";
+import { AIRecommendations } from "@/components/oncall/ai-recommendations";
+import {
+  Phone,
+  BookOpen,
+  Calendar,
+  Users,
+  Clock,
+  ArrowUpRight,
+} from "lucide-react";
+import {
+  CURRENT_ON_CALL,
+  SCHEDULE,
+  RUNBOOKS,
+  ESCALATION_POLICIES,
+  TEAM_MEMBERS,
+  TASKS,
+  AI_RECOMMENDATIONS,
+} from "@/lib/mock-data/oncall";
+import type { TeamMember, OnCallTask } from "@/lib/mock-data/oncall";
 
 export default function OnCallPage() {
+  const [members, setMembers] = useState<TeamMember[]>(TEAM_MEMBERS);
+  const [tasks, setTasks] = useState<OnCallTask[]>(TASKS);
+
+  function handleApplyRecommendation(id: string) {
+    // Mock: just show the recommendation was applied
+    console.log(`Applied recommendation: ${id}`);
+  }
+
   return (
     <div className="space-y-6 p-8">
       <div>
@@ -48,44 +49,133 @@ export default function OnCallPage() {
         <Card className="border-[#00FF88]/20 bg-card p-6">
           <div className="flex items-center gap-2">
             <Phone className="h-5 w-5 text-[#00FF88]" />
-            <span className="font-mono text-sm text-muted-foreground">Primary On-Call</span>
+            <span className="font-mono text-sm text-muted-foreground">
+              Primary On-Call
+            </span>
           </div>
-          <p className="mt-3 font-mono text-2xl font-bold">{currentOnCall.primary.name}</p>
+          <p className="mt-3 font-mono text-2xl font-bold">
+            {CURRENT_ON_CALL.primary.name}
+          </p>
           <p className="mt-1 font-mono text-sm text-muted-foreground">
-            {currentOnCall.primary.team} · Until {new Date(currentOnCall.primary.until).toLocaleDateString()}
+            {CURRENT_ON_CALL.primary.team} &middot; Until{" "}
+            {new Date(CURRENT_ON_CALL.primary.until).toLocaleDateString()}
           </p>
         </Card>
         <Card className="border-border/50 bg-card p-6">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-cyan-400" />
-            <span className="font-mono text-sm text-muted-foreground">Secondary On-Call</span>
+            <span className="font-mono text-sm text-muted-foreground">
+              Secondary On-Call
+            </span>
           </div>
-          <p className="mt-3 font-mono text-2xl font-bold">{currentOnCall.secondary.name}</p>
+          <p className="mt-3 font-mono text-2xl font-bold">
+            {CURRENT_ON_CALL.secondary.name}
+          </p>
           <p className="mt-1 font-mono text-sm text-muted-foreground">
-            {currentOnCall.secondary.team} · Until {new Date(currentOnCall.secondary.until).toLocaleDateString()}
+            {CURRENT_ON_CALL.secondary.team} &middot; Until{" "}
+            {new Date(CURRENT_ON_CALL.secondary.until).toLocaleDateString()}
           </p>
         </Card>
       </div>
 
-      <Tabs defaultValue="runbooks">
+      <Tabs defaultValue="schedule">
         <TabsList className="bg-card">
-          <TabsTrigger value="runbooks" className="font-mono text-sm">Runbooks</TabsTrigger>
-          <TabsTrigger value="schedule" className="font-mono text-sm">Schedule</TabsTrigger>
-          <TabsTrigger value="escalation" className="font-mono text-sm">Escalation</TabsTrigger>
+          <TabsTrigger value="schedule" className="font-mono text-sm">
+            Schedule
+          </TabsTrigger>
+          <TabsTrigger value="runbooks" className="font-mono text-sm">
+            Runbooks
+          </TabsTrigger>
+          <TabsTrigger value="team" className="font-mono text-sm">
+            Team
+          </TabsTrigger>
+          <TabsTrigger value="tasks" className="font-mono text-sm">
+            Tasks
+          </TabsTrigger>
+          <TabsTrigger value="ai" className="font-mono text-sm">
+            AI
+          </TabsTrigger>
         </TabsList>
 
+        {/* Schedule tab */}
+        <TabsContent value="schedule" className="mt-4">
+          <div className="space-y-3">
+            {SCHEDULE.map((week, i) => (
+              <div
+                key={i}
+                className={`flex items-center gap-4 rounded border p-4 ${week.primary === "June Gu" ? "border-[#00FF88]/30 bg-[#00FF88]/5" : "border-border/50 bg-card"}`}
+              >
+                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <span className="w-28 font-mono text-base">{week.week}</span>
+                <div className="flex flex-1 items-center gap-4 font-mono text-base">
+                  <span>
+                    <span className="text-sm text-muted-foreground">
+                      Primary:
+                    </span>{" "}
+                    {week.primary}
+                  </span>
+                  <span>
+                    <span className="text-sm text-muted-foreground">
+                      Secondary:
+                    </span>{" "}
+                    {week.secondary}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Escalation policies */}
+          <h3 className="mt-6 font-mono text-lg font-medium">
+            Escalation Policy
+          </h3>
+          <div className="mt-3 space-y-3">
+            {ESCALATION_POLICIES.map((policy) => (
+              <div
+                key={policy.level}
+                className="flex items-center gap-4 rounded border border-border/50 bg-card p-4"
+              >
+                <Badge variant="outline" className="font-mono text-sm">
+                  L{policy.level}
+                </Badge>
+                <div className="flex-1">
+                  <span className="font-mono text-base font-medium">
+                    {policy.target}
+                  </span>
+                  <div className="mt-1.5 flex items-center gap-3 font-mono text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      After {policy.delay}
+                    </span>
+                    <span>&middot;</span>
+                    <span>{policy.method}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </TabsContent>
+
+        {/* Runbooks tab */}
         <TabsContent value="runbooks" className="mt-4 space-y-3">
-          {runbooks.map((rb) => (
-            <div key={rb.id} className="flex items-center gap-4 rounded border border-border/50 bg-card p-4 hover:border-[#00FF88]/30 cursor-pointer transition-colors">
+          {RUNBOOKS.map((rb) => (
+            <div
+              key={rb.id}
+              className="flex cursor-pointer items-center gap-4 rounded border border-border/50 bg-card p-4 transition-colors hover:border-[#00FF88]/30"
+            >
               <BookOpen className="h-5 w-5 text-[#00FF88]" />
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-base font-medium">{rb.title}</span>
-                  <Badge variant="outline" className="font-mono text-xs">{rb.steps} steps</Badge>
+                  <span className="font-mono text-base font-medium">
+                    {rb.title}
+                  </span>
+                  <Badge variant="outline" className="font-mono text-xs">
+                    {rb.steps} steps
+                  </Badge>
                 </div>
                 <div className="mt-1.5 flex items-center gap-3 font-mono text-sm text-muted-foreground">
                   <span>{rb.service}</span>
-                  <span>·</span>
+                  <span>&middot;</span>
                   <span>Last used: {rb.lastUsed}</span>
                 </div>
               </div>
@@ -94,37 +184,26 @@ export default function OnCallPage() {
           ))}
         </TabsContent>
 
-        <TabsContent value="schedule" className="mt-4">
-          <div className="space-y-3">
-            {schedule.map((week, i) => (
-              <div key={i} className={`flex items-center gap-4 rounded border p-4 ${week.primary === "June Gu" ? "border-[#00FF88]/30 bg-[#00FF88]/5" : "border-border/50 bg-card"}`}>
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <span className="w-28 font-mono text-base">{week.week}</span>
-                <div className="flex-1 flex items-center gap-4 font-mono text-base">
-                  <span><span className="text-sm text-muted-foreground">Primary:</span> {week.primary}</span>
-                  <span><span className="text-sm text-muted-foreground">Secondary:</span> {week.secondary}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Team tab */}
+        <TabsContent value="team" className="mt-4">
+          <MemberManager members={members} onChange={setMembers} />
         </TabsContent>
 
-        <TabsContent value="escalation" className="mt-4">
-          <div className="space-y-3">
-            {escalationPolicies.map((policy) => (
-              <div key={policy.level} className="flex items-center gap-4 rounded border border-border/50 bg-card p-4">
-                <Badge variant="outline" className="font-mono text-sm">L{policy.level}</Badge>
-                <div className="flex-1">
-                  <span className="font-mono text-base font-medium">{policy.target}</span>
-                  <div className="mt-1.5 flex items-center gap-3 font-mono text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1"><Clock className="h-4 w-4" />After {policy.delay}</span>
-                    <span>·</span>
-                    <span>{policy.method}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Tasks tab */}
+        <TabsContent value="tasks" className="mt-4">
+          <TaskAssignment
+            tasks={tasks}
+            members={members}
+            onChange={setTasks}
+          />
+        </TabsContent>
+
+        {/* AI tab */}
+        <TabsContent value="ai" className="mt-4">
+          <AIRecommendations
+            recommendations={AI_RECOMMENDATIONS}
+            onApply={handleApplyRecommendation}
+          />
         </TabsContent>
       </Tabs>
     </div>

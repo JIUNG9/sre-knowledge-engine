@@ -14,6 +14,7 @@ import {
   Rocket,
   Phone,
   BookOpen,
+  Settings,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -38,6 +39,7 @@ const navItems = [
   { label: "Deployments", icon: Rocket, href: "/deployments" },
   { label: "On-Call", icon: Phone, href: "/oncall" },
   { label: "Service Catalog", icon: BookOpen, href: "/catalog" },
+  { label: "Settings", icon: Settings, href: "/settings" },
 ] as const
 
 interface SidebarProps {

@@ -2,12 +2,15 @@
 
 import * as React from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CostOverview } from "@/components/finops/cost-overview"
 import { CostByService } from "@/components/finops/cost-by-service"
 import { CostAnomalyCards } from "@/components/finops/cost-anomaly-card"
 import { BudgetTracker } from "@/components/finops/budget-tracker"
 import { KubernetesCost } from "@/components/finops/kubernetes-cost"
 import { CostTrendChart } from "@/components/finops/cost-trend-chart"
+import { BudgetManagement } from "@/components/finops/budget-management"
+import { RightsizingRecommendations } from "@/components/finops/rightsizing-recommendations"
 import { DollarSign } from "lucide-react"
 
 export default function FinOpsPage() {
@@ -24,28 +27,59 @@ export default function FinOpsPage() {
         </span>
       </div>
 
-      {/* Scrollable content */}
-      <ScrollArea className="flex-1">
-        <div className="space-y-6 p-6">
-          {/* Cost Overview Cards + Charts */}
-          <CostOverview />
-
-          {/* Anomalies */}
-          <CostAnomalyCards />
-
-          {/* Two-column layout: Budget + K8s */}
-          <div className="grid gap-4 xl:grid-cols-2">
-            <BudgetTracker />
-            <KubernetesCost />
-          </div>
-
-          {/* Cost Trend Chart */}
-          <CostTrendChart />
-
-          {/* Service Breakdown Table */}
-          <CostByService />
+      {/* Tabs navigation */}
+      <Tabs defaultValue="overview" className="flex flex-1 flex-col overflow-hidden">
+        <div className="border-b border-border px-6 pt-2">
+          <TabsList variant="line">
+            <TabsTrigger value="overview" className="font-mono text-sm">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="budgets" className="font-mono text-sm">
+              Budgets
+            </TabsTrigger>
+            <TabsTrigger value="rightsizing" className="font-mono text-sm">
+              Right-Sizing
+            </TabsTrigger>
+          </TabsList>
         </div>
-      </ScrollArea>
+
+        {/* Scrollable content */}
+        <ScrollArea className="flex-1">
+          <TabsContent value="overview">
+            <div className="space-y-6 p-6">
+              {/* Cost Overview Cards + Charts */}
+              <CostOverview />
+
+              {/* Anomalies */}
+              <CostAnomalyCards />
+
+              {/* Two-column layout: Budget + K8s */}
+              <div className="grid gap-4 xl:grid-cols-2">
+                <BudgetTracker />
+                <KubernetesCost />
+              </div>
+
+              {/* Cost Trend Chart */}
+              <CostTrendChart />
+
+              {/* Service Breakdown Table */}
+              <CostByService />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="budgets">
+            <div className="p-6">
+              <BudgetManagement />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="rightsizing">
+            <div className="p-6">
+              <RightsizingRecommendations />
+            </div>
+          </TabsContent>
+        </ScrollArea>
+      </Tabs>
     </div>
   )
 }

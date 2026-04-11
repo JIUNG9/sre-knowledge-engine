@@ -29,11 +29,18 @@ import {
   Activity,
   AlertTriangle,
   ArrowUpDown,
+  Building2,
   CheckCircle2,
   Filter,
   Gauge,
   XCircle,
 } from "lucide-react"
+import {
+  useAccountStore,
+  SERVICE_TO_ACCOUNT,
+  getAccountName,
+} from "@/lib/stores/account-store"
+import { SloTargets } from "@/components/slo/slo-targets"
 
 // --- Status helpers ---
 
@@ -245,6 +252,8 @@ function SloCard({ slo, onClick }: SloCardProps) {
 // --- Main Overview ---
 
 export function SloOverview() {
+  const { activeAccountId, accounts } = useAccountStore()
+  const [accountFilter, setAccountFilter] = React.useState<string | null>(activeAccountId)
   const [windowFilter, setWindowFilter] = React.useState<SloWindow | "all">(
     "all"
   )
@@ -260,8 +269,15 @@ export function SloOverview() {
     null
   )
 
+  // Sync with global account
+  React.useEffect(() => {
+    setAccountFilter(activeAccountId)
+    setSelectedService(null)
+  }, [activeAccountId])
+
   // Apply filters
   let filtered = MOCK_SLOS.filter((slo) => {
+    if (accountFilter && SERVICE_TO_ACCOUNT[slo.service] !== accountFilter) return false
     if (windowFilter !== "all" && slo.window !== windowFilter) return false
     if (sliTypeFilter !== "all" && slo.sliType !== sliTypeFilter) return false
     if (statusFilter === "meeting" && slo.status !== "meeting") return false
@@ -347,6 +363,9 @@ export function SloOverview() {
       {/* Scrollable content */}
       <ScrollArea className="flex-1">
         <div className="space-y-6 p-8">
+          {/* Team Targets */}
+          <SloTargets />
+
           {/* Service Health Grid */}
           <ServiceHealthGrid
             selectedService={selectedService}
@@ -359,6 +378,35 @@ export function SloOverview() {
               <Filter className="size-4" />
               <span className="font-mono text-sm">Filters:</span>
             </div>
+
+            {/* Account filter */}
+            <Select
+              value={accountFilter ?? "all"}
+              onValueChange={(v) => {
+                if (v) {
+                  setAccountFilter(v === "all" ? null : v)
+                  setSelectedService(null)
+                }
+              }}
+            >
+              <SelectTrigger className="h-10 font-mono text-sm">
+                <Building2 className="size-4 text-[#A855F7]" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Accounts</SelectItem>
+                {accounts.map((acct) => (
+                  <SelectItem key={acct.id} value={acct.id}>
+                    <span className="flex items-center gap-2">
+                      {acct.name}
+                      <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
+                        {acct.provider}
+                      </span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {/* SLI Type filter */}
             <Select
@@ -431,6 +479,7 @@ export function SloOverview() {
                 size="xs"
                 className="font-mono text-xs"
                 onClick={() => {
+                  setAccountFilter(null)
                   setWindowFilter("all")
                   setSliTypeFilter("all")
                   setStatusFilter("all")

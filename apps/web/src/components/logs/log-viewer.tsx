@@ -14,6 +14,7 @@ import {
   type LogEntry,
   type LogLevel,
 } from "@/lib/mock-data/logs"
+import { SERVICE_TO_ACCOUNT, useAccountStore } from "@/lib/stores/account-store"
 
 const MAX_VISIBLE_ENTRIES = 500
 
@@ -28,6 +29,13 @@ const TIME_RANGE_LABELS: Record<string, string> = {
 
 function filterLogs(logs: LogEntry[], filters: LogFilters): LogEntry[] {
   let result = logs
+
+  // Account filter
+  if (filters.account) {
+    result = result.filter(
+      (log) => SERVICE_TO_ACCOUNT[log.service] === filters.account
+    )
+  }
 
   // Text search
   if (filters.search) {
@@ -79,8 +87,10 @@ function filterLogs(logs: LogEntry[], filters: LogFilters): LogEntry[] {
 }
 
 export function LogViewer() {
+  const { activeAccountId } = useAccountStore()
   const [filters, setFilters] = React.useState<LogFilters>({
     search: "",
+    account: activeAccountId,
     levels: [],
     services: [],
     timeRange: "24h",

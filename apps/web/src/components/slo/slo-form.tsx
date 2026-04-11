@@ -23,7 +23,11 @@ import {
 } from "@/components/ui/select"
 import { SERVICES } from "@/lib/mock-data/services"
 import type { SliType, SloWindow } from "@/lib/mock-data/slo"
-import { Plus } from "lucide-react"
+import { Plus, Building2 } from "lucide-react"
+import {
+  useAccountStore,
+  getServicesForAccount,
+} from "@/lib/stores/account-store"
 
 const SLI_TYPES: { value: SliType; label: string }[] = [
   { value: "availability", label: "Availability" },
@@ -40,6 +44,8 @@ const WINDOWS: { value: SloWindow; label: string }[] = [
 ]
 
 export function SloForm() {
+  const { activeAccountId, accounts } = useAccountStore()
+  const [accountId, setAccountId] = React.useState<string>(activeAccountId ?? "")
   const [name, setName] = React.useState("")
   const [service, setService] = React.useState<string>("")
   const [target, setTarget] = React.useState("")
@@ -48,10 +54,36 @@ export function SloForm() {
   const [description, setDescription] = React.useState("")
   const [open, setOpen] = React.useState(false)
 
+  // Cascade: filter available services by selected account
+  const filteredServices = React.useMemo(() => {
+    if (!accountId) return SERVICES
+    const allowed = getServicesForAccount(accountId)
+    return SERVICES.filter((svc) => allowed.includes(svc.name))
+  }, [accountId])
+
+  // Sync with global account when dialog opens
+  React.useEffect(() => {
+    if (open && activeAccountId) {
+      setAccountId(activeAccountId)
+    }
+  }, [open, activeAccountId])
+
+  const handleAccountChange = (id: string) => {
+    setAccountId(id)
+    // Clear service if it doesn't belong to the new account
+    if (id) {
+      const allowed = getServicesForAccount(id)
+      if (!allowed.includes(service)) {
+        setService("")
+      }
+    }
+  }
+
   const handleSave = () => {
     // In a real app, this would call an API
     setOpen(false)
     // Reset form
+    setAccountId(activeAccountId ?? "")
     setName("")
     setService("")
     setTarget("")
@@ -79,7 +111,32 @@ export function SloForm() {
         </DialogHeader>
 
         <div className="grid gap-4">
-          {/* Service */}
+          {/* Service Account */}
+          <div className="grid gap-1.5">
+            <label className="font-mono text-xs text-muted-foreground">
+              Service Account
+            </label>
+            <Select value={accountId} onValueChange={(v) => handleAccountChange(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <Building2 className="size-4 text-[#A855F7]" />
+                <SelectValue placeholder="Select an account" />
+              </SelectTrigger>
+              <SelectContent>
+                {accounts.map((acct) => (
+                  <SelectItem key={acct.id} value={acct.id}>
+                    <span className="flex items-center gap-2">
+                      {acct.name}
+                      <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
+                        {acct.provider}
+                      </span>
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Service (cascaded by account) */}
           <div className="grid gap-1.5">
             <label className="font-mono text-xs text-muted-foreground">
               Service
@@ -89,7 +146,7 @@ export function SloForm() {
                 <SelectValue placeholder="Select a service" />
               </SelectTrigger>
               <SelectContent>
-                {SERVICES.map((svc) => (
+                {filteredServices.map((svc) => (
                   <SelectItem key={svc.id} value={svc.name}>
                     {svc.name}
                   </SelectItem>

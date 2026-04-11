@@ -15,6 +15,7 @@ import {
   KeyRound,
   Database,
   Filter,
+  Building2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -24,6 +25,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import type { LogLevel } from "@/lib/mock-data/logs"
 import { SERVICE_LIST, LOG_LEVEL_CONFIG } from "@/lib/mock-data/logs"
 import { SAVED_QUERIES, type SavedQuery } from "@/lib/mock-data/saved-queries"
+import {
+  useAccountStore,
+  getServicesForAccount,
+  getAccountName,
+} from "@/lib/stores/account-store"
 
 const ALL_LEVELS: LogLevel[] = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"]
 
@@ -50,6 +56,7 @@ const QUICK_PRESETS: QuickPreset[] = [
     icon: AlertTriangle,
     filters: {
       search: "",
+      account: null,
       levels: ["ERROR", "FATAL"],
       services: [],
       timeRange: "1h",
@@ -63,6 +70,7 @@ const QUICK_PRESETS: QuickPreset[] = [
     icon: KeyRound,
     filters: {
       search: "failed login|auth|login failed|account locked|brute force",
+      account: null,
       levels: [],
       services: ["auth-service"],
       timeRange: "24h",
@@ -76,6 +84,7 @@ const QUICK_PRESETS: QuickPreset[] = [
     icon: Database,
     filters: {
       search: "slow query|Slow query",
+      account: null,
       levels: ["WARN", "ERROR"],
       services: [],
       timeRange: "24h",
@@ -89,6 +98,7 @@ const QUICK_PRESETS: QuickPreset[] = [
     icon: Shield,
     filters: {
       search: "",
+      account: null,
       levels: [],
       services: [],
       timeRange: "24h",
@@ -100,6 +110,7 @@ const QUICK_PRESETS: QuickPreset[] = [
 
 export interface LogFilters {
   search: string
+  account: string | null
   levels: LogLevel[]
   services: string[]
   timeRange: string
@@ -220,10 +231,37 @@ function MultiSelectDropdown({
 export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
   const [savedQueriesOpen, setSavedQueriesOpen] = React.useState(false)
   const [activePreset, setActivePreset] = React.useState<string | null>(null)
+  const { activeAccountId, accounts } = useAccountStore()
+
+  // Sync local account filter with global sidebar account
+  const prevGlobalAccountRef = React.useRef(activeAccountId)
+  React.useEffect(() => {
+    if (prevGlobalAccountRef.current !== activeAccountId) {
+      prevGlobalAccountRef.current = activeAccountId
+      const allowedServices = getServicesForAccount(activeAccountId)
+      const newServices = filters.services.filter((s) => allowedServices.includes(s))
+      onFiltersChange({ ...filters, account: activeAccountId, services: newServices })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAccountId])
+
+  // Compute services available for current account filter
+  const availableServices = React.useMemo(
+    () => getServicesForAccount(filters.account),
+    [filters.account]
+  )
 
   const updateFilter = <K extends keyof LogFilters>(key: K, value: LogFilters[K]) => {
     setActivePreset(null)
     onFiltersChange({ ...filters, [key]: value })
+  }
+
+  const setAccountFilter = (accountId: string | null) => {
+    setActivePreset(null)
+    // When account changes, clear services that are not in the new account
+    const allowed = getServicesForAccount(accountId)
+    const newServices = filters.services.filter((s) => allowed.includes(s))
+    onFiltersChange({ ...filters, account: accountId, services: newServices })
   }
 
   const toggleLevel = (level: string) => {
@@ -248,6 +286,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
     setActivePreset(null)
     onFiltersChange({
       search: query.filters.search || "",
+      account: filters.account,
       levels: (query.filters.levels as LogLevel[]) || [],
       services: query.filters.services || [],
       timeRange: query.filters.timeRange || "24h",
@@ -263,13 +302,14 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
       return
     }
     setActivePreset(preset.id)
-    onFiltersChange({ ...preset.filters })
+    onFiltersChange({ ...preset.filters, account: filters.account })
   }
 
   const clearFilters = () => {
     setActivePreset(null)
     onFiltersChange({
       search: "",
+      account: activeAccountId,
       levels: [],
       services: [],
       timeRange: "24h",
@@ -280,6 +320,7 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
 
   const hasActiveFilters =
     filters.search !== "" ||
+    filters.account !== null ||
     filters.levels.length > 0 ||
     filters.services.length > 0 ||
     filters.timeRange !== "24h" ||
@@ -287,6 +328,14 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
 
   const activeFilterChips: { key: string; label: string; color?: string; onRemove: () => void }[] = []
 
+  if (filters.account) {
+    activeFilterChips.push({
+      key: "account",
+      label: `Account: ${getAccountName(filters.account)}`,
+      color: "#A855F7",
+      onRemove: () => setAccountFilter(null),
+    })
+  }
   for (const level of filters.levels) {
     const config = LOG_LEVEL_CONFIG[level]
     activeFilterChips.push({
@@ -350,6 +399,67 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
       <div className="flex flex-wrap items-center gap-2.5 px-5 pb-3">
         <Filter className="size-4 text-muted-foreground/40" />
 
+        {/* Account selector */}
+        <Popover>
+          <PopoverTrigger
+            render={
+              <button
+                className={cn(
+                  "inline-flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition-all outline-none",
+                  filters.account
+                    ? "border-[#A855F7]/40 bg-[#A855F7]/5 text-[#A855F7] hover:bg-[#A855F7]/10"
+                    : "border-border/60 bg-[#0D0D14] text-muted-foreground hover:border-border hover:bg-[#111118] hover:text-foreground"
+                )}
+              />
+            }
+          >
+            <Building2 className="size-4 opacity-70" />
+            <span className="font-mono text-sm">
+              {filters.account ? getAccountName(filters.account) : "All Accounts"}
+            </span>
+            <ChevronDown className="size-3.5 opacity-50" />
+          </PopoverTrigger>
+          <PopoverContent className="w-52 p-1.5" align="start" sideOffset={6}>
+            <div className="mb-1.5 px-2 py-1">
+              <span className="font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground/50">
+                Service Account
+              </span>
+            </div>
+            <button
+              onClick={() => setAccountFilter(null)}
+              className={cn(
+                "flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm outline-none transition-colors",
+                !filters.account
+                  ? "bg-[#A855F7]/10 text-[#A855F7]"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              )}
+            >
+              <span className="font-mono text-sm">All Accounts</span>
+              {!filters.account && <Check className="size-3.5 text-[#A855F7]" />}
+            </button>
+            {accounts.map((acct) => (
+              <button
+                key={acct.id}
+                onClick={() => setAccountFilter(acct.id)}
+                className={cn(
+                  "flex w-full items-center justify-between rounded-md px-2.5 py-2 text-sm outline-none transition-colors",
+                  filters.account === acct.id
+                    ? "bg-[#A855F7]/10 text-[#A855F7]"
+                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                )}
+              >
+                <span className="flex items-center gap-2 font-mono text-sm">
+                  {acct.name}
+                  <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
+                    {acct.provider}
+                  </span>
+                </span>
+                {filters.account === acct.id && <Check className="size-3.5 text-[#A855F7]" />}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
+
         {/* Level multi-select */}
         <MultiSelectDropdown
           label="Level"
@@ -370,10 +480,10 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
           }}
         />
 
-        {/* Service multi-select */}
+        {/* Service multi-select (cascaded by account) */}
         <MultiSelectDropdown
           label="Service"
-          items={SERVICE_LIST}
+          items={availableServices}
           selectedItems={filters.services}
           onToggle={toggleService}
         />

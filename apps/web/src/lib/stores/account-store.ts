@@ -71,3 +71,37 @@ export const useAccountStore = create<AccountState>((set) => ({
   accounts: mockAccounts,
   setActiveAccount: (id: string | null) => set({ activeAccountId: id }),
 }))
+
+// Maps each service name to its owning account ID
+export const SERVICE_TO_ACCOUNT: Record<string, string> = {
+  "api-gateway": "nx",
+  "deployment-controller": "nx",
+  "auth-service": "shared",
+  "user-service": "shared",
+  "payment-service": "shared",
+  "notification-service": "shared",
+  "config-service": "nw",
+  "audit-service": "nw",
+}
+
+// Maps account IDs to the list of services in that account
+export const ACCOUNT_SERVICES: Record<string, string[]> = {
+  nx: ["api-gateway", "deployment-controller"],
+  shared: ["auth-service", "user-service", "payment-service", "notification-service"],
+  nw: ["config-service", "audit-service"],
+  dp: [],
+}
+
+// Helper: get services filtered by account (null = all)
+export function getServicesForAccount(accountId: string | null): string[] {
+  if (!accountId) {
+    return Object.values(ACCOUNT_SERVICES).flat()
+  }
+  return ACCOUNT_SERVICES[accountId] ?? []
+}
+
+// Helper: get account name by ID
+export function getAccountName(accountId: string): string {
+  const account = mockAccounts.find((a) => a.id === accountId)
+  return account?.name ?? accountId
+}

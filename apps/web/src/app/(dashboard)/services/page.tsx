@@ -1,7 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Server,
   GitBranch,
@@ -10,7 +18,13 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
+  Building2,
 } from "lucide-react";
+import {
+  useAccountStore,
+  SERVICE_TO_ACCOUNT,
+  getAccountName,
+} from "@/lib/stores/account-store";
 
 const services = [
   { name: "api-gateway", team: "Platform", status: "healthy", sloMeeting: 2, sloTotal: 2, language: "Go", deploys: "4.2/day", dependencies: ["auth-service", "user-service", "payment-service"] },
@@ -28,9 +42,17 @@ const statusConfig: Record<string, { icon: React.ReactNode; color: string; borde
 };
 
 export default function ServicesPage() {
-  const healthyCount = services.filter((s) => s.status === "healthy").length;
-  const degradedCount = services.filter((s) => s.status === "degraded").length;
-  const downCount = services.filter((s) => s.status === "down").length;
+  const { accounts } = useAccountStore();
+  const [accountFilter, setAccountFilter] = useState<string | null>(null);
+
+  const filteredServices = services.filter((s) => {
+    if (!accountFilter) return true;
+    return SERVICE_TO_ACCOUNT[s.name] === accountFilter;
+  });
+
+  const healthyCount = filteredServices.filter((s) => s.status === "healthy").length;
+  const degradedCount = filteredServices.filter((s) => s.status === "degraded").length;
+  const downCount = filteredServices.filter((s) => s.status === "down").length;
 
   return (
     <div className="space-y-6 p-8">
@@ -41,21 +63,47 @@ export default function ServicesPage() {
             Service registry, dependencies, health scorecards
           </p>
         </div>
-        <div className="flex items-center gap-4 font-mono text-sm">
-          <span className="flex items-center gap-1.5 text-green-400">
-            <CheckCircle2 className="h-4 w-4" /> {healthyCount} healthy
-          </span>
-          <span className="flex items-center gap-1.5 text-amber-400">
-            <AlertTriangle className="h-4 w-4" /> {degradedCount} degraded
-          </span>
-          <span className="flex items-center gap-1.5 text-red-400">
-            <XCircle className="h-4 w-4" /> {downCount} down
-          </span>
+        <div className="flex items-center gap-4">
+          <Select
+            value={accountFilter ?? "all"}
+            onValueChange={(v) => {
+              if (v) setAccountFilter(v === "all" ? null : v);
+            }}
+          >
+            <SelectTrigger className="h-10 font-mono text-sm">
+              <Building2 className="size-4 text-[#A855F7]" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Accounts</SelectItem>
+              {accounts.map((acct) => (
+                <SelectItem key={acct.id} value={acct.id}>
+                  <span className="flex items-center gap-2">
+                    {acct.name}
+                    <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
+                      {acct.provider}
+                    </span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="flex items-center gap-4 font-mono text-sm">
+            <span className="flex items-center gap-1.5 text-green-400">
+              <CheckCircle2 className="h-4 w-4" /> {healthyCount} healthy
+            </span>
+            <span className="flex items-center gap-1.5 text-amber-400">
+              <AlertTriangle className="h-4 w-4" /> {degradedCount} degraded
+            </span>
+            <span className="flex items-center gap-1.5 text-red-400">
+              <XCircle className="h-4 w-4" /> {downCount} down
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-5">
-        {services.map((service) => {
+        {filteredServices.map((service) => {
           const config = statusConfig[service.status];
           return (
             <Card

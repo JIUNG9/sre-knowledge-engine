@@ -1,10 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, AlertTriangle, Lock, Bug, Eye } from "lucide-react";
+import { Shield, AlertTriangle, Lock, Bug, Eye, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SeverityOverrideDialog } from "@/components/security/severity-override-dialog";
 import { ComplianceEditor } from "@/components/security/compliance-editor";
 import { LogSourceManager } from "@/components/security/log-source-manager";
@@ -20,8 +27,15 @@ import type {
   LogSource,
   SeverityOverride,
 } from "@/lib/mock-data/security";
+import {
+  useAccountStore,
+  SERVICE_TO_ACCOUNT,
+  getAccountName,
+} from "@/lib/stores/account-store";
 
 export default function SecurityPage() {
+  const { accounts } = useAccountStore();
+  const [accountFilter, setAccountFilter] = useState<string | null>(null);
   const [complianceChecks, setComplianceChecks] =
     useState<ComplianceCheck[]>(COMPLIANCE_CHECKS);
   const [logSources, setLogSources] = useState<LogSource[]>(LOG_SOURCES);
@@ -50,10 +64,15 @@ export default function SecurityPage() {
     });
   }
 
-  const criticalCount = VULNERABILITIES.filter(
+  const filteredVulns = VULNERABILITIES.filter((v) => {
+    if (!accountFilter) return true;
+    return SERVICE_TO_ACCOUNT[v.service] === accountFilter;
+  });
+
+  const criticalCount = filteredVulns.filter(
     (v) => getEffectiveSeverity(v) === "critical"
   ).length;
-  const highCount = VULNERABILITIES.filter(
+  const highCount = filteredVulns.filter(
     (v) => getEffectiveSeverity(v) === "high"
   ).length;
   const passCount = complianceChecks.filter(
@@ -73,9 +92,35 @@ export default function SecurityPage() {
             Vulnerability scanning, RBAC audit, compliance tracking
           </p>
         </div>
-        <Badge variant="outline" className="font-mono text-xs">
-          Last scan: 2h ago
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Select
+            value={accountFilter ?? "all"}
+            onValueChange={(v) => {
+              if (v) setAccountFilter(v === "all" ? null : v);
+            }}
+          >
+            <SelectTrigger className="h-10 font-mono text-sm">
+              <Building2 className="size-4 text-[#A855F7]" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Accounts</SelectItem>
+              {accounts.map((acct) => (
+                <SelectItem key={acct.id} value={acct.id}>
+                  <span className="flex items-center gap-2">
+                    {acct.name}
+                    <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
+                      {acct.provider}
+                    </span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Badge variant="outline" className="font-mono text-xs">
+            Last scan: 2h ago
+          </Badge>
+        </div>
       </div>
 
       {/* Stats */}
@@ -121,7 +166,7 @@ export default function SecurityPage() {
             </span>
           </div>
           <p className="mt-3 font-mono text-3xl font-bold">
-            {VULNERABILITIES.length}
+            {filteredVulns.length}
           </p>
         </Card>
       </div>
@@ -149,7 +194,7 @@ export default function SecurityPage() {
               </p>
             </div>
           )}
-          {VULNERABILITIES.map((vuln) => {
+          {filteredVulns.map((vuln) => {
             const effective = getEffectiveSeverity(vuln);
             const hasOverride = overrides.some((o) => o.cveId === vuln.id);
 

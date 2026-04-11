@@ -3,13 +3,7 @@
 import * as React from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { AccountFilter } from "@/components/account-filter"
 import { CostOverview } from "@/components/finops/cost-overview"
 import { CostByService } from "@/components/finops/cost-by-service"
 import { CostAnomalyCards } from "@/components/finops/cost-anomaly-card"
@@ -18,11 +12,11 @@ import { KubernetesCost } from "@/components/finops/kubernetes-cost"
 import { CostTrendChart } from "@/components/finops/cost-trend-chart"
 import { BudgetManagement } from "@/components/finops/budget-management"
 import { RightsizingRecommendations } from "@/components/finops/rightsizing-recommendations"
-import { DollarSign, Building2 } from "lucide-react"
+import { DollarSign } from "lucide-react"
 import { useAccountStore, getAccountName } from "@/lib/stores/account-store"
 
 export default function FinOpsPage() {
-  const { activeAccountId, accounts } = useAccountStore()
+  const { activeAccountId } = useAccountStore()
   const [accountFilter, setAccountFilter] = React.useState<string | null>(activeAccountId)
 
   // Sync with global sidebar account
@@ -48,30 +42,7 @@ export default function FinOpsPage() {
         <div className="flex-1" />
 
         {/* Account filter */}
-        <Select
-          value={accountFilter ?? "all"}
-          onValueChange={(v) => {
-            if (v) setAccountFilter(v === "all" ? null : v)
-          }}
-        >
-          <SelectTrigger className="h-10 font-mono text-sm">
-            <Building2 className="size-4 text-[#A855F7]" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Accounts</SelectItem>
-            {accounts.map((acct) => (
-              <SelectItem key={acct.id} value={acct.id}>
-                <span className="flex items-center gap-2">
-                  {acct.name}
-                  <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
-                    {acct.provider}
-                  </span>
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <AccountFilter value={accountFilter} onChange={setAccountFilter} />
       </div>
 
       {/* Tabs navigation */}

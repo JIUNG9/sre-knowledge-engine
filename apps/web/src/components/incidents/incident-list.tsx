@@ -34,19 +34,17 @@ import {
   type IncidentSeverity,
   type IncidentStatus,
 } from "@/lib/mock-data/incidents"
+import { AccountFilter } from "@/components/account-filter"
 import {
   AlertTriangle,
   ArrowUpDown,
-  Building2,
   Filter,
   LayoutGrid,
   LayoutList,
   UserCircle,
 } from "lucide-react"
 import {
-  useAccountStore,
   SERVICE_TO_ACCOUNT,
-  getAccountName,
 } from "@/lib/stores/account-store"
 
 // ---- Config helpers ----
@@ -203,7 +201,6 @@ function IncidentCard({
 // ---- Main List ----
 
 export function IncidentList() {
-  const { accounts } = useAccountStore()
   const [accountFilter, setAccountFilter] = React.useState<string | null>(null)
   const [viewMode, setViewMode] = React.useState<ViewMode>("table")
   const [sortBy, setSortBy] = React.useState<SortOption>("severity")
@@ -283,30 +280,7 @@ export function IncidentList() {
                 </div>
 
                 {/* Service Account */}
-                <Select
-                  value={accountFilter ?? "all"}
-                  onValueChange={(v) => {
-                    if (v) setAccountFilter(v === "all" ? null : v)
-                  }}
-                >
-                  <SelectTrigger className="h-10 font-mono text-sm">
-                    <Building2 className="size-4 text-[#A855F7]" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Accounts</SelectItem>
-                    {accounts.map((acct) => (
-                      <SelectItem key={acct.id} value={acct.id}>
-                        <span className="flex items-center gap-2">
-                          {acct.name}
-                          <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
-                            {acct.provider}
-                          </span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <AccountFilter value={accountFilter} onChange={setAccountFilter} />
 
                 {/* Status */}
                 <Select

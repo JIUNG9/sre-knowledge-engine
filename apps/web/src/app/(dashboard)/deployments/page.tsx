@@ -4,13 +4,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { AccountFilter } from "@/components/account-filter";
 import {
   Rocket,
   Clock,
@@ -19,12 +13,9 @@ import {
   CheckCircle2,
   XCircle,
   GitBranch,
-  Building2,
 } from "lucide-react";
 import {
-  useAccountStore,
   SERVICE_TO_ACCOUNT,
-  getAccountName,
 } from "@/lib/stores/account-store";
 import {
   AreaChart,
@@ -78,7 +69,6 @@ const ratingColors: Record<string, string> = {
 };
 
 export default function DeploymentsPage() {
-  const { accounts } = useAccountStore();
   const [accountFilter, setAccountFilter] = useState<string | null>(null);
 
   const filteredDeployments = recentDeployments.filter((deploy) => {
@@ -95,30 +85,7 @@ export default function DeploymentsPage() {
             DORA metrics, deployment timeline, change failure rate
           </p>
         </div>
-        <Select
-          value={accountFilter ?? "all"}
-          onValueChange={(v) => {
-            if (v) setAccountFilter(v === "all" ? null : v);
-          }}
-        >
-          <SelectTrigger className="h-10 font-mono text-sm">
-            <Building2 className="size-4 text-[#A855F7]" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Accounts</SelectItem>
-            {accounts.map((acct) => (
-              <SelectItem key={acct.id} value={acct.id}>
-                <span className="flex items-center gap-2">
-                  {acct.name}
-                  <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
-                    {acct.provider}
-                  </span>
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <AccountFilter value={accountFilter} onChange={setAccountFilter} />
       </div>
 
       {/* DORA Metrics */}

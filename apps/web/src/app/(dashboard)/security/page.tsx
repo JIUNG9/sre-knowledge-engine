@@ -1,17 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, AlertTriangle, Lock, Bug, Eye, Building2 } from "lucide-react";
+import { Shield, AlertTriangle, Lock, Bug, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { AccountFilter } from "@/components/account-filter";
 import { SeverityOverrideDialog } from "@/components/security/severity-override-dialog";
 import { ComplianceEditor } from "@/components/security/compliance-editor";
 import { LogSourceManager } from "@/components/security/log-source-manager";
@@ -28,13 +22,10 @@ import type {
   SeverityOverride,
 } from "@/lib/mock-data/security";
 import {
-  useAccountStore,
   SERVICE_TO_ACCOUNT,
-  getAccountName,
 } from "@/lib/stores/account-store";
 
 export default function SecurityPage() {
-  const { accounts } = useAccountStore();
   const [accountFilter, setAccountFilter] = useState<string | null>(null);
   const [complianceChecks, setComplianceChecks] =
     useState<ComplianceCheck[]>(COMPLIANCE_CHECKS);
@@ -93,30 +84,7 @@ export default function SecurityPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Select
-            value={accountFilter ?? "all"}
-            onValueChange={(v) => {
-              if (v) setAccountFilter(v === "all" ? null : v);
-            }}
-          >
-            <SelectTrigger className="h-10 font-mono text-sm">
-              <Building2 className="size-4 text-[#A855F7]" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Accounts</SelectItem>
-              {accounts.map((acct) => (
-                <SelectItem key={acct.id} value={acct.id}>
-                  <span className="flex items-center gap-2">
-                    {acct.name}
-                    <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
-                      {acct.provider}
-                    </span>
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <AccountFilter value={accountFilter} onChange={setAccountFilter} />
           <Badge variant="outline" className="font-mono text-xs">
             Last scan: 2h ago
           </Badge>

@@ -25,11 +25,11 @@ import {
   type SliType,
   type SloStatus,
 } from "@/lib/mock-data/slo"
+import { AccountFilter } from "@/components/account-filter"
 import {
   Activity,
   AlertTriangle,
   ArrowUpDown,
-  Building2,
   CheckCircle2,
   Filter,
   Gauge,
@@ -38,7 +38,6 @@ import {
 import {
   useAccountStore,
   SERVICE_TO_ACCOUNT,
-  getAccountName,
 } from "@/lib/stores/account-store"
 import { SloTargets } from "@/components/slo/slo-targets"
 
@@ -252,7 +251,7 @@ function SloCard({ slo, onClick }: SloCardProps) {
 // --- Main Overview ---
 
 export function SloOverview() {
-  const { activeAccountId, accounts } = useAccountStore()
+  const { activeAccountId } = useAccountStore()
   const [accountFilter, setAccountFilter] = React.useState<string | null>(activeAccountId)
   const [windowFilter, setWindowFilter] = React.useState<SloWindow | "all">(
     "all"
@@ -380,33 +379,13 @@ export function SloOverview() {
             </div>
 
             {/* Account filter */}
-            <Select
-              value={accountFilter ?? "all"}
-              onValueChange={(v) => {
-                if (v) {
-                  setAccountFilter(v === "all" ? null : v)
-                  setSelectedService(null)
-                }
+            <AccountFilter
+              value={accountFilter}
+              onChange={(v) => {
+                setAccountFilter(v)
+                setSelectedService(null)
               }}
-            >
-              <SelectTrigger className="h-10 font-mono text-sm">
-                <Building2 className="size-4 text-[#A855F7]" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Accounts</SelectItem>
-                {accounts.map((acct) => (
-                  <SelectItem key={acct.id} value={acct.id}>
-                    <span className="flex items-center gap-2">
-                      {acct.name}
-                      <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-xs uppercase text-muted-foreground/60">
-                        {acct.provider}
-                      </span>
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
 
             {/* SLI Type filter */}
             <Select

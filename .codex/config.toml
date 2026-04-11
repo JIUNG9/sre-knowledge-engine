@@ -1,0 +1,5 @@
+# Aegis Project — Codex Local Configuration
+# Overrides global config when working in this project
+
+[sandbox_workspace_write]
+network_access = true

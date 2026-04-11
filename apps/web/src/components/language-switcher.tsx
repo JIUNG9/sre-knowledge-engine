@@ -18,11 +18,7 @@ const locales = [
   { code: "ko", label: "KO", name: "한국어" },
 ] as const
 
-interface LanguageSwitcherProps {
-  collapsed?: boolean
-}
-
-export function LanguageSwitcher({ collapsed }: LanguageSwitcherProps) {
+export function LanguageSwitcher() {
   const locale = useLocale()
   const router = useRouter()
 
@@ -39,17 +35,15 @@ export function LanguageSwitcher({ collapsed }: LanguageSwitcherProps) {
         render={
           <Button
             variant="ghost"
-            size={collapsed ? "icon-sm" : "sm"}
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            size="default"
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
           >
-            <Globe className="size-4 shrink-0" />
-            {!collapsed && (
-              <span className="text-xs font-medium">{currentLocale.label}</span>
-            )}
+            <Globe className="size-[18px] shrink-0" />
+            <span className="text-sm font-medium">{currentLocale.label}</span>
           </Button>
         }
       />
-      <DropdownMenuContent side="top" align="start">
+      <DropdownMenuContent side="bottom" align="end">
         {locales.map((l) => (
           <DropdownMenuItem
             key={l.code}

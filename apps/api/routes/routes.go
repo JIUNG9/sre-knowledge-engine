@@ -34,6 +34,34 @@ func Setup(app *fiber.App, logger *zap.Logger) {
 		logger.Info("CLICKHOUSE_URL not set, using mock data for logs")
 	}
 
+	// Initialize PostgreSQL store if configured.
+	if dsn := os.Getenv("POSTGRES_URL"); dsn != "" {
+		pgStore, err := store.NewPostgresStore(dsn, logger)
+		if err != nil {
+			logger.Warn("Failed to connect to PostgreSQL, using in-memory stores",
+				zap.Error(err),
+			)
+		} else {
+			logger.Info("Connected to PostgreSQL")
+			_ = pgStore // Available for config store, targets store, etc.
+		}
+	} else {
+		logger.Info("POSTGRES_URL not set, using in-memory stores")
+	}
+
+	// Determine auth middleware based on OIDC configuration.
+	oidcIssuer := os.Getenv("OIDC_ISSUER_URL")
+	oidcClientID := os.Getenv("OIDC_CLIENT_ID")
+	authMiddleware := middleware.OIDCAuth(oidcIssuer, oidcClientID)
+	if oidcIssuer != "" {
+		logger.Info("OIDC authentication configured",
+			zap.String("issuer", oidcIssuer),
+			zap.String("client_id", oidcClientID),
+		)
+	} else {
+		logger.Info("OIDC not configured, using dev-mode authentication")
+	}
+
 	// Initialize handlers.
 	logHandlers := handlers.NewLogHandlers(logStore, logger)
 	ingestHandlers := handlers.NewIngestHandlers(logStore, logger)
@@ -62,14 +90,14 @@ func Setup(app *fiber.App, logger *zap.Logger) {
 	accounts.Post("/:id/test", handlers.TestAccountConnection)
 
 	// Integrations (no auth required during setup).
-	integrations := api.Group("/integrations")
-	integrations.Get("/", handlers.ListIntegrations)
-	integrations.Put("/:id", handlers.UpdateIntegration)
-	integrations.Post("/:id/test", handlers.TestIntegrationConnection)
-	integrations.Delete("/:id", handlers.DisconnectIntegration)
+	integ := api.Group("/integrations")
+	integ.Get("/", handlers.ListIntegrations)
+	integ.Put("/:id", handlers.UpdateIntegration)
+	integ.Post("/:id/test", handlers.TestIntegrationConnection)
+	integ.Delete("/:id", handlers.DisconnectIntegration)
 
 	// Authenticated routes.
-	authenticated := api.Group("", middleware.Auth())
+	authenticated := api.Group("", authMiddleware)
 
 	// Incidents.
 	incidents := authenticated.Group("/incidents")
@@ -123,6 +151,12 @@ func Setup(app *fiber.App, logger *zap.Logger) {
 	finops.Get("/anomalies", handlers.GetFinOpsAnomalies)
 	finops.Get("/budgets", handlers.GetFinOpsBudgets)
 	finops.Get("/kubernetes", handlers.GetFinOpsKubernetes)
+
+	// Targets (team SLO/MTTR/SLA/ErrorBudget/CostBudget targets).
+	targets := authenticated.Group("/targets")
+	targets.Get("/", handlers.ListTargets)
+	targets.Get("/:account_id", handlers.GetTargets)
+	targets.Put("/:account_id", handlers.UpdateTargets)
 
 	// Ingestion endpoints (separate from authenticated routes for external sources).
 	ingest := api.Group("/ingest")

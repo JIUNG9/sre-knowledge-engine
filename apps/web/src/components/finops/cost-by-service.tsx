@@ -135,6 +135,41 @@ function ProviderBadge({ provider }: { provider: string }) {
   )
 }
 
+// --- Sortable table head ---
+
+function SortableHead({
+  field,
+  children,
+  className,
+  sortField,
+  onSort,
+}: {
+  field: SortField
+  children: React.ReactNode
+  className?: string
+  sortField: SortField
+  onSort: (field: SortField) => void
+}) {
+  return (
+    <TableHead
+      className={cn("cursor-pointer select-none hover:text-foreground", className)}
+      onClick={() => onSort(field)}
+    >
+      <span className="flex items-center gap-1 font-mono text-xs">
+        {children}
+        <ArrowUpDown
+          className={cn(
+            "size-3 transition-colors",
+            sortField === field
+              ? "text-primary"
+              : "text-muted-foreground/40"
+          )}
+        />
+      </span>
+    </TableHead>
+  )
+}
+
 // --- Main component ---
 
 export function CostByService() {
@@ -163,33 +198,6 @@ export function CostByService() {
     })
   }, [sortField, sortDir])
 
-  const SortableHead = ({
-    field,
-    children,
-    className,
-  }: {
-    field: SortField
-    children: React.ReactNode
-    className?: string
-  }) => (
-    <TableHead
-      className={cn("cursor-pointer select-none hover:text-foreground", className)}
-      onClick={() => handleSort(field)}
-    >
-      <span className="flex items-center gap-1 font-mono text-xs">
-        {children}
-        <ArrowUpDown
-          className={cn(
-            "size-3 transition-colors",
-            sortField === field
-              ? "text-primary"
-              : "text-muted-foreground/40"
-          )}
-        />
-      </span>
-    </TableHead>
-  )
-
   return (
     <Card size="sm">
       <CardHeader className="border-b">
@@ -201,17 +209,17 @@ export function CostByService() {
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <SortableHead field="service">Service</SortableHead>
-              <SortableHead field="team">Team</SortableHead>
-              <SortableHead field="account">Account</SortableHead>
-              <SortableHead field="provider">Provider</SortableHead>
-              <SortableHead field="currentMonth" className="text-right">
+              <SortableHead field="service" sortField={sortField} onSort={handleSort}>Service</SortableHead>
+              <SortableHead field="team" sortField={sortField} onSort={handleSort}>Team</SortableHead>
+              <SortableHead field="account" sortField={sortField} onSort={handleSort}>Account</SortableHead>
+              <SortableHead field="provider" sortField={sortField} onSort={handleSort}>Provider</SortableHead>
+              <SortableHead field="currentMonth" className="text-right" sortField={sortField} onSort={handleSort}>
                 Current
               </SortableHead>
-              <SortableHead field="previousMonth" className="text-right">
+              <SortableHead field="previousMonth" className="text-right" sortField={sortField} onSort={handleSort}>
                 Previous
               </SortableHead>
-              <SortableHead field="changePercent" className="text-right">
+              <SortableHead field="changePercent" className="text-right" sortField={sortField} onSort={handleSort}>
                 Change
               </SortableHead>
               <TableHead className="font-mono text-xs">Trend</TableHead>

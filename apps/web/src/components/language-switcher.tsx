@@ -21,12 +21,20 @@ const locales = [
 export function LanguageSwitcher() {
   const locale = useLocale()
   const router = useRouter()
+  const [pendingLocale, setPendingLocale] = React.useState<string | null>(null)
 
   const currentLocale = locales.find((l) => l.code === locale) ?? locales[0]
 
+  React.useEffect(() => {
+    if (pendingLocale) {
+      document.cookie = `aegis-locale=${pendingLocale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`
+      router.refresh()
+      setPendingLocale(null)
+    }
+  }, [pendingLocale, router])
+
   function switchLocale(newLocale: string) {
-    document.cookie = `aegis-locale=${newLocale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`
-    router.refresh()
+    setPendingLocale(newLocale)
   }
 
   return (

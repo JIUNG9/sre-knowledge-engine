@@ -262,15 +262,10 @@ function getUtilColor(percent: number): string {
   return "#FF4444"
 }
 
-function getRecIcon(type: RecType) {
-  switch (type) {
-    case "rightsize":
-      return Cpu
-    case "schedule":
-      return Clock
-    case "scale":
-      return Zap
-  }
+const REC_ICONS: Record<RecType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+  rightsize: Cpu,
+  schedule: Clock,
+  scale: Zap,
 }
 
 function getRecColor(type: RecType): string {
@@ -469,7 +464,7 @@ function TrafficTooltip({ active, payload }: TrafficTooltipProps) {
 }
 
 function RecommendationCard({ rec }: { rec: Recommendation }) {
-  const Icon = getRecIcon(rec.type)
+  const Icon = REC_ICONS[rec.type]
   const color = getRecColor(rec.type)
   const chartData = rec.trafficPattern.map((v, i) => ({
     hour: i.toString().padStart(2, "0"),

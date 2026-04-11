@@ -13,6 +13,17 @@ type Config struct {
 	CORSOrigins string
 	RateLimit   int
 	JWTSecret   string
+
+	// Database connections.
+	PostgresURL   string
+	ClickHouseURL string
+
+	// OIDC authentication.
+	OIDCIssuerURL string
+	OIDCClientID  string
+
+	// Encryption key for API secrets at rest.
+	EncryptionKey string
 }
 
 // Load reads configuration from environment variables with sensible defaults.
@@ -24,6 +35,14 @@ func Load() *Config {
 		CORSOrigins: getEnv("CORS_ORIGINS", "*"),
 		RateLimit:   getEnvInt("RATE_LIMIT", 100),
 		JWTSecret:   getEnv("JWT_SECRET", "aegis-dev-secret-change-me"),
+
+		PostgresURL:   getEnv("POSTGRES_URL", ""),
+		ClickHouseURL: getEnv("CLICKHOUSE_URL", ""),
+
+		OIDCIssuerURL: getEnv("OIDC_ISSUER_URL", ""),
+		OIDCClientID:  getEnv("OIDC_CLIENT_ID", ""),
+
+		EncryptionKey: getEnv("ENCRYPTION_KEY", "aegis-dev-encryption-key"),
 	}
 }
 

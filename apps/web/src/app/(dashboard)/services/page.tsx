@@ -53,21 +53,21 @@ export default function ServicesPage() {
             Service registry, dependencies, health scorecards
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <AccountFilter value={accountFilter} onChange={setAccountFilter} />
-          <div className="flex items-center gap-4 font-mono text-sm">
-            <span className="flex items-center gap-1.5 text-green-400">
-              <CheckCircle2 className="h-4 w-4" /> {healthyCount} healthy
-            </span>
-            <span className="flex items-center gap-1.5 text-amber-400">
-              <AlertTriangle className="h-4 w-4" /> {degradedCount} degraded
-            </span>
-            <span className="flex items-center gap-1.5 text-red-400">
-              <XCircle className="h-4 w-4" /> {downCount} down
-            </span>
-          </div>
+        <div className="flex items-center gap-4 font-mono text-sm">
+          <span className="flex items-center gap-1.5 text-green-400">
+            <CheckCircle2 className="h-4 w-4" /> {healthyCount} healthy
+          </span>
+          <span className="flex items-center gap-1.5 text-amber-400">
+            <AlertTriangle className="h-4 w-4" /> {degradedCount} degraded
+          </span>
+          <span className="flex items-center gap-1.5 text-red-400">
+            <XCircle className="h-4 w-4" /> {downCount} down
+          </span>
         </div>
       </div>
+
+      {/* Account filter chips — below title */}
+      <AccountFilter value={accountFilter} onChange={setAccountFilter} />
 
       <div className="grid grid-cols-2 gap-5">
         {filteredServices.map((service) => {

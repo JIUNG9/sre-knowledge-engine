@@ -29,20 +29,21 @@ export default function FinOpsPage() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-border px-8 py-5">
-        <DollarSign className="size-6 text-primary" />
-        <h1 className="font-heading text-2xl font-semibold text-foreground text-glow">
-          FinOps Dashboard
-        </h1>
-        <span className="font-mono text-sm text-muted-foreground">
-          Cloud Cost Management
-        </span>
+      <div className="border-b border-border px-8 py-5">
+        <div className="flex items-center gap-3">
+          <DollarSign className="size-6 text-primary" />
+          <h1 className="font-heading text-2xl font-semibold text-foreground text-glow">
+            FinOps Dashboard
+          </h1>
+          <span className="font-mono text-sm text-muted-foreground">
+            Cloud Cost Management
+          </span>
+        </div>
 
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Account filter */}
-        <AccountFilter value={accountFilter} onChange={setAccountFilter} />
+        {/* Account filter chips — below title */}
+        <div className="mt-4">
+          <AccountFilter value={accountFilter} onChange={setAccountFilter} />
+        </div>
       </div>
 
       {/* Tabs navigation */}

@@ -30,6 +30,7 @@ import {
   getServicesForAccount,
   getAccountName,
 } from "@/lib/stores/account-store"
+import { AccountFilter } from "@/components/account-filter"
 
 const ALL_LEVELS: LogLevel[] = ["TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"]
 
@@ -378,8 +379,13 @@ export function LogSearch({ filters, onFiltersChange }: LogSearchProps) {
 
   return (
     <div className="sticky top-0 z-20 border-b border-border/40 bg-[#0A0A0F]/95 backdrop-blur-sm">
+      {/* Row 0: Account filter chips */}
+      <div className="px-5 pt-4 pb-2">
+        <AccountFilter value={filters.account} onChange={setAccountFilter} />
+      </div>
+
       {/* Row 1: Search input */}
-      <div className="px-5 pt-4 pb-3">
+      <div className="px-5 pt-2 pb-3">
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground/40" />
           <Input

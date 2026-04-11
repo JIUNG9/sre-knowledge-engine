@@ -78,15 +78,15 @@ export default function DeploymentsPage() {
 
   return (
     <div className="space-y-6 p-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-mono text-2xl font-bold">Deployment Tracker</h1>
-          <p className="mt-1 font-mono text-sm text-muted-foreground">
-            DORA metrics, deployment timeline, change failure rate
-          </p>
-        </div>
-        <AccountFilter value={accountFilter} onChange={setAccountFilter} />
+      <div>
+        <h1 className="font-mono text-2xl font-bold">Deployment Tracker</h1>
+        <p className="mt-1 font-mono text-sm text-muted-foreground">
+          DORA metrics, deployment timeline, change failure rate
+        </p>
       </div>
+
+      {/* Account filter chips — below title */}
+      <AccountFilter value={accountFilter} onChange={setAccountFilter} />
 
       {/* DORA Metrics */}
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">

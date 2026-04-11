@@ -235,31 +235,38 @@ export function IncidentList() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-8 py-5">
-        <div className="flex items-center gap-3">
-          <h1 className="font-heading text-2xl font-semibold text-foreground text-glow">
-            Incident Management
-          </h1>
-        </div>
-        <div className="flex items-center gap-3">
-          {/* View toggle */}
-          <div className="flex items-center rounded-md bg-muted p-1">
-            <Button
-              variant={viewMode === "table" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("table")}
-            >
-              <LayoutList className="size-4" />
-            </Button>
-            <Button
-              variant={viewMode === "cards" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("cards")}
-            >
-              <LayoutGrid className="size-4" />
-            </Button>
+      <div className="border-b border-border px-8 py-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading text-2xl font-semibold text-foreground text-glow">
+              Incident Management
+            </h1>
           </div>
-          <IncidentCreate />
+          <div className="flex items-center gap-3">
+            {/* View toggle */}
+            <div className="flex items-center rounded-md bg-muted p-1">
+              <Button
+                variant={viewMode === "table" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+              >
+                <LayoutList className="size-4" />
+              </Button>
+              <Button
+                variant={viewMode === "cards" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("cards")}
+              >
+                <LayoutGrid className="size-4" />
+              </Button>
+            </div>
+            <IncidentCreate />
+          </div>
+        </div>
+
+        {/* Account filter chips — below title */}
+        <div className="mt-4">
+          <AccountFilter value={accountFilter} onChange={setAccountFilter} />
         </div>
       </div>
 
@@ -278,9 +285,6 @@ export function IncidentList() {
                   <Filter className="size-4" />
                   <span className="font-mono text-sm">Filters:</span>
                 </div>
-
-                {/* Service Account */}
-                <AccountFilter value={accountFilter} onChange={setAccountFilter} />
 
                 {/* Status */}
                 <Select

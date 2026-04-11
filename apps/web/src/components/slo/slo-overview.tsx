@@ -310,15 +310,28 @@ export function SloOverview() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border px-8 py-5">
-        <div className="flex items-center gap-4">
-          <h1 className="font-heading text-2xl font-semibold text-foreground text-glow">
-            SLO Dashboard
-          </h1>
+      <div className="border-b border-border px-8 py-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <h1 className="font-heading text-2xl font-semibold text-foreground text-glow">
+              SLO Dashboard
+            </h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <TimeWindowToggle value={windowFilter} onChange={setWindowFilter} />
+            <SloForm />
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <TimeWindowToggle value={windowFilter} onChange={setWindowFilter} />
-          <SloForm />
+
+        {/* Account filter chips — below title */}
+        <div className="mt-4">
+          <AccountFilter
+            value={accountFilter}
+            onChange={(v) => {
+              setAccountFilter(v)
+              setSelectedService(null)
+            }}
+          />
         </div>
       </div>
 
@@ -377,15 +390,6 @@ export function SloOverview() {
               <Filter className="size-4" />
               <span className="font-mono text-sm">Filters:</span>
             </div>
-
-            {/* Account filter */}
-            <AccountFilter
-              value={accountFilter}
-              onChange={(v) => {
-                setAccountFilter(v)
-                setSelectedService(null)
-              }}
-            />
 
             {/* SLI Type filter */}
             <Select

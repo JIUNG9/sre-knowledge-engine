@@ -76,18 +76,22 @@ export default function SecurityPage() {
 
   return (
     <div className="space-y-6 p-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-mono text-2xl font-bold">Security Dashboard</h1>
-          <p className="mt-1 font-mono text-sm text-muted-foreground">
-            Vulnerability scanning, RBAC audit, compliance tracking
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <AccountFilter value={accountFilter} onChange={setAccountFilter} />
+      <div>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-mono text-2xl font-bold">Security Dashboard</h1>
+            <p className="mt-1 font-mono text-sm text-muted-foreground">
+              Vulnerability scanning, RBAC audit, compliance tracking
+            </p>
+          </div>
           <Badge variant="outline" className="font-mono text-xs">
             Last scan: 2h ago
           </Badge>
+        </div>
+
+        {/* Account filter chips — below title */}
+        <div className="mt-4">
+          <AccountFilter value={accountFilter} onChange={setAccountFilter} />
         </div>
       </div>
 

@@ -39,15 +39,15 @@ export default function OnCallPage() {
 
   return (
     <div className="space-y-6 p-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-mono text-2xl font-bold">On-Call & Runbooks</h1>
-          <p className="mt-1 font-mono text-sm text-muted-foreground">
-            Rotation schedules, escalation policies, runbook library
-          </p>
-        </div>
-        <AccountFilter value={accountFilter} onChange={setAccountFilter} />
+      <div>
+        <h1 className="font-mono text-2xl font-bold">On-Call & Runbooks</h1>
+        <p className="mt-1 font-mono text-sm text-muted-foreground">
+          Rotation schedules, escalation policies, runbook library
+        </p>
       </div>
+
+      {/* Account filter chips — below title */}
+      <AccountFilter value={accountFilter} onChange={setAccountFilter} />
 
       {/* Current On-Call */}
       <div className="grid grid-cols-2 gap-5">

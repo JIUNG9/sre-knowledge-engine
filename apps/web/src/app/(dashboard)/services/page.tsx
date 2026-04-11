@@ -22,9 +22,9 @@ const services = [
 ];
 
 const statusConfig: Record<string, { icon: React.ReactNode; color: string; border: string }> = {
-  healthy: { icon: <CheckCircle2 className="h-4 w-4 text-green-400" />, color: "text-green-400", border: "border-green-400/20" },
-  degraded: { icon: <AlertTriangle className="h-4 w-4 text-amber-400" />, color: "text-amber-400", border: "border-amber-400/20" },
-  down: { icon: <XCircle className="h-4 w-4 text-red-400" />, color: "text-red-400", border: "border-red-400/20" },
+  healthy: { icon: <CheckCircle2 className="h-5 w-5 text-green-400" />, color: "text-green-400", border: "border-green-400/20" },
+  degraded: { icon: <AlertTriangle className="h-5 w-5 text-amber-400" />, color: "text-amber-400", border: "border-amber-400/20" },
+  down: { icon: <XCircle className="h-5 w-5 text-red-400" />, color: "text-red-400", border: "border-red-400/20" },
 };
 
 export default function ServicesPage() {
@@ -33,7 +33,7 @@ export default function ServicesPage() {
   const downCount = services.filter((s) => s.status === "down").length;
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-mono text-2xl font-bold">Service Catalog</h1>
@@ -41,49 +41,49 @@ export default function ServicesPage() {
             Service registry, dependencies, health scorecards
           </p>
         </div>
-        <div className="flex items-center gap-3 font-mono text-sm">
-          <span className="flex items-center gap-1 text-green-400">
-            <CheckCircle2 className="h-3 w-3" /> {healthyCount} healthy
+        <div className="flex items-center gap-4 font-mono text-sm">
+          <span className="flex items-center gap-1.5 text-green-400">
+            <CheckCircle2 className="h-4 w-4" /> {healthyCount} healthy
           </span>
-          <span className="flex items-center gap-1 text-amber-400">
-            <AlertTriangle className="h-3 w-3" /> {degradedCount} degraded
+          <span className="flex items-center gap-1.5 text-amber-400">
+            <AlertTriangle className="h-4 w-4" /> {degradedCount} degraded
           </span>
-          <span className="flex items-center gap-1 text-red-400">
-            <XCircle className="h-3 w-3" /> {downCount} down
+          <span className="flex items-center gap-1.5 text-red-400">
+            <XCircle className="h-4 w-4" /> {downCount} down
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-5">
         {services.map((service) => {
           const config = statusConfig[service.status];
           return (
             <Card
               key={service.name}
-              className={`border-border/50 ${config.border} bg-card p-4 hover:border-[#00FF88]/30 cursor-pointer transition-colors`}
+              className={`border-border/50 ${config.border} bg-card p-6 hover:border-[#00FF88]/30 cursor-pointer transition-colors`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  <Server className="h-4 w-4 text-[#00FF88]" />
-                  <span className="font-mono text-sm font-bold">{service.name}</span>
+                  <Server className="h-5 w-5 text-[#00FF88]" />
+                  <span className="font-mono text-base font-bold">{service.name}</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   {config.icon}
-                  <span className={`font-mono text-xs ${config.color}`}>{service.status}</span>
+                  <span className={`font-mono text-sm ${config.color}`}>{service.status}</span>
                 </div>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
-                  <Users className="h-3 w-3" /> {service.team}
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
+                  <Users className="h-4 w-4" /> {service.team}
                 </div>
-                <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
-                  <GitBranch className="h-3 w-3" /> {service.language}
+                <div className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
+                  <GitBranch className="h-4 w-4" /> {service.language}
                 </div>
-                <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
-                  <Activity className="h-3 w-3" /> {service.deploys}
+                <div className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
+                  <Activity className="h-4 w-4" /> {service.deploys}
                 </div>
-                <div className="font-mono text-xs">
+                <div className="font-mono text-sm">
                   SLO: <span className={service.sloMeeting === service.sloTotal ? "text-green-400" : "text-amber-400"}>
                     {service.sloMeeting}/{service.sloTotal}
                   </span>

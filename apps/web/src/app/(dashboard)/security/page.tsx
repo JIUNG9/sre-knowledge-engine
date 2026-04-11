@@ -40,7 +40,7 @@ export default function SecurityPage() {
   const complianceScore = Math.round((passCount / complianceChecks.length) * 100);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-mono text-2xl font-bold">Security Dashboard</h1>
@@ -54,47 +54,47 @@ export default function SecurityPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
-        <Card className="border-border/50 bg-card p-4">
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+        <Card className="border-border/50 bg-card p-6">
           <div className="flex items-center gap-2">
-            <Bug className="h-4 w-4 text-red-400" />
-            <span className="font-mono text-xs text-muted-foreground">Critical</span>
+            <Bug className="h-5 w-5 text-red-400" />
+            <span className="font-mono text-sm text-muted-foreground">Critical</span>
           </div>
-          <p className="mt-2 font-mono text-2xl font-bold text-red-400">{criticalCount}</p>
+          <p className="mt-3 font-mono text-3xl font-bold text-red-400">{criticalCount}</p>
         </Card>
-        <Card className="border-border/50 bg-card p-4">
+        <Card className="border-border/50 bg-card p-6">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-orange-400" />
-            <span className="font-mono text-xs text-muted-foreground">High</span>
+            <AlertTriangle className="h-5 w-5 text-orange-400" />
+            <span className="font-mono text-sm text-muted-foreground">High</span>
           </div>
-          <p className="mt-2 font-mono text-2xl font-bold text-orange-400">{highCount}</p>
+          <p className="mt-3 font-mono text-3xl font-bold text-orange-400">{highCount}</p>
         </Card>
-        <Card className="border-border/50 bg-card p-4">
+        <Card className="border-border/50 bg-card p-6">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-[#00FF88]" />
-            <span className="font-mono text-xs text-muted-foreground">Compliance</span>
+            <Shield className="h-5 w-5 text-[#00FF88]" />
+            <span className="font-mono text-sm text-muted-foreground">Compliance</span>
           </div>
-          <p className="mt-2 font-mono text-2xl font-bold text-[#00FF88]">{complianceScore}%</p>
+          <p className="mt-3 font-mono text-3xl font-bold text-[#00FF88]">{complianceScore}%</p>
         </Card>
-        <Card className="border-border/50 bg-card p-4">
+        <Card className="border-border/50 bg-card p-6">
           <div className="flex items-center gap-2">
-            <Lock className="h-4 w-4 text-cyan-400" />
-            <span className="font-mono text-xs text-muted-foreground">Total Vulns</span>
+            <Lock className="h-5 w-5 text-cyan-400" />
+            <span className="font-mono text-sm text-muted-foreground">Total Vulns</span>
           </div>
-          <p className="mt-2 font-mono text-2xl font-bold">{vulnerabilities.length}</p>
+          <p className="mt-3 font-mono text-3xl font-bold">{vulnerabilities.length}</p>
         </Card>
       </div>
 
       <Tabs defaultValue="vulnerabilities">
         <TabsList className="bg-card">
-          <TabsTrigger value="vulnerabilities" className="font-mono text-xs">Vulnerabilities</TabsTrigger>
-          <TabsTrigger value="compliance" className="font-mono text-xs">Compliance</TabsTrigger>
-          <TabsTrigger value="rbac" className="font-mono text-xs">RBAC Audit</TabsTrigger>
+          <TabsTrigger value="vulnerabilities" className="font-mono text-sm">Vulnerabilities</TabsTrigger>
+          <TabsTrigger value="compliance" className="font-mono text-sm">Compliance</TabsTrigger>
+          <TabsTrigger value="rbac" className="font-mono text-sm">RBAC Audit</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="vulnerabilities" className="mt-4 space-y-2">
+        <TabsContent value="vulnerabilities" className="mt-4 space-y-3">
           {vulnerabilities.map((vuln) => (
-            <div key={vuln.id} className="flex items-center gap-3 rounded border border-border/50 bg-card p-3">
+            <div key={vuln.id} className="flex items-center gap-4 rounded border border-border/50 bg-card p-4">
               <Badge variant="outline" className={`font-mono text-xs ${severityColors[vuln.severity]}`}>
                 {vuln.severity.toUpperCase()}
               </Badge>
@@ -103,7 +103,7 @@ export default function SecurityPage() {
                   <span className="font-mono text-sm font-medium">{vuln.id}</span>
                   <span className="truncate text-sm text-muted-foreground">{vuln.title}</span>
                 </div>
-                <div className="mt-1 flex items-center gap-3 font-mono text-xs text-muted-foreground">
+                <div className="mt-1.5 flex items-center gap-3 font-mono text-sm text-muted-foreground">
                   <span>{vuln.package}@{vuln.version}</span>
                   <span>→ {vuln.fixedVersion}</span>
                   <span>·</span>
@@ -116,17 +116,17 @@ export default function SecurityPage() {
           ))}
         </TabsContent>
 
-        <TabsContent value="compliance" className="mt-4 space-y-2">
+        <TabsContent value="compliance" className="mt-4 space-y-3">
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-mono text-sm">Overall Compliance Score</span>
-              <span className="font-mono text-sm text-[#00FF88]">{complianceScore}%</span>
+              <span className="font-mono text-base">Overall Compliance Score</span>
+              <span className="font-mono text-base font-bold text-[#00FF88]">{complianceScore}%</span>
             </div>
-            <Progress value={complianceScore} className="h-2" />
+            <Progress value={complianceScore} className="h-3" />
           </div>
           {complianceChecks.map((check, i) => (
-            <div key={i} className="flex items-center gap-3 rounded border border-border/50 bg-card p-3">
-              <div className={`h-2 w-2 rounded-full ${check.status === "pass" ? "bg-green-400" : check.status === "fail" ? "bg-red-400" : "bg-amber-400"}`} />
+            <div key={i} className="flex items-center gap-4 rounded border border-border/50 bg-card p-4">
+              <div className={`h-3 w-3 rounded-full ${check.status === "pass" ? "bg-green-400" : check.status === "fail" ? "bg-red-400" : "bg-amber-400"}`} />
               <span className="flex-1 font-mono text-sm">{check.name}</span>
               <Badge variant="outline" className="font-mono text-xs">{check.category}</Badge>
               <span className={`font-mono text-xs ${check.status === "pass" ? "text-green-400" : check.status === "fail" ? "text-red-400" : "text-amber-400"}`}>

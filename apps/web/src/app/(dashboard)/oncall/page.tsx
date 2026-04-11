@@ -35,7 +35,7 @@ const escalationPolicies = [
 
 export default function OnCallPage() {
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-8">
       <div>
         <h1 className="font-mono text-2xl font-bold">On-Call & Runbooks</h1>
         <p className="mt-1 font-mono text-sm text-muted-foreground">
@@ -44,24 +44,24 @@ export default function OnCallPage() {
       </div>
 
       {/* Current On-Call */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="border-[#00FF88]/20 bg-card p-4">
+      <div className="grid grid-cols-2 gap-5">
+        <Card className="border-[#00FF88]/20 bg-card p-6">
           <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4 text-[#00FF88]" />
-            <span className="font-mono text-xs text-muted-foreground">Primary On-Call</span>
+            <Phone className="h-5 w-5 text-[#00FF88]" />
+            <span className="font-mono text-sm text-muted-foreground">Primary On-Call</span>
           </div>
-          <p className="mt-2 font-mono text-lg font-bold">{currentOnCall.primary.name}</p>
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="mt-3 font-mono text-2xl font-bold">{currentOnCall.primary.name}</p>
+          <p className="mt-1 font-mono text-sm text-muted-foreground">
             {currentOnCall.primary.team} · Until {new Date(currentOnCall.primary.until).toLocaleDateString()}
           </p>
         </Card>
-        <Card className="border-border/50 bg-card p-4">
+        <Card className="border-border/50 bg-card p-6">
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-cyan-400" />
-            <span className="font-mono text-xs text-muted-foreground">Secondary On-Call</span>
+            <Users className="h-5 w-5 text-cyan-400" />
+            <span className="font-mono text-sm text-muted-foreground">Secondary On-Call</span>
           </div>
-          <p className="mt-2 font-mono text-lg font-bold">{currentOnCall.secondary.name}</p>
-          <p className="font-mono text-xs text-muted-foreground">
+          <p className="mt-3 font-mono text-2xl font-bold">{currentOnCall.secondary.name}</p>
+          <p className="mt-1 font-mono text-sm text-muted-foreground">
             {currentOnCall.secondary.team} · Until {new Date(currentOnCall.secondary.until).toLocaleDateString()}
           </p>
         </Card>
@@ -69,40 +69,40 @@ export default function OnCallPage() {
 
       <Tabs defaultValue="runbooks">
         <TabsList className="bg-card">
-          <TabsTrigger value="runbooks" className="font-mono text-xs">Runbooks</TabsTrigger>
-          <TabsTrigger value="schedule" className="font-mono text-xs">Schedule</TabsTrigger>
-          <TabsTrigger value="escalation" className="font-mono text-xs">Escalation</TabsTrigger>
+          <TabsTrigger value="runbooks" className="font-mono text-sm">Runbooks</TabsTrigger>
+          <TabsTrigger value="schedule" className="font-mono text-sm">Schedule</TabsTrigger>
+          <TabsTrigger value="escalation" className="font-mono text-sm">Escalation</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="runbooks" className="mt-4 space-y-2">
+        <TabsContent value="runbooks" className="mt-4 space-y-3">
           {runbooks.map((rb) => (
-            <div key={rb.id} className="flex items-center gap-3 rounded border border-border/50 bg-card p-3 hover:border-[#00FF88]/30 cursor-pointer transition-colors">
-              <BookOpen className="h-4 w-4 text-[#00FF88]" />
+            <div key={rb.id} className="flex items-center gap-4 rounded border border-border/50 bg-card p-4 hover:border-[#00FF88]/30 cursor-pointer transition-colors">
+              <BookOpen className="h-5 w-5 text-[#00FF88]" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm font-medium">{rb.title}</span>
+                  <span className="font-mono text-base font-medium">{rb.title}</span>
                   <Badge variant="outline" className="font-mono text-xs">{rb.steps} steps</Badge>
                 </div>
-                <div className="mt-1 flex items-center gap-3 font-mono text-xs text-muted-foreground">
+                <div className="mt-1.5 flex items-center gap-3 font-mono text-sm text-muted-foreground">
                   <span>{rb.service}</span>
                   <span>·</span>
                   <span>Last used: {rb.lastUsed}</span>
                 </div>
               </div>
-              <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+              <ArrowUpRight className="h-5 w-5 text-muted-foreground" />
             </div>
           ))}
         </TabsContent>
 
         <TabsContent value="schedule" className="mt-4">
-          <div className="space-y-2">
+          <div className="space-y-3">
             {schedule.map((week, i) => (
-              <div key={i} className={`flex items-center gap-3 rounded border p-3 ${week.primary === "June Gu" ? "border-[#00FF88]/30 bg-[#00FF88]/5" : "border-border/50 bg-card"}`}>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="w-24 font-mono text-sm">{week.week}</span>
-                <div className="flex-1 flex items-center gap-4 font-mono text-sm">
-                  <span><span className="text-xs text-muted-foreground">Primary:</span> {week.primary}</span>
-                  <span><span className="text-xs text-muted-foreground">Secondary:</span> {week.secondary}</span>
+              <div key={i} className={`flex items-center gap-4 rounded border p-4 ${week.primary === "June Gu" ? "border-[#00FF88]/30 bg-[#00FF88]/5" : "border-border/50 bg-card"}`}>
+                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <span className="w-28 font-mono text-base">{week.week}</span>
+                <div className="flex-1 flex items-center gap-4 font-mono text-base">
+                  <span><span className="text-sm text-muted-foreground">Primary:</span> {week.primary}</span>
+                  <span><span className="text-sm text-muted-foreground">Secondary:</span> {week.secondary}</span>
                 </div>
               </div>
             ))}
@@ -110,14 +110,14 @@ export default function OnCallPage() {
         </TabsContent>
 
         <TabsContent value="escalation" className="mt-4">
-          <div className="space-y-2">
+          <div className="space-y-3">
             {escalationPolicies.map((policy) => (
-              <div key={policy.level} className="flex items-center gap-3 rounded border border-border/50 bg-card p-3">
-                <Badge variant="outline" className="font-mono text-xs">L{policy.level}</Badge>
+              <div key={policy.level} className="flex items-center gap-4 rounded border border-border/50 bg-card p-4">
+                <Badge variant="outline" className="font-mono text-sm">L{policy.level}</Badge>
                 <div className="flex-1">
-                  <span className="font-mono text-sm font-medium">{policy.target}</span>
-                  <div className="mt-1 flex items-center gap-3 font-mono text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" />After {policy.delay}</span>
+                  <span className="font-mono text-base font-medium">{policy.target}</span>
+                  <div className="mt-1.5 flex items-center gap-3 font-mono text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1"><Clock className="h-4 w-4" />After {policy.delay}</span>
                     <span>·</span>
                     <span>{policy.method}</span>
                   </div>

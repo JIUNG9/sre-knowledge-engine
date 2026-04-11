@@ -1,12 +1,21 @@
 "use client"
 
 import * as React from "react"
-import { Shield, User } from "lucide-react"
+import { Shield, User, Sparkles } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { useAIStore } from "@/lib/stores/ai-store"
+import { AccountSwitcher } from "@/components/account-switcher"
 
 export function CommandBar() {
+  const openPanel = useAIStore((s) => s.openPanel)
+
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-sm">
       {/* Left: Logo + branding (visible on mobile where sidebar is hidden) */}
@@ -36,8 +45,39 @@ export function CommandBar() {
 
       <Separator orientation="vertical" className="mx-3 hidden h-6 md:block" />
 
-      {/* Right: User avatar placeholder */}
-      <div className="flex items-center gap-2">
+      {/* Account Switcher */}
+      <div className="hidden md:flex">
+        <AccountSwitcher />
+      </div>
+
+      <Separator orientation="vertical" className="mx-3 hidden h-6 md:block" />
+
+      {/* Right: AI Assistant + User */}
+      <div className="flex items-center gap-1.5">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={openPanel}
+                className="relative text-muted-foreground hover:text-foreground"
+              />
+            }
+          >
+            <Sparkles className="size-4" />
+            {/* Green availability dot */}
+            <span className="absolute top-1 right-1 size-1.5 rounded-full bg-emerald-500" />
+            <span className="sr-only">AI Assistant</span>
+          </TooltipTrigger>
+          <TooltipContent>
+            AI Assistant
+            <kbd className="ml-1.5 rounded border border-border bg-muted px-1 font-mono text-[10px]">
+              &#8984;J
+            </kbd>
+          </TooltipContent>
+        </Tooltip>
+
         <Button
           variant="ghost"
           size="icon-sm"

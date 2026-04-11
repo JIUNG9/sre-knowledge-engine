@@ -65,7 +65,7 @@ const ratingColors: Record<string, string> = {
 
 export default function DeploymentsPage() {
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-8">
       <div>
         <h1 className="font-mono text-2xl font-bold">Deployment Tracker</h1>
         <p className="mt-1 font-mono text-sm text-muted-foreground">
@@ -74,22 +74,22 @@ export default function DeploymentsPage() {
       </div>
 
       {/* DORA Metrics */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {Object.entries(doraMetrics).map(([key, metric]) => (
-          <Card key={key} className="border-border/50 bg-card p-4">
+          <Card key={key} className="border-border/50 bg-card p-6">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-muted-foreground">
+              <span className="font-mono text-sm text-muted-foreground">
                 {key.replace(/([A-Z])/g, " $1").trim()}
               </span>
               <Badge variant="outline" className={`font-mono text-xs ${ratingColors[metric.rating]}`}>
                 {metric.rating}
               </Badge>
             </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="font-mono text-2xl font-bold">{metric.value}</span>
-              <span className="font-mono text-xs text-muted-foreground">{metric.unit}</span>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="font-mono text-3xl font-bold">{metric.value}</span>
+              <span className="font-mono text-sm text-muted-foreground">{metric.unit}</span>
             </div>
-            <span className={`font-mono text-xs ${metric.trend.startsWith("-") ? "text-[#00FF88]" : "text-amber-400"}`}>
+            <span className={`font-mono text-sm ${metric.trend.startsWith("-") ? "text-[#00FF88]" : "text-amber-400"}`}>
               {metric.trend} vs last month
             </span>
           </Card>
@@ -98,34 +98,34 @@ export default function DeploymentsPage() {
 
       <Tabs defaultValue="timeline">
         <TabsList className="bg-card">
-          <TabsTrigger value="timeline" className="font-mono text-xs">Timeline</TabsTrigger>
-          <TabsTrigger value="frequency" className="font-mono text-xs">Frequency</TabsTrigger>
-          <TabsTrigger value="lead-time" className="font-mono text-xs">Lead Time</TabsTrigger>
+          <TabsTrigger value="timeline" className="font-mono text-sm">Timeline</TabsTrigger>
+          <TabsTrigger value="frequency" className="font-mono text-sm">Frequency</TabsTrigger>
+          <TabsTrigger value="lead-time" className="font-mono text-sm">Lead Time</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="timeline" className="mt-4 space-y-2">
+        <TabsContent value="timeline" className="mt-4 space-y-3">
           {recentDeployments.map((deploy) => (
-            <div key={deploy.id} className="flex items-center gap-3 rounded border border-border/50 bg-card p-3">
+            <div key={deploy.id} className="flex items-center gap-4 rounded border border-border/50 bg-card p-4">
               <div className="flex items-center gap-2">
                 {deploy.status === "success" ? (
-                  <CheckCircle2 className="h-4 w-4 text-green-400" />
+                  <CheckCircle2 className="h-5 w-5 text-green-400" />
                 ) : deploy.status === "failed" ? (
-                  <XCircle className="h-4 w-4 text-red-400" />
+                  <XCircle className="h-5 w-5 text-red-400" />
                 ) : (
-                  <AlertTriangle className="h-4 w-4 text-amber-400" />
+                  <AlertTriangle className="h-5 w-5 text-amber-400" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm font-medium">{deploy.service}</span>
+                  <span className="font-mono text-base font-medium">{deploy.service}</span>
                   <Badge variant="outline" className="font-mono text-xs">{deploy.version}</Badge>
                   <Badge variant="outline" className={`font-mono text-xs ${statusColors[deploy.status]}`}>
                     {deploy.status}
                   </Badge>
                 </div>
-                <div className="mt-1 flex items-center gap-3 font-mono text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><GitBranch className="h-3 w-3" />{deploy.env}</span>
-                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{deploy.duration}</span>
+                <div className="mt-1.5 flex items-center gap-3 font-mono text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1"><GitBranch className="h-4 w-4" />{deploy.env}</span>
+                  <span className="flex items-center gap-1"><Clock className="h-4 w-4" />{deploy.duration}</span>
                   <span>{deploy.author}</span>
                   <span>{new Date(deploy.timestamp).toLocaleDateString()}</span>
                 </div>
@@ -135,9 +135,9 @@ export default function DeploymentsPage() {
         </TabsContent>
 
         <TabsContent value="frequency" className="mt-4">
-          <Card className="border-border/50 bg-card p-4">
-            <h3 className="mb-4 font-mono text-sm font-medium">Deployments per Day</h3>
-            <ResponsiveContainer width="100%" height={250}>
+          <Card className="border-border/50 bg-card p-5">
+            <h3 className="mb-4 font-mono text-lg font-medium">Deployments per Day</h3>
+            <ResponsiveContainer width="100%" height={320}>
               <BarChart data={deployFrequencyData}>
                 <XAxis dataKey="date" tick={{ fill: "#666", fontSize: 10, fontFamily: "JetBrains Mono" }} />
                 <YAxis tick={{ fill: "#666", fontSize: 10, fontFamily: "JetBrains Mono" }} />
@@ -149,9 +149,9 @@ export default function DeploymentsPage() {
         </TabsContent>
 
         <TabsContent value="lead-time" className="mt-4">
-          <Card className="border-border/50 bg-card p-4">
-            <h3 className="mb-4 font-mono text-sm font-medium">Lead Time for Changes (hours)</h3>
-            <ResponsiveContainer width="100%" height={250}>
+          <Card className="border-border/50 bg-card p-5">
+            <h3 className="mb-4 font-mono text-lg font-medium">Lead Time for Changes (hours)</h3>
+            <ResponsiveContainer width="100%" height={320}>
               <AreaChart data={leadTimeData}>
                 <XAxis dataKey="date" tick={{ fill: "#666", fontSize: 10, fontFamily: "JetBrains Mono" }} />
                 <YAxis tick={{ fill: "#666", fontSize: 10, fontFamily: "JetBrains Mono" }} />

@@ -2497,7 +2497,7 @@ function TeamTab() {
 
 export default function SettingsPage() {
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="h-full overflow-y-auto">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-border px-6 py-4">
         <Settings className="size-5 text-primary" />
@@ -2510,8 +2510,8 @@ export default function SettingsPage() {
       </div>
 
       {/* Tabs navigation */}
-      <Tabs defaultValue="general" className="flex flex-1 flex-col overflow-hidden">
-        <div className="border-b border-border px-6 pt-2">
+      <Tabs defaultValue="general">
+        <div className="sticky top-0 z-10 border-b border-border bg-background px-6 pt-2">
           <TabsList variant="line">
             <TabsTrigger value="general" className="font-mono text-sm">
               General
@@ -2531,38 +2531,35 @@ export default function SettingsPage() {
           </TabsList>
         </div>
 
-        {/* Scrollable content */}
-        <ScrollArea className="flex-1">
-          <TabsContent value="general">
-            <div className="p-6">
-              <GeneralTab />
-            </div>
-          </TabsContent>
+        <TabsContent value="general">
+          <div className="p-6">
+            <GeneralTab />
+          </div>
+        </TabsContent>
 
-          <TabsContent value="integrations">
-            <div className="p-6">
-              <IntegrationsTab />
-            </div>
-          </TabsContent>
+        <TabsContent value="integrations">
+          <div className="p-6">
+            <IntegrationsTab />
+          </div>
+        </TabsContent>
 
-          <TabsContent value="cloud">
-            <div className="p-6">
-              <CloudAccountsTab />
-            </div>
-          </TabsContent>
+        <TabsContent value="cloud">
+          <div className="p-6">
+            <CloudAccountsTab />
+          </div>
+        </TabsContent>
 
-          <TabsContent value="ai">
-            <div className="p-6">
-              <AITokensTab />
-            </div>
-          </TabsContent>
+        <TabsContent value="ai">
+          <div className="p-6">
+            <AITokensTab />
+          </div>
+        </TabsContent>
 
-          <TabsContent value="team">
-            <div className="p-6">
-              <TeamTab />
-            </div>
-          </TabsContent>
-        </ScrollArea>
+        <TabsContent value="team">
+          <div className="p-6">
+            <TeamTab />
+          </div>
+        </TabsContent>
       </Tabs>
     </div>
   )

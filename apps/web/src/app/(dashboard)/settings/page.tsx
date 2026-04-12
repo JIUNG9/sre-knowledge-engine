@@ -98,6 +98,7 @@ import {
   Target,
   Search,
   Link,
+  ShieldAlert,
 } from "lucide-react"
 import { useAIStore, type AIMode } from "@/lib/stores/ai-store"
 import { cn } from "@/lib/utils"
@@ -1205,6 +1206,23 @@ function AITokensTab() {
   const [syncGithubWiki, setSyncGithubWiki] = React.useState(false)
   const [ragDocs, setRagDocs] = React.useState<RAGDocument[]>(MOCK_RAG_DOCS)
 
+  // --- Section 6: Safety & Guardrails ---
+  const [antiHallucination, setAntiHallucination] = React.useState<"off" | "warn" | "strict">("warn")
+  const [groundingMode, setGroundingMode] = React.useState<"hybrid" | "data-only">("hybrid")
+  const [contextCap, setContextCap] = React.useState<"50k" | "100k" | "200k" | "unlimited">("100k")
+  const [blockPII, setBlockPII] = React.useState(true)
+  const [blockSecrets, setBlockSecrets] = React.useState(true)
+  const [blockSQLInjection, setBlockSQLInjection] = React.useState(true)
+  const [customRegexFilter, setCustomRegexFilter] = React.useState(false)
+  const [validateCommands, setValidateCommands] = React.useState(true)
+  const [blockDestructiveActions, setBlockDestructiveActions] = React.useState(true)
+  const [validateJSONOutput, setValidateJSONOutput] = React.useState(false)
+  const [redactSecretsOutput, setRedactSecretsOutput] = React.useState(true)
+  const [blockProdNamespaces, setBlockProdNamespaces] = React.useState(true)
+  const [requireDryRun, setRequireDryRun] = React.useState(false)
+  const [logToolInputs, setLogToolInputs] = React.useState(true)
+  const [aiAuditLog, setAiAuditLog] = React.useState(true)
+
   const usagePercent = Math.min((monthlySpent / monthlyBudget) * 100, 100)
   const budgetResetDate = "May 1, 2026"
 
@@ -1950,7 +1968,111 @@ function AITokensTab() {
       </CollapsibleSection>
 
       {/* ================================================================== */}
-      {/* Section 5: Knowledge Base (RAG) (default CLOSED)                  */}
+      {/* Section 5: Safety & Guardrails (default CLOSED)                   */}
+      {/* ================================================================== */}
+
+      <CollapsibleSection icon={ShieldAlert} title="Safety & Guardrails" defaultOpen={false}>
+        <div className="space-y-5">
+
+          {/* Anti-Hallucination Mode */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Anti-Hallucination Mode</Label>
+            <p className="text-xs text-muted-foreground">Reject AI responses with claims not grounded in actual data</p>
+            <ButtonGroup
+              options={[
+                { label: "Off", value: "off" },
+                { label: "Warn", value: "warn" },
+                { label: "Strict", value: "strict" },
+              ]}
+              value={antiHallucination}
+              onChange={setAntiHallucination}
+            />
+          </div>
+
+          {/* Grounding Mode */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Grounding Mode</Label>
+            <p className="text-xs text-muted-foreground">Control what data sources AI can use for answers</p>
+            <ButtonGroup
+              options={[
+                { label: "My Data + LLM", value: "hybrid" },
+                { label: "My Data Only", value: "data-only" },
+              ]}
+              value={groundingMode}
+              onChange={setGroundingMode}
+            />
+          </div>
+
+          {/* Pre-LLM Input Validation */}
+          <div>
+            <Label className="font-mono text-xs mb-2 block">Pre-LLM Input Validation</Label>
+            <p className="text-xs text-muted-foreground mb-3">Sanitize inputs before sending to Claude API</p>
+            <div className="space-y-2">
+              <ToggleRow label="Block PII" description="Strip personal identifiable information from prompts" checked={blockPII} onChange={setBlockPII} />
+              <ToggleRow label="Block secrets" description="Detect and mask API keys, passwords, tokens in inputs" checked={blockSecrets} onChange={setBlockSecrets} />
+              <ToggleRow label="Block SQL injection" description="Reject inputs containing SQL injection patterns" checked={blockSQLInjection} onChange={setBlockSQLInjection} />
+              <ToggleRow label="Custom regex filter" description="Apply custom regex patterns to block specific content" checked={customRegexFilter} onChange={setCustomRegexFilter} />
+            </div>
+          </div>
+
+          {/* Post-LLM Output Validation */}
+          <div>
+            <Label className="font-mono text-xs mb-2 block">Post-LLM Output Validation</Label>
+            <p className="text-xs text-muted-foreground mb-3">Validate AI responses before showing to user</p>
+            <div className="space-y-2">
+              <ToggleRow label="Validate commands" description="Check kubectl/terraform commands for dangerous operations" checked={validateCommands} onChange={setValidateCommands} />
+              <ToggleRow label="Block destructive actions" description="Reject responses suggesting rm -rf, DROP TABLE, force-push" checked={blockDestructiveActions} onChange={setBlockDestructiveActions} />
+              <ToggleRow label="Validate JSON output" description="Ensure structured responses are valid JSON" checked={validateJSONOutput} onChange={setValidateJSONOutput} />
+              <ToggleRow label="Redact secrets in output" description="Mask any secrets that appear in AI responses" checked={redactSecretsOutput} onChange={setRedactSecretsOutput} />
+            </div>
+          </div>
+
+          {/* Pre-Tool Hook */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Pre-Tool Execution Hook</Label>
+            <p className="text-xs text-muted-foreground">Inspect and validate MCP tool inputs before execution</p>
+            <div className="space-y-2">
+              <ToggleRow label="Block production namespaces" description="Prevent kubectl actions on 'production' and 'prod' namespaces" checked={blockProdNamespaces} onChange={setBlockProdNamespaces} />
+              <ToggleRow label="Require dry-run first" description="Force --dry-run flag on all kubectl/terraform commands" checked={requireDryRun} onChange={setRequireDryRun} />
+              <ToggleRow label="Log all tool inputs" description="Audit log every MCP tool call input for compliance" checked={logToolInputs} onChange={setLogToolInputs} />
+            </div>
+          </div>
+
+          {/* AI Decision Audit Log */}
+          <ToggleRow label="AI decision audit log" description="Tamper-proof log of every AI decision, tool call, and approval (SOC2 compliance)" checked={aiAuditLog} onChange={setAiAuditLog} />
+
+          {/* Context Size Cap */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Context Size Cap</Label>
+            <p className="text-xs text-muted-foreground">Hard limit to prevent accuracy degradation from token stuffing</p>
+            <ButtonGroup
+              options={[
+                { label: "50K", value: "50k" },
+                { label: "100K", value: "100k" },
+                { label: "200K", value: "200k" },
+                { label: "Unlimited", value: "unlimited" },
+              ]}
+              value={contextCap}
+              onChange={setContextCap}
+            />
+          </div>
+
+          {/* Warning card */}
+          <div className="rounded-lg border border-amber-400/20 bg-amber-400/5 p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <AlertTriangle className="size-4 text-amber-400" />
+              <span className="text-sm font-semibold text-amber-400">Production Recommendation</span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              For production environments, enable: Anti-Hallucination (Strict), Block PII, Block secrets,
+              Validate commands, Block destructive actions, AI audit log, and Context cap at 100K.
+            </p>
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* ================================================================== */}
+      {/* Section 6: Knowledge Base (RAG) (default CLOSED)                  */}
       {/* ================================================================== */}
 
       <CollapsibleSection icon={BookOpen} title="Knowledge Base (RAG)">

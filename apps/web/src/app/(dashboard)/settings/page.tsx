@@ -71,6 +71,7 @@ import {
   UserPlus,
   Shield,
   ChevronRight,
+  ChevronDown,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -81,6 +82,22 @@ import {
   AlertTriangle,
   DollarSign,
   TrendingDown,
+  MessageSquare,
+  Bot,
+  Database,
+  SlidersHorizontal,
+  BookOpen,
+  Upload,
+  FileText,
+  X,
+  Clock,
+  Hash,
+  Thermometer,
+  RotateCw,
+  Quote,
+  Target,
+  Search,
+  Link,
 } from "lucide-react"
 import { useAIStore, type AIMode } from "@/lib/stores/ai-store"
 import { cn } from "@/lib/utils"
@@ -962,6 +979,178 @@ function ModeTooltip({ active, payload }: ModeTooltipProps) {
   )
 }
 
+// =============================================================================
+// Collapsible Section Component
+// =============================================================================
+
+function CollapsibleSection({
+  icon: Icon,
+  title,
+  defaultOpen = false,
+  children,
+}: {
+  icon: React.ElementType
+  title: string
+  defaultOpen?: boolean
+  children: React.ReactNode
+}) {
+  const [isOpen, setIsOpen] = React.useState(defaultOpen)
+
+  return (
+    <div className="rounded-xl border border-border/50 bg-card overflow-hidden">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/30"
+      >
+        <Icon className="size-4 text-primary shrink-0" />
+        <span className="font-heading text-sm font-semibold text-foreground flex-1">
+          {title}
+        </span>
+        {isOpen ? (
+          <ChevronDown className="size-4 text-muted-foreground transition-transform" />
+        ) : (
+          <ChevronRight className="size-4 text-muted-foreground transition-transform" />
+        )}
+      </button>
+      {isOpen && (
+        <div className="border-t border-border/50 px-5 py-5">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// =============================================================================
+// Button Group Component
+// =============================================================================
+
+function ButtonGroup<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { label: string; value: T; sublabel?: string }[]
+  value: T
+  onChange: (val: T) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          onClick={() => onChange(opt.value)}
+          className={cn(
+            "rounded-lg border px-3.5 py-2 font-mono text-xs font-medium transition-all",
+            value === opt.value
+              ? "border-primary/40 bg-primary text-primary-foreground"
+              : "border-border/50 bg-muted/50 text-foreground hover:border-border hover:bg-muted"
+          )}
+        >
+          {opt.label}
+          {opt.sublabel && (
+            <span className="ml-1 opacity-60">{opt.sublabel}</span>
+          )}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+// =============================================================================
+// Toggle Row Component
+// =============================================================================
+
+function ToggleRow({
+  label,
+  description,
+  checked,
+  onChange,
+}: {
+  label: string
+  description?: string
+  checked: boolean
+  onChange: (val: boolean) => void
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div className="space-y-0.5">
+        <Label className="font-mono text-sm">{label}</Label>
+        {description && (
+          <p className="font-mono text-[10px] text-muted-foreground">
+            {description}
+          </p>
+        )}
+      </div>
+      <button
+        onClick={() => onChange(!checked)}
+        className={cn(
+          "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors",
+          checked ? "bg-[#00FF88]" : "bg-muted-foreground/30"
+        )}
+      >
+        <span
+          className={cn(
+            "inline-block size-4.5 rounded-full bg-white shadow-sm transition-transform",
+            checked ? "translate-x-5.5" : "translate-x-0.5"
+          )}
+        />
+      </button>
+    </div>
+  )
+}
+
+// =============================================================================
+// Tool Permission Types
+// =============================================================================
+
+type ToolPermission = "allow" | "approve" | "block"
+type ToolCategory = "READ" | "WRITE" | "BLOCKED"
+
+interface MCPTool {
+  name: string
+  category: ToolCategory
+  defaultPermission: ToolPermission
+}
+
+const MCP_TOOLS: MCPTool[] = [
+  { name: "query_logs", category: "READ", defaultPermission: "allow" },
+  { name: "query_metrics", category: "READ", defaultPermission: "allow" },
+  { name: "kubectl_read", category: "READ", defaultPermission: "allow" },
+  { name: "kubectl_action", category: "WRITE", defaultPermission: "approve" },
+  { name: "terraform_apply", category: "WRITE", defaultPermission: "approve" },
+  { name: "terraform_destroy", category: "BLOCKED", defaultPermission: "block" },
+  { name: "aws_iam_modify", category: "BLOCKED", defaultPermission: "block" },
+]
+
+function getCategoryColor(cat: ToolCategory): string {
+  switch (cat) {
+    case "READ":
+      return "#00FF88"
+    case "WRITE":
+      return "#FFB020"
+    case "BLOCKED":
+      return "#FF4444"
+  }
+}
+
+// =============================================================================
+// Mock RAG Documents
+// =============================================================================
+
+interface RAGDocument {
+  id: string
+  name: string
+  size: string
+  indexedDate: string
+}
+
+const MOCK_RAG_DOCS: RAGDocument[] = [
+  { id: "rag-1", name: "incident-response-runbook.md", size: "24 KB", indexedDate: "Apr 10, 2026" },
+  { id: "rag-2", name: "k8s-architecture.pdf", size: "1.2 MB", indexedDate: "Apr 8, 2026" },
+  { id: "rag-3", name: "terraform-modules.md", size: "18 KB", indexedDate: "Apr 11, 2026" },
+]
+
 function AITokensTab() {
   const [showKey, setShowKey] = React.useState(false)
   const {
@@ -975,6 +1164,46 @@ function AITokensTab() {
     notificationThresholds,
     toggleNotificationThreshold,
   } = useAIStore()
+
+  // --- Section 1: Response Preferences ---
+  const [responseStyle, setResponseStyle] = React.useState<"brief" | "balanced" | "detailed">("balanced")
+  const [outputLanguage, setOutputLanguage] = React.useState<"en" | "ko" | "auto">("en")
+  const [autoSaveFindings, setAutoSaveFindings] = React.useState(true)
+  const [showTokenCost, setShowTokenCost] = React.useState(true)
+  const [preOperationConfirm, setPreOperationConfirm] = React.useState(true)
+
+  // --- Section 2: Agent Behavior ---
+  const [toolPermissions, setToolPermissions] = React.useState<Record<string, ToolPermission>>(
+    Object.fromEntries(MCP_TOOLS.map((t) => [t.name, t.defaultPermission]))
+  )
+  const [fallbackChain, setFallbackChain] = React.useState<"opus-sonnet-haiku" | "sonnet-haiku" | "none">("opus-sonnet-haiku")
+  const [trigger1Enabled, setTrigger1Enabled] = React.useState(true)
+  const [trigger2Enabled, setTrigger2Enabled] = React.useState(true)
+  const [trigger3Enabled, setTrigger3Enabled] = React.useState(false)
+
+  // --- Section 3: Context Management ---
+  const [contextWindow, setContextWindow] = React.useState<"5" | "10" | "20" | "unlimited">("10")
+  const [promptCaching, setPromptCaching] = React.useState<"aggressive" | "balanced" | "conservative">("aggressive")
+  const [serviceScope, setServiceScope] = React.useState<"current" | "all" | "custom">("current")
+  const [historyRetention, setHistoryRetention] = React.useState<"7" | "30" | "90" | "forever">("30")
+  const [includeSystemStatus, setIncludeSystemStatus] = React.useState(true)
+  const [includeRecentIncidents, setIncludeRecentIncidents] = React.useState(true)
+
+  // --- Section 4: Output & Quality ---
+  const [temperature, setTemperature] = React.useState<"low" | "medium" | "high">("low")
+  const [maxRetries, setMaxRetries] = React.useState<"1" | "3" | "5">("3")
+  const [maxOutputTokens, setMaxOutputTokens] = React.useState<"2k" | "4k" | "8k" | "16k">("8k")
+  const [structuredOutput, setStructuredOutput] = React.useState(false)
+  const [citationMode, setCitationMode] = React.useState(true)
+  const [confidenceScores, setConfidenceScores] = React.useState(true)
+
+  // --- Section 5: Knowledge Base (RAG) ---
+  const [ragEnabled, setRagEnabled] = React.useState(false)
+  const [vectorDB, setVectorDB] = React.useState<"pgvector" | "qdrant" | "pinecone">("pgvector")
+  const [syncConfluence, setSyncConfluence] = React.useState(false)
+  const [syncNotion, setSyncNotion] = React.useState(false)
+  const [syncGithubWiki, setSyncGithubWiki] = React.useState(false)
+  const [ragDocs, setRagDocs] = React.useState<RAGDocument[]>(MOCK_RAG_DOCS)
 
   const usagePercent = Math.min((monthlySpent / monthlyBudget) * 100, 100)
   const budgetResetDate = "May 1, 2026"
@@ -1307,6 +1536,571 @@ function AITokensTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* ================================================================== */}
+      {/* Section 1: Response Preferences (default OPEN)                     */}
+      {/* ================================================================== */}
+
+      <CollapsibleSection icon={MessageSquare} title="Response Preferences" defaultOpen>
+        <div className="space-y-5">
+          {/* Response style */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Response Style</Label>
+            <ButtonGroup
+              options={[
+                { label: "Brief", value: "brief" as const },
+                { label: "Balanced", value: "balanced" as const },
+                { label: "Detailed", value: "detailed" as const },
+              ]}
+              value={responseStyle}
+              onChange={setResponseStyle}
+            />
+          </div>
+
+          {/* Output language */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Output Language</Label>
+            <ButtonGroup
+              options={[
+                { label: "English", value: "en" as const },
+                { label: "Korean", value: "ko" as const },
+                { label: "Auto", value: "auto" as const },
+              ]}
+              value={outputLanguage}
+              onChange={setOutputLanguage}
+            />
+          </div>
+
+          <Separator />
+
+          {/* Toggles */}
+          <ToggleRow
+            label="Auto-save findings"
+            description="Automatically save AI investigation results"
+            checked={autoSaveFindings}
+            onChange={setAutoSaveFindings}
+          />
+          <ToggleRow
+            label="Show token cost in responses"
+            description="Display token usage and cost after each AI response"
+            checked={showTokenCost}
+            onChange={setShowTokenCost}
+          />
+          <ToggleRow
+            label="Pre-operation confirmation"
+            description="Ask before operations > $0.05"
+            checked={preOperationConfirm}
+            onChange={setPreOperationConfirm}
+          />
+        </div>
+      </CollapsibleSection>
+
+      {/* ================================================================== */}
+      {/* Section 2: Agent Behavior / Harness (default CLOSED)              */}
+      {/* ================================================================== */}
+
+      <CollapsibleSection icon={Bot} title="Agent Behavior / Harness">
+        <div className="space-y-6">
+          {/* Tool Permissions Table */}
+          <div className="space-y-3">
+            <Label className="font-mono text-xs flex items-center gap-2">
+              <Wrench className="size-3" />
+              Tool Permissions
+            </Label>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Control MCP tool access levels for AI agent operations
+            </p>
+            <div className="rounded-lg border border-border/50 overflow-hidden">
+              {/* Table header */}
+              <div className="grid grid-cols-[1fr_90px_200px] gap-3 bg-muted/30 px-4 py-2.5 border-b border-border/50">
+                <span className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Tool</span>
+                <span className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Category</span>
+                <span className="font-mono text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Permission</span>
+              </div>
+              {/* Table rows */}
+              {MCP_TOOLS.map((tool) => {
+                const catColor = getCategoryColor(tool.category)
+                const currentPerm = toolPermissions[tool.name]
+                return (
+                  <div
+                    key={tool.name}
+                    className="grid grid-cols-[1fr_90px_200px] gap-3 items-center px-4 py-3 border-b border-border/30 last:border-b-0 hover:bg-muted/20 transition-colors"
+                  >
+                    <span className="font-mono text-xs text-foreground">{tool.name}</span>
+                    <Badge
+                      variant="outline"
+                      className="w-fit font-mono text-[10px] border-0"
+                      style={{
+                        backgroundColor: `${catColor}15`,
+                        color: catColor,
+                      }}
+                    >
+                      {tool.category}
+                    </Badge>
+                    <div className="flex gap-1.5">
+                      {(["allow", "approve", "block"] as const).map((perm) => (
+                        <button
+                          key={perm}
+                          onClick={() =>
+                            setToolPermissions((prev) => ({
+                              ...prev,
+                              [tool.name]: perm,
+                            }))
+                          }
+                          className={cn(
+                            "rounded-md border px-2.5 py-1 font-mono text-[10px] font-medium capitalize transition-all",
+                            currentPerm === perm
+                              ? perm === "allow"
+                                ? "border-[#00FF88]/40 bg-[#00FF88]/15 text-[#00FF88]"
+                                : perm === "approve"
+                                  ? "border-[#FFB020]/40 bg-[#FFB020]/15 text-[#FFB020]"
+                                  : "border-[#FF4444]/40 bg-[#FF4444]/15 text-[#FF4444]"
+                              : "border-border/50 text-muted-foreground/60 hover:border-border hover:text-muted-foreground"
+                          )}
+                        >
+                          {perm}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Pre/Post Hooks */}
+          <div className="space-y-3">
+            <Label className="font-mono text-xs flex items-center gap-2">
+              <Link className="size-3" />
+              Pre/Post Hooks
+            </Label>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 rounded-lg border border-border/50 p-3">
+                <Badge
+                  variant="outline"
+                  className="shrink-0 font-mono text-[10px] border-[#00BFFF]/30 text-[#00BFFF] bg-[#00BFFF]/10"
+                >
+                  PRE-HOOK
+                </Badge>
+                <span className="font-mono text-xs text-foreground flex-1">
+                  Before incident investigation &rarr; auto-pull last 1h logs
+                </span>
+              </div>
+              <div className="flex items-center gap-3 rounded-lg border border-border/50 p-3">
+                <Badge
+                  variant="outline"
+                  className="shrink-0 font-mono text-[10px] border-[#A855F7]/30 text-[#A855F7] bg-[#A855F7]/10"
+                >
+                  POST-HOOK
+                </Badge>
+                <span className="font-mono text-xs text-foreground flex-1">
+                  After investigation &rarr; create JIRA ticket + notify Slack
+                </span>
+              </div>
+              <button className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border/50 p-3 font-mono text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
+                <Plus className="size-3" />
+                Add Hook
+              </button>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Automated Triggers */}
+          <div className="space-y-3">
+            <Label className="font-mono text-xs flex items-center gap-2">
+              <Zap className="size-3" />
+              Automated Triggers
+            </Label>
+            <div className="space-y-2">
+              {[
+                { condition: "Error budget < 10%", action: "Auto-investigate top error source", enabled: trigger1Enabled, toggle: setTrigger1Enabled },
+                { condition: "Critical incident opened", action: "Start AI investigation", enabled: trigger2Enabled, toggle: setTrigger2Enabled },
+                { condition: "Cost anomaly detected", action: "Analyze and notify Slack", enabled: trigger3Enabled, toggle: setTrigger3Enabled },
+              ].map((trigger) => (
+                <div
+                  key={trigger.condition}
+                  className="flex items-center gap-3 rounded-lg border border-border/50 p-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <span className="font-mono text-xs text-foreground">
+                      &ldquo;{trigger.condition}&rdquo;
+                    </span>
+                    <span className="font-mono text-xs text-muted-foreground mx-2">&rarr;</span>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      &ldquo;{trigger.action}&rdquo;
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => trigger.toggle(!trigger.enabled)}
+                    className={cn(
+                      "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                      trigger.enabled ? "bg-[#00FF88]" : "bg-muted-foreground/30"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "inline-block size-4.5 rounded-full bg-white shadow-sm transition-transform",
+                        trigger.enabled ? "translate-x-5.5" : "translate-x-0.5"
+                      )}
+                    />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Fallback Chain */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Fallback Chain</Label>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Model fallback order when primary model is unavailable or rate-limited
+            </p>
+            <ButtonGroup
+              options={[
+                { label: "Opus \u2192 Sonnet \u2192 Haiku", value: "opus-sonnet-haiku" as const },
+                { label: "Sonnet \u2192 Haiku", value: "sonnet-haiku" as const },
+                { label: "No fallback", value: "none" as const },
+              ]}
+              value={fallbackChain}
+              onChange={setFallbackChain}
+            />
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* ================================================================== */}
+      {/* Section 3: Context Management (default CLOSED)                    */}
+      {/* ================================================================== */}
+
+      <CollapsibleSection icon={Database} title="Context Management">
+        <div className="space-y-5">
+          {/* Context window */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Context Window</Label>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Number of previous messages included in each AI request
+            </p>
+            <ButtonGroup
+              options={[
+                { label: "5 msgs", value: "5" as const },
+                { label: "10 msgs", value: "10" as const },
+                { label: "20 msgs", value: "20" as const },
+                { label: "Unlimited", value: "unlimited" as const },
+              ]}
+              value={contextWindow}
+              onChange={setContextWindow}
+            />
+          </div>
+
+          {/* Prompt caching */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Prompt Caching</Label>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Cache static system prompts to reduce token costs
+            </p>
+            <ButtonGroup
+              options={[
+                { label: "Aggressive", value: "aggressive" as const },
+                { label: "Balanced", value: "balanced" as const },
+                { label: "Conservative", value: "conservative" as const },
+              ]}
+              value={promptCaching}
+              onChange={setPromptCaching}
+            />
+          </div>
+
+          {/* Service scope */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Service Scope</Label>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Which accounts the AI agent can access
+            </p>
+            <ButtonGroup
+              options={[
+                { label: "Current account", value: "current" as const },
+                { label: "All accounts", value: "all" as const },
+                { label: "Custom", value: "custom" as const },
+              ]}
+              value={serviceScope}
+              onChange={setServiceScope}
+            />
+          </div>
+
+          {/* History retention */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">History Retention</Label>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              How long AI conversation history is kept
+            </p>
+            <ButtonGroup
+              options={[
+                { label: "7 days", value: "7" as const },
+                { label: "30 days", value: "30" as const },
+                { label: "90 days", value: "90" as const },
+                { label: "Forever", value: "forever" as const },
+              ]}
+              value={historyRetention}
+              onChange={setHistoryRetention}
+            />
+          </div>
+
+          <Separator />
+
+          {/* Toggles */}
+          <ToggleRow
+            label="Include system status"
+            description="Auto-inject current system health into AI context"
+            checked={includeSystemStatus}
+            onChange={setIncludeSystemStatus}
+          />
+          <ToggleRow
+            label="Include recent incidents"
+            description="Auto-inject last 24h incidents into AI context"
+            checked={includeRecentIncidents}
+            onChange={setIncludeRecentIncidents}
+          />
+        </div>
+      </CollapsibleSection>
+
+      {/* ================================================================== */}
+      {/* Section 4: Output & Quality (default CLOSED)                      */}
+      {/* ================================================================== */}
+
+      <CollapsibleSection icon={SlidersHorizontal} title="Output & Quality">
+        <div className="space-y-5">
+          {/* Temperature */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Temperature</Label>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Controls randomness in AI responses &mdash; lower is more deterministic
+            </p>
+            <ButtonGroup
+              options={[
+                { label: "Low", value: "low" as const, sublabel: "(0.1)" },
+                { label: "Medium", value: "medium" as const, sublabel: "(0.5)" },
+                { label: "High", value: "high" as const, sublabel: "(0.8)" },
+              ]}
+              value={temperature}
+              onChange={setTemperature}
+            />
+          </div>
+
+          {/* Max retries */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Max Retries</Label>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Number of retry attempts on AI request failure
+            </p>
+            <ButtonGroup
+              options={[
+                { label: "1", value: "1" as const },
+                { label: "3", value: "3" as const },
+                { label: "5", value: "5" as const },
+              ]}
+              value={maxRetries}
+              onChange={setMaxRetries}
+            />
+          </div>
+
+          {/* Max output tokens */}
+          <div className="space-y-2">
+            <Label className="font-mono text-xs">Max Output Tokens</Label>
+            <p className="font-mono text-[10px] text-muted-foreground">
+              Maximum tokens the AI can generate per response
+            </p>
+            <ButtonGroup
+              options={[
+                { label: "2K", value: "2k" as const },
+                { label: "4K", value: "4k" as const },
+                { label: "8K", value: "8k" as const },
+                { label: "16K", value: "16k" as const },
+              ]}
+              value={maxOutputTokens}
+              onChange={setMaxOutputTokens}
+            />
+          </div>
+
+          <Separator />
+
+          {/* Toggles */}
+          <ToggleRow
+            label="Structured output"
+            description="Return AI responses in structured JSON format when applicable"
+            checked={structuredOutput}
+            onChange={setStructuredOutput}
+          />
+          <ToggleRow
+            label="Citation mode"
+            description="AI cites specific log lines and metric values"
+            checked={citationMode}
+            onChange={setCitationMode}
+          />
+          <ToggleRow
+            label="Confidence scores"
+            description="Show confidence percentage for AI findings and recommendations"
+            checked={confidenceScores}
+            onChange={setConfidenceScores}
+          />
+        </div>
+      </CollapsibleSection>
+
+      {/* ================================================================== */}
+      {/* Section 5: Knowledge Base (RAG) (default CLOSED)                  */}
+      {/* ================================================================== */}
+
+      <CollapsibleSection icon={BookOpen} title="Knowledge Base (RAG)">
+        <div className="space-y-5">
+          {/* Enable RAG toggle — prominent */}
+          <div className="flex items-center justify-between gap-4 rounded-lg border border-border/50 bg-muted/20 p-4">
+            <div className="space-y-1">
+              <Label className="font-mono text-sm font-semibold">Enable RAG</Label>
+              <p className="font-mono text-[10px] text-muted-foreground">
+                Retrieval-Augmented Generation — AI uses your uploaded documents for more accurate, context-aware responses
+              </p>
+            </div>
+            <button
+              onClick={() => setRagEnabled(!ragEnabled)}
+              className={cn(
+                "relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors",
+                ragEnabled ? "bg-[#00FF88]" : "bg-muted-foreground/30"
+              )}
+            >
+              <span
+                className={cn(
+                  "inline-block size-4.5 rounded-full bg-white shadow-sm transition-transform",
+                  ragEnabled ? "translate-x-5.5" : "translate-x-0.5"
+                )}
+              />
+            </button>
+          </div>
+
+          {ragEnabled && (
+            <>
+              {/* Upload area */}
+              <div className="rounded-lg border-2 border-dashed border-border/50 p-8 text-center transition-colors hover:border-primary/30 hover:bg-muted/10">
+                <Upload className="mx-auto size-8 text-muted-foreground/40" />
+                <p className="mt-3 font-mono text-xs text-muted-foreground">
+                  Drag & drop or click to upload runbooks, docs, post-mortems
+                </p>
+                <p className="mt-1 font-mono text-[10px] text-muted-foreground/50">
+                  .md, .pdf, .txt
+                </p>
+              </div>
+
+              {/* Uploaded documents */}
+              <div className="space-y-2">
+                <Label className="font-mono text-xs">Uploaded Documents</Label>
+                {ragDocs.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="flex items-center gap-3 rounded-lg border border-border/50 p-3"
+                  >
+                    <FileText className="size-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-mono text-xs text-foreground truncate">
+                        {doc.name}
+                      </p>
+                      <p className="font-mono text-[10px] text-muted-foreground">
+                        {doc.size} &middot; Indexed {doc.indexedDate}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => setRagDocs((prev) => prev.filter((d) => d.id !== doc.id))}
+                      className="text-muted-foreground hover:text-[#FF4444]"
+                    >
+                      <X className="size-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              <Separator />
+
+              {/* Vector DB provider */}
+              <div className="space-y-2">
+                <Label className="font-mono text-xs">Vector DB Provider</Label>
+                <ButtonGroup
+                  options={[
+                    { label: "Built-in (pgvector)", value: "pgvector" as const },
+                    { label: "Qdrant", value: "qdrant" as const },
+                    { label: "Pinecone", value: "pinecone" as const },
+                  ]}
+                  value={vectorDB}
+                  onChange={setVectorDB}
+                />
+              </div>
+
+              {/* Auto-sync toggles */}
+              <div className="space-y-3">
+                <Label className="font-mono text-xs">Auto-sync from</Label>
+                <ToggleRow
+                  label="Confluence"
+                  description="Sync knowledge base articles from Confluence"
+                  checked={syncConfluence}
+                  onChange={setSyncConfluence}
+                />
+                <ToggleRow
+                  label="Notion"
+                  description="Sync pages and databases from Notion"
+                  checked={syncNotion}
+                  onChange={setSyncNotion}
+                />
+                <ToggleRow
+                  label="GitHub Wiki"
+                  description="Sync wiki pages from GitHub repositories"
+                  checked={syncGithubWiki}
+                  onChange={setSyncGithubWiki}
+                />
+              </div>
+
+              <Separator />
+
+              {/* Indexing status */}
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="size-3.5 text-[#00FF88]" />
+                <span className="font-mono text-xs text-foreground">
+                  {ragDocs.length} documents indexed
+                </span>
+                <span className="font-mono text-[10px] text-muted-foreground">
+                  &middot; Last sync: 2m ago
+                </span>
+              </div>
+
+              {/* Token overhead notice */}
+              <div className="rounded-lg border border-[#FFB020]/20 bg-[#FFB020]/5 p-4">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="size-4 text-[#FFB020] shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-mono text-xs font-medium text-[#FFB020]">
+                      Token Overhead Notice
+                    </p>
+                    <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                      RAG adds ~2K-5K tokens per query (~$0.01-0.03 extra)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Test button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 font-mono text-xs"
+              >
+                <Search className="size-3" />
+                Test RAG &mdash; Ask a question to verify accuracy
+              </Button>
+            </>
+          )}
+        </div>
+      </CollapsibleSection>
 
       {/* ================================================================== */}
       {/* Usage History                                                       */}

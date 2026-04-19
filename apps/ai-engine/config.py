@@ -5,6 +5,10 @@ and .env files. All settings can be overridden via environment variables
 prefixed with AEGIS_ (e.g., AEGIS_ANTHROPIC_API_KEY).
 """
 
+from __future__ import annotations
+
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +25,30 @@ class Settings(BaseSettings):
     model_name: str = "claude-sonnet-4-6"
     api_port: int = 8000
     debug: bool = False
+
+    # Wiki
+    wiki_vault_root: Path = Path.home() / "Documents" / "obsidian-sre"
+    wiki_stale_threshold_days: int = 30
+    wiki_archive_threshold_days: int = 180
+    wiki_synthesis_model: str = "claude-haiku-4-5-20251001"
+    wiki_contradiction_model: str = "claude-sonnet-4-6"
+
+    # Confluence (optional — empty means disabled)
+    confluence_base_url: str = ""
+    confluence_space_key: str = ""
+    confluence_email: str = ""
+    confluence_api_token: str = ""
+
+    # SigNoz (optional)
+    signoz_base_url: str = ""
+    signoz_api_key: str = ""
+    signoz_lookback_days: int = 30
+
+    # Wiki publisher
+    wiki_remote_url: str = "git@github.com:JIUNG9/aegis-wiki.git"
+    wiki_git_author_name: str = "Jiung Gu"
+    wiki_git_author_email: str = "june@example.com"
+    wiki_auto_push: bool = False
 
 
 settings = Settings()

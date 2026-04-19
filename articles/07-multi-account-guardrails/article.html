@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Production Guardrails for AI Agents — The Risk Tier System Across 4 AWS Accounts — June Gu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0A0A0F;
+    --panel: #1E1E2A;
+    --ink: #E5E7EB;
+    --mute: #9CA3AF;
+    --accent: #00FF88;
+    --border: #2A2A3A;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.7; font-size: 17px; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+  h1, h2, h3, h4 { font-family: 'JetBrains Mono', monospace; letter-spacing: -0.01em; color: #F9FAFB; }
+  h1 { font-size: 40px; line-height: 1.15; margin: 0 0 16px; }
+  h2 { font-size: 28px; line-height: 1.25; margin: 48px 0 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { font-size: 22px; line-height: 1.3; margin: 32px 0 12px; color: var(--accent); }
+  h4 { font-size: 18px; margin: 24px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+  a:hover { border-bottom-style: solid; }
+  .byline { color: var(--mute); font-style: italic; margin-bottom: 32px; }
+  .subtitle { color: var(--mute); font-size: 20px; margin: 0 0 32px; font-weight: 400; }
+  blockquote { border-left: 3px solid var(--accent); padding: 8px 20px; margin: 24px 0; color: #D1D5DB; font-style: italic; background: rgba(0,255,136,0.04); }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.92em; background: var(--panel); padding: 2px 6px; border-radius: 4px; color: var(--accent); }
+  pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; font-size: 14px; line-height: 1.5; }
+  pre code { background: transparent; padding: 0; color: inherit; font-size: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px; }
+  th, td { border: 1px solid var(--border); padding: 10px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--panel); font-family: 'JetBrains Mono', monospace; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
+  tr:nth-child(even) td { background: rgba(30,30,42,0.4); }
+  .mermaid { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin: 24px 0; text-align: center; }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 48px 0; }
+  .tags { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--mute); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .cta { background: linear-gradient(135deg, rgba(0,255,136,0.08), rgba(0,255,136,0.02)); border: 1px solid var(--accent); border-radius: 12px; padding: 24px; margin: 40px 0; text-align: center; }
+  .cta a { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 18px; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Production Guardrails for AI Agents — The Risk Tier System Across 4 AWS Accounts</h1>
+<p class="subtitle">How to let an AI act in a hub-spoke AWS topology without letting it torch production</p>
+<p class="byline">By June Gu — SRE at my employer, ex-e-commerce. Building <a href="https://github.com/JIUNG9/aegis">Aegis</a>, an open-source AI-Native DevSecOps Command Center.</p>
+
+<hr />
+
+<h2>The hook</h2>
+<p><strong>AI agents without guardrails are a production incident waiting to happen.</strong></p>
+<p>Especially when you have 4 AWS accounts in a hub-spoke topology, Transit Gateway between them, and an AI that can — if you let it — kubectl-scale, s3-copy, or modify an IAM policy that's trusted by every account downstream.</p>
+<p>I work in a setup like that. At my employer, our production AWS footprint spans several accounts wired through Transit Gateway. Before we let Aegis do anything autonomously, we had to answer a question every AI-in-production team eventually faces:</p>
+<blockquote>"Which actions can the AI take on its own? Which require a human? Which should never be automated, ever?"</blockquote>
+<p>This article is my answer — the <strong>risk tier system</strong> that Aegis Layer 4 enforces, and why we designed it this way. It's what Aegis will ship as Layer 4 (Guardrails), coming in the v4.0 roadmap. Code references below point at planned files; the design is locked, the code is landing.</p>
+<blockquote>"The speed of an AI agent is its biggest feature and its biggest liability. Guardrails are how you keep the feature and remove the liability."</blockquote>
+
+<h2>Part 1: The scale of the problem</h2>
+<p>A multi-account AWS topology gives you:</p>
+<ul>
+<li><strong>Blast radius isolation</strong> — a bug in one account doesn't trash the others</li>
+<li><strong>Billing clarity</strong> — per-account cost reports</li>
+<li><strong>IAM boundaries</strong> — cross-account roles are explicit, not implicit</li>
+<li><strong>Compliance boundaries</strong> — SOC2 audit scope can be per-account</li>
+</ul>
+<p>But it also gives you:</p>
+<ul>
+<li><strong>Cross-account role trust</strong> — if you mess up an IAM role in the hub, you can break access in every spoke</li>
+<li><strong>Transit Gateway coupling</strong> — a bad security group in one account can reach another</li>
+<li><strong>Shared services</strong> — a single S3 bucket used by 3 environments becomes a correlation hazard</li>
+</ul>
+<p>Now add an AI agent. The agent is intelligent, helpful, and — at 3 AM — operating faster than any human. It notices elevated errors in the <code>auth-service</code> deployment in spoke-prod. It proposes a fix. It's about to run <code>kubectl scale deployment auth-service --replicas=7</code> in the spoke-prod EKS cluster.</p>
+<p>Is that OK? It depends on about 12 things. The job of the guardrails layer is to answer those 12 things in milliseconds, deterministically, auditably, every time.</p>
+
+<h2>Part 2: Our topology (anonymized)</h2>
+<div class="mermaid">
+graph TB
+    subgraph Hub["Hub (111111111111)"]
+        IAM[IAM Identity Center]
+        TGW[Transit Gateway]
+        Art[Shared Artifacts]
+    end
+    subgraph SP1["Stage (222222222222)"]
+        EKS_S[EKS 1.33]
+        RDS_S[(RDS)]
+    end
+    subgraph SP2["Prod (333333333333)"]
+        EKS_P[EKS 1.33]
+        RDS_P[(RDS Aurora)]
+    end
+    subgraph SP3["DR (444444444444)"]
+        EKS_D[EKS DR]
+        RDS_D[(RDS Replica)]
+    end
+    subgraph Sec["Security (555555555555)"]
+        Logs[Centralized Logs]
+        SH[Security Hub]
+    end
+    IAM --> EKS_S
+    IAM --> EKS_P
+    IAM --> EKS_D
+    TGW --- EKS_S
+    TGW --- EKS_P
+    TGW --- EKS_D
+    EKS_P --> Logs
+    EKS_S --> Logs
+    EKS_D --> Logs
+</div>
+
+<p>So: <strong>1 hub, 3 spokes, 1 security/observability tap.</strong> An AI operating in this topology must understand three things simultaneously:</p>
+<ol>
+<li>Which account is the target of the action?</li>
+<li>What's the blast radius inside that account?</li>
+<li>Does the action cross account boundaries at all? (If yes, default to BLOCKED unless explicitly whitelisted.)</li>
+</ol>
+
+<h2>Part 3: Risk classification deep dive</h2>
+<table>
+<tr><th>#</th><th>Action Type</th><th>Risk Tier</th><th>AWS Example</th><th>Automation</th></tr>
+<tr><td>1</td><td>CloudWatch log query</td><td>NONE</td><td><code>filter-log-events</code></td><td>Auto, no approval</td></tr>
+<tr><td>2</td><td>CloudWatch metric read</td><td>NONE</td><td><code>get-metric-statistics</code></td><td>Auto, no approval</td></tr>
+<tr><td>3</td><td>Describe resources</td><td>NONE</td><td><code>describe-db-instances</code></td><td>Auto, no approval</td></tr>
+<tr><td>4</td><td>kubectl get / logs</td><td>NONE</td><td><code>kubectl get pods -n auth</code></td><td>Auto, no approval</td></tr>
+<tr><td>5</td><td>kubectl rollout restart (spoke)</td><td>LOW</td><td><code>kubectl rollout restart deploy/auth-service</code></td><td>Auto-approve + dry-run</td></tr>
+<tr><td>6</td><td>kubectl scale up (spoke)</td><td>LOW</td><td><code>kubectl scale --replicas=7</code></td><td>Auto-approve + dry-run</td></tr>
+<tr><td>7</td><td>kubectl scale down (spoke)</td><td>MEDIUM</td><td><code>kubectl scale --replicas=1</code></td><td>Slack approval</td></tr>
+<tr><td>8</td><td>kubectl delete pod (spoke)</td><td>MEDIUM</td><td><code>kubectl delete pod auth-xxxx</code></td><td>Slack approval</td></tr>
+<tr><td>9</td><td>kubectl rollout undo (spoke)</td><td>MEDIUM</td><td>Roll back to previous ReplicaSet</td><td>Slack approval</td></tr>
+<tr><td>10</td><td>Terraform apply (any)</td><td>HIGH</td><td><code>terraform apply</code></td><td>Manual only</td></tr>
+<tr><td>11</td><td>kubectl delete (non-pod)</td><td>HIGH</td><td><code>kubectl delete deployment</code></td><td>Manual only</td></tr>
+<tr><td>12</td><td>RDS stop / modify</td><td>HIGH</td><td><code>aws rds modify-db-instance</code></td><td>Manual only</td></tr>
+<tr><td>13</td><td>Action in hub account</td><td>HIGH</td><td>Anything in <code>111111111111</code></td><td>Manual only</td></tr>
+<tr><td>14</td><td>Action in security account</td><td>BLOCKED</td><td>Anything in <code>555555555555</code></td><td>Never automated</td></tr>
+<tr><td>15</td><td>IAM policy modify</td><td>BLOCKED</td><td><code>iam put-role-policy</code></td><td>Hard-coded block</td></tr>
+<tr><td>16</td><td>S3 public-access config</td><td>BLOCKED</td><td><code>s3api put-public-access-block</code></td><td>Hard-coded block</td></tr>
+<tr><td>17</td><td>S3 bucket policy modify</td><td>BLOCKED</td><td><code>s3api put-bucket-policy</code></td><td>Hard-coded block</td></tr>
+<tr><td>18</td><td>Cross-account IAM role</td><td>BLOCKED</td><td><code>iam update-assume-role-policy</code></td><td>Hard-coded block</td></tr>
+<tr><td>19</td><td>Security Group rule modify</td><td>HIGH</td><td><code>ec2 authorize-security-group-ingress</code></td><td>Manual only</td></tr>
+<tr><td>20</td><td>KMS key policy modify</td><td>BLOCKED</td><td><code>kms put-key-policy</code></td><td>Hard-coded block</td></tr>
+</table>
+
+<h3>The NONE tier is huge</h3>
+<p>Most of what an AI needs to do during an investigation is <strong>read</strong>. Aegis's investigation flow leans heavily on NONE-tier actions — log queries, metric reads, describe calls, kubectl reads. These run with zero friction, no approval, no audit overhead beyond the default trail. That's how we get fast investigations.</p>
+
+<h3>The LOW tier is scale-up only</h3>
+<p><strong>Scale-up is LOW, scale-down is MEDIUM.</strong> A scale-up from 3 to 7 replicas is reversible in 30 seconds and only risks over-provisioning cost for that window. A scale-down from 5 to 1 during an incident is how you turn a warning into a page. Asymmetric risk gets asymmetric treatment.</p>
+
+<h3>The BLOCKED tier is code-level, not config-level</h3>
+<p>IAM modifications, S3 public-access, cross-account role changes, KMS key policies — these are <strong>not overridable</strong>. The code path literally does not exist for the AI to emit those actions.</p>
+
+<blockquote>"The only way to make sure an AI never modifies IAM is to never write the code that would let it."</blockquote>
+
+<h2>Part 4: Hub-spoke guardrails — account-scoped actions</h2>
+<pre><code class="language-python"># apps/ai-engine/guardrails/risk_assessor.py  (coming in Layer 4 — see roadmap)
+
+from enum import Enum
+
+class Tier(Enum):
+    NONE = 0
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+    BLOCKED = 4
+
+HUB_ACCOUNT     = "111111111111"
+SECURITY_ACCT   = "555555555555"
+SPOKE_ACCOUNTS  = {"222222222222", "333333333333", "444444444444"}
+
+def adjust_for_account(base_tier: Tier, account_id: str) -> Tier:
+    if account_id == SECURITY_ACCT and base_tier != Tier.NONE:
+        return Tier.BLOCKED
+    if account_id == HUB_ACCOUNT and base_tier != Tier.NONE:
+        return Tier.HIGH
+    if account_id not in SPOKE_ACCOUNTS | {HUB_ACCOUNT, SECURITY_ACCT}:
+        return Tier.BLOCKED
+    return base_tier
+</code></pre>
+
+<p><strong>The hub is sacred</strong>, <strong>the security account is read-only</strong>, <strong>spokes are where automation is allowed</strong>. The AI never has the credentials to cross an account boundary on its own.</p>
+
+<h2>Part 5: Pre-validation — dry-run, IAM simulator, policy simulator</h2>
+
+<h3>5.1 Dry-run</h3>
+<p>Every mutating action must support a dry-run path. For Kubernetes: <code>--dry-run=server</code>. For AWS CLI: <code>--dry-run</code>. For actions without native dry-run, Aegis synthesizes one.</p>
+
+<h3>5.2 IAM simulator</h3>
+<p>AWS <code>iam simulate-principal-policy</code> verifies the executor role has permission to perform the action <strong>before</strong> attempting it.</p>
+
+<h3>5.3 OPA policy simulator</h3>
+<pre><code class="language-rego"># apps/ai-engine/guardrails/policies/scale_down.rego
+package aegis.guardrails
+
+deny[msg] {
+  input.action == "scale"
+  input.target.labels.tier == "critical"
+  input.new_replicas < 2
+  msg := sprintf("Cannot scale critical service %v below 2 replicas (requested %d)",
+                 [input.target.name, input.new_replicas])
+}
+</code></pre>
+
+<blockquote>"Dry-run catches syntax errors. IAM simulator catches permission errors. OPA catches policy errors. None of the three is sufficient alone. All three are required."</blockquote>
+
+<h2>Part 6: Post-validation — did the metrics actually improve?</h2>
+<pre><code>Action:      kubectl scale deployment auth-service --replicas=5 (from 3)
+Prediction:  P99 to drop below 300ms within 5 minutes
+Execution:   Completed at 09:14:22 KST
+Observe:     Watching metric auth-service.latency.p99 for 10 minutes
+
+09:15:00 — P99: 1180ms  (no change yet, expected)
+09:17:00 — P99:  640ms  (improvement, but not at target)
+09:19:00 — P99:  280ms  (target reached)
+09:24:00 — P99:  240ms  (stable below target)
+
+Result: SUCCESS. Action retained.
+</code></pre>
+
+<p>And the failure mode:</p>
+<pre><code>Action:      kubectl rollout restart deployment/payment-worker
+Prediction:  Memory steady-state reset
+Execution:   Completed at 14:22:08 KST
+
+14:23:00 — error_rate: 0.2%  memory: 82%
+14:25:00 — error_rate: 8.1%  memory: 45%   (!)
+14:27:00 — error_rate: 9.4%  memory: 48%   (!)
+
+Result: FAILURE. Auto-rollback initiated.
+</code></pre>
+
+<h2>Part 7: The "AI can't touch IAM" rule — hard-coded</h2>
+<p>Aegis's rule: <strong>the AI cannot emit an IAM-modifying action. Ever. For any reason. Under any escalation path.</strong> Enforced at three levels:</p>
+<ol>
+<li><strong>Code path doesn't exist.</strong> There's no <code>guardrails/actions/iam_modify.py</code>. The tool registry doesn't list it.</li>
+<li><strong>Credential scope doesn't permit it.</strong> The IAM role the executor assumes has an explicit <code>Deny iam:*</code> on its permissions boundary.</li>
+<li><strong>Audit picks it up.</strong> CloudTrail in the security account alarms on any <code>iam:*</code> call from the executor's principal ARN.</li>
+</ol>
+<blockquote>"The right way to avoid an AI going rogue on your IAM is not 'better prompting' or 'approval gates.' It's to never grant the permission in the first place."</blockquote>
+
+<h2>Part 8: Audit trail per account (SOC2 angle)</h2>
+<pre><code class="language-json">{
+  "decision_id": "GRD-2026-0419-00042",
+  "timestamp": "2026-04-19T09:14:22.145Z",
+  "investigation_id": "INV-2026-0419-00017",
+  "account_id": "333333333333",
+  "action": {
+    "type": "kubectl_scale",
+    "target": "deployment/auth-service",
+    "namespace": "auth",
+    "old_replicas": 3,
+    "new_replicas": 5
+  },
+  "classification": {
+    "base_tier": "LOW",
+    "account_adjusted_tier": "LOW",
+    "rationale": "Spoke account; scale-up is LOW"
+  },
+  "pre_validation": {
+    "dry_run": { "status": "safe", "latency_ms": 142 },
+    "iam_simulator": { "status": "allowed", "latency_ms": 89 },
+    "opa_policy": { "status": "allowed", "latency_ms": 12 }
+  },
+  "approval": {
+    "mode": "auto_approved",
+    "approved_by": "aegis-guardrails",
+    "human_required": false
+  },
+  "execution": {
+    "status": "success",
+    "started_at": "2026-04-19T09:14:22.300Z",
+    "completed_at": "2026-04-19T09:14:23.022Z"
+  },
+  "post_validation": {
+    "window_minutes": 10,
+    "predicted": { "p99_ms": 300 },
+    "observed": { "p99_ms": 240 },
+    "status": "SUCCESS"
+  },
+  "rollback_available_until": "2026-04-19T09:29:22.300Z",
+  "model": "claude-sonnet-4-7",
+  "tokens_used": 11420,
+  "cost_usd": 0.074
+}
+</code></pre>
+
+<h2>Part 9: Rollback-first policy</h2>
+<p>Core invariant: <strong>no action executes without a documented rollback plan.</strong></p>
+<pre><code class="language-json">{
+  "action": {
+    "type": "kubectl_scale",
+    "target": "deployment/auth-service",
+    "old_replicas": 3,
+    "new_replicas": 5
+  },
+  "rollback": {
+    "type": "kubectl_scale",
+    "target": "deployment/auth-service",
+    "to_replicas": 3,
+    "timeout_seconds": 120
+  },
+  "rollback_sla_minutes": 15
+}
+</code></pre>
+<blockquote>"If you can't describe how to undo it, you don't get to do it."</blockquote>
+
+<h2>Part 10: A real example (anonymized)</h2>
+<table>
+<tr><th>Time (KST)</th><th>Event</th></tr>
+<tr><td>09:12:04</td><td>SigNoz fires: <code>auth-service</code> P99 > 1000ms</td></tr>
+<tr><td>09:12:08</td><td>Aegis opens investigation <code>INV-2026-0419-00017</code></td></tr>
+<tr><td>09:12:10</td><td>Wiki context fetched: 3 pages on auth-service</td></tr>
+<tr><td>09:12:12</td><td>Pattern analyzer: "Pattern A match — Mon 9AM cold-start"</td></tr>
+<tr><td>09:12:15</td><td>Claude proposes: scale 3 -> 5 + pre-warm pool</td></tr>
+<tr><td>09:12:16</td><td>Guardrails: target <code>333333333333</code>, kubectl_scale up, LOW tier</td></tr>
+<tr><td>09:12:17</td><td>Pre-validation: dry-run SAFE, IAM ALLOWED, OPA ALLOWED</td></tr>
+<tr><td>09:12:17</td><td>Approval: auto-approved</td></tr>
+<tr><td>09:12:18</td><td>Execution: <code>kubectl scale deployment auth-service --replicas=5</code></td></tr>
+<tr><td>09:12:19</td><td>Rollback armed until 09:27:18</td></tr>
+<tr><td>09:17:00</td><td>P99 down to 280ms (target)</td></tr>
+<tr><td>09:22:30</td><td>Post-validation: SUCCESS</td></tr>
+</table>
+<p>Total AI-operator time from alert to mitigation: <strong>13 seconds.</strong> Human involvement: zero.</p>
+
+<h2>Part 11: Implementation — where the code lives</h2>
+<table>
+<tr><th>File</th><th>Role</th></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/guardrails/engine.py</code></a></td><td>Main guardrails orchestrator</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/guardrails/risk_assessor.py</code></a></td><td>Classifies NONE/LOW/MEDIUM/HIGH/BLOCKED</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/guardrails/observation_mode.py</code></a></td><td>Trust-building ladder</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/guardrails/approval_gate.py</code></a></td><td>Slack approval for MEDIUM</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/guardrails/pre_validator.py</code></a></td><td>Dry-run, IAM simulator, OPA</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/guardrails/post_validator.py</code></a></td><td>Metric watch + auto-rollback</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/guardrails/rollback_manager.py</code></a></td><td>Rollback plan enforcement</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/guardrails/audit_logger.py</code></a></td><td>SOC2-compliant audit writer</td></tr>
+</table>
+
+<pre><code class="language-bash">AEGIS_HUB_ACCOUNT=111111111111
+AEGIS_SECURITY_ACCOUNT=555555555555
+AEGIS_SPOKE_ACCOUNTS=222222222222,333333333333,444444444444
+AEGIS_AUTOMATION_STAGE=recommend
+AEGIS_SLACK_APPROVAL_CHANNEL=sre-ai-approvals
+AEGIS_AUDIT_LOG_BUCKET=s3://aegis-audit-555555555555/logs
+</code></pre>
+
+<h2>Part 12: Try it yourself</h2>
+<pre><code class="language-bash">git clone https://github.com/JIUNG9/aegis.git
+cd aegis
+cp .env.example .env
+# Edit AEGIS_HUB_ACCOUNT, AEGIS_SPOKE_ACCOUNTS, etc.
+pnpm install
+pnpm dev
+export AEGIS_AUTOMATION_STAGE=observe   # always start here
+</code></pre>
+
+<pre><code class="language-bash">aegis guardrails classify \
+  --action kubectl_scale \
+  --target deployment/auth-service \
+  --account 333333333333 \
+  --old-replicas 3 --new-replicas 5
+
+# base_tier: LOW
+# account_adjusted_tier: LOW
+# dry_run: required
+# approval: auto
+</code></pre>
+
+<h2>Part 13: What's next — the career capstone</h2>
+<p>The final article in this series is the career capstone: <strong>"Open-Sourcing an AI-Native DevSecOps Platform — From Side Project to Portfolio Piece."</strong></p>
+
+<div class="cta">
+<p>Star the repo and watch Layer 4 roll out:</p>
+<a href="https://github.com/JIUNG9/aegis">github.com/JIUNG9/aegis</a>
+</div>
+
+<p class="tags"><strong>Tags:</strong> AI, Security, AWS, SRE, DevSecOps, Compliance</p>
+
+</div>
+<script>
+  hljs.highlightAll();
+  mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { primaryColor: '#00FF88', primaryTextColor: '#F9FAFB', background: '#1E1E2A', primaryBorderColor: '#00FF88', lineColor: '#9CA3AF' } });
+</script>
+</body>
+</html>

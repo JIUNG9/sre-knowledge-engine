@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aegis v4.0 — AI Control Tower Plan</title>
+<style>
+  :root { --bg: #1E1E2A; --card: #252535; --surface: #2A2A3A; --text: #E8E8ED; --muted: #9090A0; --accent: #00FF88; --border: rgba(255,255,255,0.10); --red: #FF6B6B; --amber: #FFB020; --blue: #00BFFF; --purple: #A855F7; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0E0E16; color: var(--text); line-height: 1.7; padding: 40px 20px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+  h1 span { color: var(--accent); }
+  .subtitle { text-align: center; color: var(--muted); font-size: 16px; margin-bottom: 40px; }
+  h2 { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h2 .icon { margin-right: 8px; }
+  h3 { font-size: 18px; font-weight: 600; margin: 24px 0 12px; color: var(--accent); }
+  p { margin-bottom: 16px; font-size: 15px; color: var(--muted); }
+  strong { color: var(--text); }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 16px 0; }
+  .card-accent { border-left: 3px solid var(--accent); }
+  .card-red { border-left: 3px solid var(--red); }
+  .card-amber { border-left: 3px solid var(--amber); }
+  .card-blue { border-left: 3px solid var(--blue); }
+  .card-purple { border-left: 3px solid var(--purple); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-green { background: rgba(0,255,136,0.15); color: var(--accent); }
+  .badge-red { background: rgba(255,107,107,0.15); color: var(--red); }
+  .badge-amber { background: rgba(255,176,32,0.15); color: var(--amber); }
+  .badge-blue { background: rgba(0,191,255,0.15); color: var(--blue); }
+  .badge-purple { background: rgba(168,85,247,0.15); color: var(--purple); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  td { color: var(--text); }
+  code { background: var(--surface); padding: 2px 8px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); }
+  pre { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; overflow-x: auto; margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; color: var(--text); }
+  .flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+  .flow-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 20px; font-size: 14px; font-weight: 600; }
+  .flow-arrow { color: var(--accent); font-size: 20px; }
+  .comparison { margin: 20px 0; }
+  .vs { display: flex; align-items: stretch; gap: 16px; }
+  .vs > div { flex: 1; }
+  .metric { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; }
+  .metric-green { color: var(--accent); }
+  .metric-red { color: var(--red); }
+  .metric-blue { color: var(--blue); }
+  .section-number { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--accent); color: var(--bg); border-radius: 50%; font-size: 14px; font-weight: 700; margin-right: 8px; }
+  .warning { background: rgba(255,176,32,0.08); border: 1px solid rgba(255,176,32,0.2); border-radius: 8px; padding: 16px; margin: 16px 0; }
+  .warning strong { color: var(--amber); }
+  .concept { background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.2); border-radius: 8px; padding: 16px; margin: 16px 0; }
+  .concept strong { color: var(--purple); }
+  ul { margin: 8px 0 16px 20px; }
+  li { margin: 4px 0; font-size: 14px; color: var(--muted); }
+  li strong { color: var(--text); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Aegis v4.0 — <span>AI Control Tower</span></h1>
+<p class="subtitle">Local RAG (LLM Wiki) + SigNoz Connector + Claude Control Tower + Production Guardrails</p>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2><span class="section-number">0</span> The Big Picture</h2>
+
+<div class="card card-accent">
+  <h3>What We're Building</h3>
+  <p>An <strong>AI-powered incident management and knowledge system</strong> that:</p>
+  <ul>
+    <li><strong>Learns</strong> from your runbooks, post-mortems, and Confluence (LLM Wiki — not RAG)</li>
+    <li><strong>Watches</strong> your SigNoz metrics, logs, and alerts in real-time</li>
+    <li><strong>Detects</strong> time-based patterns ("80% of incidents happen Monday 9 AM")</li>
+    <li><strong>Acts</strong> through Claude API with layered guardrails (observe → recommend → auto)</li>
+    <li><strong>Remembers</strong> — knowledge compounds over time, stale docs auto-detected</li>
+  </ul>
+</div>
+
+<pre>
+┌─────────────────────────────────────────────────────────┐
+│                  AEGIS AI CONTROL TOWER                    │
+│                                                           │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐│
+│  │ LLM Wiki │  │ SigNoz   │  │ Claude   │  │ Guard-   ││
+│  │ (Layer 1)│→ │ Connector│→ │ Control  │→ │ rails    ││
+│  │          │  │ (Layer 2)│  │ (Layer 3)│  │ (Layer 4)││
+│  │ Obsidian │  │ Logs     │  │ Pattern  │  │ Observe  ││
+│  │ Wiki     │  │ Metrics  │  │ Analysis │  │ Approve  ││
+│  │ Confluence│ │ Traces   │  │ Decision │  │ Audit    ││
+│  │ Auto-sync│  │ Alerts   │  │ Propose  │  │ Rollback ││
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘│
+└─────────────────────────────────────────────────────────┘
+</pre>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2><span class="section-number">1</span> Layer 1: LLM Wiki (Karpathy Pattern)</h2>
+
+<div class="concept">
+  <strong>Key Concept: LLM Wiki vs Traditional RAG</strong>
+  <p style="margin-top:8px">Traditional RAG chunks docs and searches chunks every query — no accumulation, no staleness detection. <strong>LLM Wiki</strong> (Andrej Karpathy's pattern) has the AI read sources ONCE, build structured wiki pages, detect contradictions, and compound knowledge over time.</p>
+</div>
+
+<div class="vs">
+  <div class="card card-red">
+    <h3 style="color:var(--red)">❌ Traditional RAG</h3>
+    <ul>
+      <li>Chunks docs → embeds → searches at query time</li>
+      <li><strong>No staleness detection</strong> — serves 2-year-old Confluence pages as truth</li>
+      <li>No knowledge accumulation — rediscovers every query</li>
+      <li>90% accuracy (lost-in-the-middle)</li>
+      <li>Cost: $30-100/month (cloud embeddings + vector DB)</li>
+    </ul>
+  </div>
+  <div class="card card-accent">
+    <h3 style="color:var(--accent)">✅ LLM Wiki</h3>
+    <ul>
+      <li>AI reads source → merges into existing wiki pages</li>
+      <li><strong>Contradiction flags</strong> — new source conflicts → flagged immediately</li>
+      <li>Knowledge compounds — each doc updates, not re-chunks</li>
+      <li>Higher accuracy — pre-synthesized, cross-referenced</li>
+      <li>Cost: $0.50-2/month (local Haiku synthesis)</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Sources Auto-Ingested</h3>
+<div class="grid-2">
+  <div class="card">
+    <p><span class="badge badge-green">LOCAL</span></p>
+    <ul>
+      <li>Runbooks (.md, .pdf)</li>
+      <li>Post-mortems</li>
+      <li>Architecture Decision Records (ADRs)</li>
+      <li>Terraform module docs</li>
+    </ul>
+  </div>
+  <div class="card">
+    <p><span class="badge badge-blue">API SYNC</span></p>
+    <ul>
+      <li>SigNoz alert history</li>
+      <li>Incident reports + RCA</li>
+      <li>Confluence pages (auto-sync, periodic)</li>
+      <li>Stale page auto-removal</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Wiki Structure (Obsidian Vault)</h3>
+<pre>
+wiki/
+├── overview.md              ← Auto-updated synthesis of everything
+├── entities/
+│   ├── auth-service.md      ← Auto-created from incidents + runbooks
+│   ├── payment-service.md
+│   └── api-gateway.md
+├── concepts/
+│   ├── slo-error-budgets.md ← Synthesized from multiple sources
+│   └── hub-spoke-architecture.md
+├── incidents/
+│   ├── INC-042-db-pool.md   ← From SigNoz + post-mortem
+│   └── INC-067-auth-spike.md
+├── runbooks/
+│   ├── runbook-auth-service.md
+│   └── runbook-redis-failover.md
+└── _meta/
+    ├── freshness.json       ← Page timestamps for staleness detection
+    └── contradictions.json  ← Flagged conflicts
+</pre>
+
+<h3>Staleness Prevention</h3>
+<table>
+  <tr><th>Check</th><th>How It Works</th><th>Action</th></tr>
+  <tr><td>Freshness lint</td><td>Compare page <code>last_updated</code> against threshold (30 days default)</td><td>Flag as <span class="badge badge-amber">STALE</span></td></tr>
+  <tr><td>Contradiction detection</td><td>New source contradicts existing page claim</td><td>Flag as <span class="badge badge-red">CONFLICT</span></td></tr>
+  <tr><td>Confluence sync</td><td>Confluence page deleted or major edit</td><td>Auto-update or archive wiki page</td></tr>
+  <tr><td>Orphan detection</td><td>Page with no incoming links and no recent source</td><td>Flag as <span class="badge badge-amber">ORPHAN</span></td></tr>
+</table>
+
+<div class="card card-purple">
+  <h3 style="color:var(--purple)">Public Portfolio: GitHub Pages</h3>
+  <p>The wiki auto-publishes to <code>github.com/JIUNG9/aegis-wiki</code> — recruiters see a living, AI-maintained SRE knowledge base. This is a portfolio piece by itself.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2><span class="section-number">2</span> Layer 2: SigNoz Connector</h2>
+
+<p>Pulls real data from your SigNoz instance via HTTP API. Feeds into both the LLM Wiki (incident history) and the Claude Control Tower (real-time analysis).</p>
+
+<h3>SigNoz API Integration</h3>
+<table>
+  <tr><th>Endpoint</th><th>Data</th><th>Use</th></tr>
+  <tr><td><code>GET /api/v1/logs</code></td><td>Structured logs with filters</td><td>Incident investigation</td></tr>
+  <tr><td><code>GET /api/v1/query_range</code></td><td>PromQL metrics</td><td>Performance analysis</td></tr>
+  <tr><td><code>GET /api/v1/traces</code></td><td>Distributed traces</td><td>Dependency mapping</td></tr>
+  <tr><td><code>GET /api/v1/alerts</code></td><td>Alert rules + history</td><td>Pattern detection</td></tr>
+  <tr><td><code>GET /api/v1/services</code></td><td>Service inventory</td><td>Service catalog sync</td></tr>
+</table>
+
+<h3>Time-Based Pattern Detection</h3>
+<div class="card card-blue">
+  <p>The <strong>Pattern Analyzer</strong> aggregates SigNoz data over time and detects recurring patterns:</p>
+  <ul>
+    <li><strong>Peak hours</strong>: "Traffic peaks at 9-11 AM and 2-4 PM KST"</li>
+    <li><strong>Weekly cycles</strong>: "80% of payment-service errors occur on Monday mornings"</li>
+    <li><strong>Seasonal trends</strong>: "Auth latency increases during batch jobs at 02:00"</li>
+    <li><strong>Scaling opportunities</strong>: "Traffic drops 70% between 22:00-06:00 — scale down"</li>
+    <li><strong>Deployment correlation</strong>: "3 of last 5 incidents followed a Friday deploy"</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2><span class="section-number">3</span> Layer 3: Claude Control Tower</h2>
+
+<p>The "brain" — Claude receives synthesized wiki knowledge + real SigNoz metrics + pattern analysis, then makes intelligent decisions.</p>
+
+<div class="flow">
+  <div class="flow-item" style="border-color:var(--purple)">📚 Wiki Context</div>
+  <div class="flow-arrow">+</div>
+  <div class="flow-item" style="border-color:var(--blue)">📊 SigNoz Metrics</div>
+  <div class="flow-arrow">+</div>
+  <div class="flow-item" style="border-color:var(--amber)">🔍 Patterns</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item" style="border-color:var(--accent)">🧠 Claude Decision</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-item" style="border-color:var(--red)">🛡️ Guardrails</div>
+</div>
+
+<h3>3 Intelligence Modes</h3>
+<div class="grid-3">
+  <div class="card" style="border-top: 3px solid var(--blue)">
+    <p><span class="badge badge-blue">ECO</span></p>
+    <p><strong>Haiku 4.5</strong></p>
+    <p>$1/$5 per 1M tokens</p>
+    <p style="font-size:13px">Quick status checks, simple log queries</p>
+  </div>
+  <div class="card" style="border-top: 3px solid var(--accent)">
+    <p><span class="badge badge-green">STANDARD</span></p>
+    <p><strong>Sonnet 4.6</strong></p>
+    <p>$3/$15 per 1M tokens</p>
+    <p style="font-size:13px">Investigations, pattern analysis</p>
+  </div>
+  <div class="card" style="border-top: 3px solid var(--purple)">
+    <p><span class="badge badge-purple">DEEP</span></p>
+    <p><strong>Opus 4.6</strong></p>
+    <p>$5/$25 per 1M tokens</p>
+    <p style="font-size:13px">Critical incidents, initial analysis</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2><span class="section-number">4</span> Layer 4: Production Guardrails</h2>
+
+<div class="warning">
+  <strong>⚠️ Core Principle: Observe First, Act Later</strong>
+  <p style="margin-top:8px">Start in observation mode. Build trust with the team. Only graduate to automation after weeks of accurate recommendations.</p>
+</div>
+
+<h3>The 4-Stage Automation Ladder</h3>
+<div class="grid-4">
+  <div class="card" style="border-top:3px solid var(--muted)">
+    <p><strong>Stage 1</strong></p>
+    <p style="color:var(--muted); font-size:14px">OBSERVE</p>
+    <p style="font-size:13px">AI watches, logs findings. No recommendations shown to users.</p>
+  </div>
+  <div class="card" style="border-top:3px solid var(--blue)">
+    <p><strong>Stage 2</strong></p>
+    <p style="color:var(--blue); font-size:14px">RECOMMEND</p>
+    <p style="font-size:13px">AI shows recommendations but cannot act. Humans decide.</p>
+  </div>
+  <div class="card" style="border-top:3px solid var(--amber)">
+    <p><strong>Stage 3</strong></p>
+    <p style="color:var(--amber); font-size:14px">LOW-AUTO</p>
+    <p style="font-size:13px">AI auto-acts on low-risk. Slack approval for medium/high.</p>
+  </div>
+  <div class="card" style="border-top:3px solid var(--accent)">
+    <p><strong>Stage 4</strong></p>
+    <p style="color:var(--accent); font-size:14px">FULL-AUTO</p>
+    <p style="font-size:13px">AI auto-acts low+medium. Manual only for high-risk.</p>
+  </div>
+</div>
+
+<h3>Risk Classification</h3>
+<table>
+  <tr><th>Action</th><th>Risk</th><th>Automation</th></tr>
+  <tr><td>Query logs/metrics</td><td><span class="badge badge-green">NONE</span></td><td>Always auto</td></tr>
+  <tr><td>Scale up (more replicas)</td><td><span class="badge badge-green">LOW</span></td><td>Auto at Stage 3+</td></tr>
+  <tr><td>Restart pod</td><td><span class="badge badge-amber">MEDIUM</span></td><td>Slack approval</td></tr>
+  <tr><td>Rollback deployment</td><td><span class="badge badge-amber">MEDIUM</span></td><td>Slack approval</td></tr>
+  <tr><td>Apply Terraform</td><td><span class="badge badge-red">HIGH</span></td><td>Manual only</td></tr>
+  <tr><td>Delete resource</td><td><span class="badge badge-red">HIGH</span></td><td>Manual only</td></tr>
+  <tr><td>Modify IAM</td><td><span class="badge badge-red">BLOCKED</span></td><td>Never automated</td></tr>
+</table>
+
+<h3>Guardrail Checkpoints</h3>
+<pre>
+Action proposed by Claude
+    │
+    ▼
+┌─ Risk Assessment ─┐
+│  Low? Med? High?   │
+└────────┬──────────┘
+         │
+    ┌────┴────┐
+    ▼         ▼
+ [Low]     [Med/High]
+ Auto-act   Slack approval
+    │         │
+    ▼         ▼
+┌─ Pre-Validation ──┐
+│  Dry-run first     │
+│  Block prod ns     │
+│  Rollback exists?  │
+└────────┬──────────┘
+         │
+         ▼
+┌─ Execute Action ──┐
+└────────┬──────────┘
+         │
+         ▼
+┌─ Post-Validation ─┐
+│  Metrics improved? │
+│  No new errors?    │
+│  Rollback if not   │
+└────────┬──────────┘
+         │
+         ▼
+┌─ Audit Log ───────┐
+│  SOC2 compliant    │
+│  Decision + result │
+│  Token cost        │
+└───────────────────┘
+</pre>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2><span class="section-number">5</span> Medium Articles (3-part series)</h2>
+
+<div class="grid-3">
+  <div class="card card-purple">
+    <p><span class="badge badge-purple">PART 1</span></p>
+    <h3 style="font-size:15px; color:var(--text)">"Why RAG is Dead for SRE Knowledge Bases — LLM Wiki is the Answer"</h3>
+    <ul>
+      <li>RAG vs LLM Wiki comparison</li>
+      <li>Karpathy pattern for SRE</li>
+      <li>Staleness detection</li>
+      <li>Cost: $0.50 vs $100/mo</li>
+    </ul>
+  </div>
+  <div class="card card-accent">
+    <p><span class="badge badge-green">PART 2</span></p>
+    <h3 style="font-size:15px; color:var(--text)">"Building an AI Control Tower for Multi-Account DevSecOps"</h3>
+    <ul>
+      <li>4-stage automation ladder</li>
+      <li>SigNoz pattern detection</li>
+      <li>Guardrails architecture</li>
+      <li>Real metric examples</li>
+    </ul>
+  </div>
+  <div class="card card-blue">
+    <p><span class="badge badge-blue">PART 3</span></p>
+    <h3 style="font-size:15px; color:var(--text)">"How I Built a Self-Maintaining SRE Knowledge Base That Recruiters Love"</h3>
+    <ul>
+      <li>OSS → Medium → LinkedIn</li>
+      <li>Wiki as portfolio piece</li>
+      <li>Career angle</li>
+      <li>Recruiter feedback</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2><span class="section-number">6</span> Cost Comparison</h2>
+
+<div class="grid-3">
+  <div class="card" style="text-align:center">
+    <p style="color:var(--muted); font-size:13px">CLOUD RAG</p>
+    <p class="metric metric-red">$30-100</p>
+    <p style="font-size:13px">/month</p>
+  </div>
+  <div class="card" style="text-align:center">
+    <p style="color:var(--muted); font-size:13px">LLM WIKI</p>
+    <p class="metric metric-green">$0.50-2</p>
+    <p style="font-size:13px">/month</p>
+  </div>
+  <div class="card" style="text-align:center">
+    <p style="color:var(--muted); font-size:13px">SAVINGS</p>
+    <p class="metric metric-blue">95%+</p>
+    <p style="font-size:13px">cost reduction</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2><span class="section-number">7</span> Key Concepts to Understand</h2>
+
+<div class="concept">
+  <strong>🧠 Karpathy's LLM Wiki Pattern</strong>
+  <p style="margin-top:8px">Instead of RAG's "embed chunks → search at query time", the AI reads sources ONCE, builds structured wiki pages, detects contradictions, and compounds knowledge. Think of it as the AI maintaining your team's Confluence — but it actually stays current.</p>
+  <p><a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f">Original gist by Andrej Karpathy</a> | <a href="https://github.com/nvk/llm-wiki">llm-wiki on GitHub</a></p>
+</div>
+
+<div class="concept">
+  <strong>🛡️ Autonomy with Guardrails (Conf42 SRE 2026)</strong>
+  <p style="margin-top:8px">The agent generates a plan → passes through guardrails/policy → system validates → agent interacts through secure APIs only. Free-form AI outputs converted to controlled, verifiable operations.</p>
+  <p><a href="https://tldrecap.tech/posts/2026/conf42-sre/autonomous-agent-safety/">Conf42 SRE 2026 Talk</a></p>
+</div>
+
+<div class="concept">
+  <strong>📊 Observation Mode → Automation Ladder</strong>
+  <p style="margin-top:8px">Never go straight to automation. Start by observing (the AI watches and logs). Then recommend (humans see suggestions). Then low-risk auto (AI acts on safe things). Finally full-auto with approval gates. This builds team trust progressively.</p>
+  <p><a href="https://rootly.com/sre/what-is-ai-sre-guide-to-reliable-services-in-2026">Rootly: What Is AI SRE?</a></p>
+</div>
+
+<div class="concept">
+  <strong>🏗️ Agent Control Plane (Galileo, open source)</strong>
+  <p style="margin-top:8px">Centralized governance for AI agents. AWS, CrewAI, and Glean are among the first partners. This is what Aegis's Control Tower implements.</p>
+  <p><a href="https://thenewstack.io/galileo-agent-control-open-source/">Galileo Agent Control</a></p>
+</div>
+
+<div class="concept">
+  <strong>🔄 Contradiction Detection & Staleness Lint</strong>
+  <p style="margin-top:8px">The wiki periodically runs "lint checks" — like spell-check for knowledge. Finds: orphaned pages with no links, stale content beyond freshness threshold, contradictions between sources, missing cross-references. This is why LLM Wiki > Confluence.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<h2><span class="section-number">8</span> Implementation Phases</h2>
+
+<table>
+  <tr><th>Phase</th><th>What</th><th>Time</th><th>Article</th></tr>
+  <tr><td>1</td><td><strong>LLM Wiki Engine</strong> — ingester, synthesizer, contradiction detection, staleness lint</td><td>1-2 days</td><td rowspan="2">Part 1: LLM Wiki</td></tr>
+  <tr><td>2</td><td><strong>Confluence + SigNoz Sync</strong> — auto-ingest, wiki update, GitHub publish</td><td>1 day</td></tr>
+  <tr><td>3</td><td><strong>SigNoz Connector</strong> — log/metric/trace fetchers, pattern analyzer</td><td>1-2 days</td><td rowspan="2">Part 2: Control Tower</td></tr>
+  <tr><td>4</td><td><strong>Guardrails</strong> — risk assessor, observation mode, approval gate, audit</td><td>1-2 days</td></tr>
+  <tr><td>5</td><td><strong>Control Tower Integration</strong> — wire everything into orchestrator</td><td>1 day</td><td></td></tr>
+  <tr><td>6</td><td><strong>Articles + Screenshots + LinkedIn</strong></td><td>1 day</td><td>Part 3: Career</td></tr>
+</table>
+
+<div style="text-align:center; margin-top:40px; padding-top:20px; border-top:1px solid var(--border)">
+  <p style="color:var(--muted); font-size:13px">Aegis v4.0 Plan — <a href="https://github.com/JIUNG9/aegis">github.com/JIUNG9/aegis</a></p>
+</div>
+
+</div>
+</body>
+</html>

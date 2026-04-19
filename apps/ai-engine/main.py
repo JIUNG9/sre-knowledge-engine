@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import analyze, health, investigate, logs, mcp
+from routers import analyze, health, investigate, logs, mcp, wiki
 
 logger = logging.getLogger("aegis")
 
@@ -44,3 +44,4 @@ app.include_router(investigate.router)
 app.include_router(analyze.router)
 app.include_router(logs.router)
 app.include_router(mcp.router)
+app.include_router(wiki.router)

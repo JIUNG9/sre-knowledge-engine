@@ -4,257 +4,254 @@
 
 ### AI-Native DevSecOps Command Center
 
-[![CI](https://github.com/JIUNG9/aegis/actions/workflows/ci.yml/badge.svg)](https://github.com/JIUNG9/aegis/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/JIUNG9/aegis?label=v3.0.0)](https://github.com/JIUNG9/aegis/releases)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/JIUNG9/aegis)](https://goreportcard.com/report/github.com/JIUNG9/aegis)
+[![CI](https://img.shields.io/github/actions/workflow/status/JIUNG9/aegis/ci.yml?label=ci&logo=github)](https://github.com/JIUNG9/aegis/actions)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-v4.0%20Layer%201%20built-brightgreen)](docs/ARCHITECTURE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000?logo=next.js)](https://nextjs.org/)
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
 [![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)](https://python.org/)
+[![Claude](https://img.shields.io/badge/Anthropic-Claude%20API-D4A27F)](https://www.anthropic.com/)
 
-**Consolidate observability, reliability engineering, FinOps, security, and AI-powered incident management into a single pane of glass.**
+**An AI-native DevSecOps command center built on the Karpathy LLM Wiki pattern, not traditional RAG. Runs for about fifteen dollars a month.**
 
-[Documentation](https://aegis-devsecops.dev/docs) | [Demo](https://demo.aegis-devsecops.dev) | [Discord](https://discord.gg/aegis) | [Blog](https://medium.com/@junegu)
+[Architecture](docs/ARCHITECTURE.md) | [Live wiki](https://github.com/JIUNG9/aegis-wiki) | [Article series](#read-the-series) | [Author](#about-the-author)
 
 </div>
 
 ---
 
-## What is Aegis?
+## Why Aegis
 
-Aegis is an open-source DevSecOps platform that replaces the fragmented tooling (SigNoz, Datadog, Grafana, Confluence, JIRA, Slack, PagerDuty) that most SRE teams juggle. It provides a unified command center with AI-powered incident management via Claude API and MCP (Model Context Protocol).
+Most "AI for SRE" products are a retrieval-augmented chatbot pointed at a Confluence export. That design is fundamentally wrong for incident response. Chunk-based retrieval returns the three highest-scoring fragments and calls it context — and those fragments are usually stale, contradictory, or lifted from a runbook that no one has touched in two years. The agent answers confidently from a knowledge base it cannot evaluate. Aegis rejects that pattern.
 
-**v3.0** brings AI token management with three intelligence modes, multi-cloud account management, IAM/RBAC administration, team settings, and full internationalization (English + Korean).
+Aegis uses the **LLM Wiki pattern** popularized by Andrej Karpathy: every source (runbook, post-mortem, Confluence page, resolved incident) is read exactly once by an LLM and synthesized into a canonical Obsidian page. Contradictions are flagged at ingest time. Staleness is tracked per source. The Control Tower queries pre-synthesized knowledge instead of raw chunks. The vault is public — it doubles as a portfolio artifact at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki), edited locally in Obsidian and auto-published.
 
-### Screenshots
-
-> **SLO Dashboard** — Service-level objectives with error budget burn rates, team targets, and weekly/monthly/annual views.
->
-> **FinOps** — Cloud cost breakdown by service, provider, and Kubernetes namespace with anomaly detection and rightsizing recommendations.
->
-> **Incidents** — AI-powered incident timeline with root cause analysis, auto-remediation proposals, and Slack approval workflows.
->
-> **Settings / AI & Tokens** — Three-mode AI engine selection (Eco / Standard / Deep Analysis), budget guardrails, and usage analytics.
+The whole platform targets a specific constraint: **under fifteen dollars a month of recurring cost**. Claude Haiku 4.5 does the cheap synthesis work, Sonnet 4.6 does the reasoning, Opus only when the operator explicitly asks for it. SigNoz is OSS and self-hostable. Postgres, ClickHouse, and Redis run on a single VM. MCP (Model Context Protocol) is native, not bolted on. A four-stage automation ladder (Observe → Recommend → Low-Auto → Full-Auto) keeps the agent out of production until the operator trusts it.
 
 ---
 
-## Core Modules
+## Architecture at a Glance
 
-| # | Module | Route | Description |
-|---|--------|-------|-------------|
-| 1 | **Log Explorer** | `/logs` | Unified application + security log search powered by ClickHouse |
-| 2 | **SLO/SLI Dashboard** | `/slo` | Error budgets, burn rate alerts, team targets, weekly/monthly/annual views |
-| 3 | **FinOps** | `/finops` | Cloud cost tracking, K8s cost allocation, rightsizing, anomaly detection |
-| 4 | **Incident Management** | `/incidents` | AI-powered investigation, root cause analysis, auto-remediation |
-| 5 | **Security Dashboard** | `/security` | Vulnerability scanning, RBAC audit, compliance tracking |
-| 6 | **Deployment Tracker** | `/deployments` | DORA metrics, deployment timeline, change failure rate |
-| 7 | **On-Call & Runbooks** | `/oncall` | Rotation schedules, escalation policies, AI runbook assistant |
-| 8 | **Service Catalog** | `/services` | Service registry, dependency maps, health scorecards |
-| 9 | **IAM & Access** | `/iam` | Identity management, role-based access control, audit logs |
-| 10 | **Cloud Accounts** | `/accounts` | Multi-cloud account management (AWS, GCP, Azure, a regional cloud) |
-| 11 | **Settings** | `/settings` | General config, integrations, AI & tokens, team management |
+```mermaid
+graph TB
+  subgraph AEGIS["Aegis v4.0 — 5 Layers"]
+    L1[Layer 1: LLM Wiki<br/>Karpathy Pattern<br/><b>BUILT</b>]
+    L2[Layer 2: SigNoz Connector<br/>HTTP API<br/>planned]
+    L3[Layer 3: Claude Control Tower<br/>Eco / Standard / Deep<br/>planned]
+    L4[Layer 4: Production Guardrails<br/>4-Stage Automation Ladder<br/>planned]
+    L5[Layer 5: MCP Doc Reconciliation<br/>Confluence + GitHub + Incidents<br/>planned]
+  end
+  User[SRE on-call] --> L3
+  Alert[SigNoz alert] --> L3
+  L3 --> L1
+  L3 --> L2
+  L3 --> L4
+  L5 --> L1
+  L2 --> L5
+  L1 --> Vault[Obsidian vault<br/>aegis-wiki repo]
+```
+
+Full design document, component boundaries, trust model, and cost envelope: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
-## AI-Powered Features
+## Status
 
-Aegis ships with three AI intelligence modes, each backed by a different Claude model:
+| Layer | Component | Status | Code path |
+|-------|-----------|--------|-----------|
+| 1 | LLM Wiki (Karpathy pattern) | Built | `apps/ai-engine/wiki/` |
+| 1 | Contradiction detector | Built | `apps/ai-engine/wiki/contradiction.py` |
+| 1 | Staleness linter | Built | `apps/ai-engine/wiki/staleness.py` |
+| 1 | Confluence sync | Built | `apps/ai-engine/wiki/confluence_sync.py` |
+| 1 | SigNoz wiki sync | Built | `apps/ai-engine/wiki/signoz_sync.py` |
+| 1 | Git publisher | Built | `apps/ai-engine/wiki/publisher.py` |
+| 2 | SigNoz HTTP connector | Planned | `apps/ai-engine/connectors/` |
+| 2 | Time-based pattern analyzer | Planned | `apps/ai-engine/connectors/pattern_analyzer.py` |
+| 3 | Claude Control Tower | Planned | `apps/ai-engine/agents/orchestrator.py` |
+| 3 | Three-mode routing (Eco / Standard / Deep) | Built (UI), planned (backend) | `apps/web/src/app/(dashboard)/settings/` |
+| 4 | Risk classifier | Planned | `apps/ai-engine/guardrails/risk_assessor.py` |
+| 4 | Four-stage automation ladder | Planned | `apps/ai-engine/guardrails/observation_mode.py` |
+| 4 | Slack approval gate | Planned | `apps/ai-engine/guardrails/approval_gate.py` |
+| 4 | Pre-validator (dry-run) | Planned | `apps/ai-engine/guardrails/pre_validator.py` |
+| 4 | Post-validator (metric verify) | Planned | `apps/ai-engine/guardrails/post_validator.py` |
+| 4 | Audit logger (SOC2 trail) | Planned | `apps/ai-engine/guardrails/audit_logger.py` |
+| 5 | MCP docs reconciliation tools | Planned | `apps/ai-engine/mcp/tools/docs_reconciliation.py` |
 
-| Mode | Model | Input / Output | Latency | Best For |
-|------|-------|---------------|---------|----------|
-| **Eco** | Haiku 4.5 | $1 / $5 per 1M tokens | <2s | Monitoring, status checks |
-| **Standard** | Sonnet 4.6 | $3 / $15 per 1M tokens | ~5s | Investigations, analysis |
-| **Deep Analysis** | Opus 4.6 | $5 / $25 per 1M tokens | ~15s | Initial setup, critical incidents |
-
-### Token Management
-
-- **Budget guardrails** — Set monthly spend caps with auto-downgrade to Eco mode at configurable thresholds
-- **Notification thresholds** — Alerts at 50%, 80%, and 100% of budget
-- **Per-operation cost confirmation** — See estimated token cost before every AI action
-- **Usage analytics** — 30-day spend charts, breakdown by module and mode
-- **Mode toggle everywhere** — Switch modes from Settings or directly in the AI Assistant panel
-
-### AI Incident Response Pipeline
-
-```
-Alert Triggered --> Aegis Ingests --> AI Investigates --> Proposes Fix --> Slack Approval --> Auto-Remediation --> Verification
-```
-
-When a critical alert fires, Aegis uses Claude API with MCP to:
-1. Query your logs, metrics, and traces automatically
-2. Analyze root cause across your entire stack
-3. Propose a specific remediation (kubectl rollback, Terraform apply, config change)
-4. Post to Slack with an approval workflow
-5. Execute the fix on approval and verify resolution
-
-**Cost: ~$0.15 per incident investigation** using Claude Sonnet 4.6 with prompt caching.
-
----
-
-## Architecture
-
-```
-                              +-------------------+
-                              |    Load Balancer   |
-                              +--------+----------+
-                                       |
-              +------------------------+------------------------+
-              |                        |                        |
-    +---------v----------+   +---------v----------+   +---------v----------+
-    |     Frontend       |   |     API Layer      |   |     AI Engine      |
-    |   Next.js 16       |   |   Go + Fiber       |   |  Python + FastAPI  |
-    |   React 19         |   |   REST + WebSocket  |   |  Claude API + MCP  |
-    |   Tailwind CSS v4  |   |   JWT + OIDC Auth   |   |  LangGraph         |
-    |   shadcn/ui        |   |   19 API Routes     |   |  Vector DB         |
-    |   :3000            |   |   :8080             |   |  :8000             |
-    +--------------------+   +---------+----------+   +---------+----------+
-                                       |                        |
-              +------------------------+------------------------+
-              |              |              |              |
-    +---------v--+ +---------v--+ +--------v---+ +--------v---+
-    | PostgreSQL | | ClickHouse | |   Redis    | |     S3     |
-    |    16      | | (logs/     | |   7        | | (artifacts)|
-    |            | |  metrics)  | | (cache/    | |            |
-    |            | |            | |  pubsub)   | |            |
-    +------------+ +------------+ +------------+ +------------+
-```
+Frontend modules already shipped: Log Explorer, SLO Dashboard, FinOps, Incidents, Security, Deployments, On-Call, Services, IAM, Cloud Accounts, Settings (general, integrations, AI & tokens, team, safety). See `apps/web/src/app/(dashboard)/`.
 
 ---
 
 ## Quick Start
 
-### Docker Compose (recommended)
+### Prerequisites
+
+- Node.js 20+
+- Go 1.22+
+- Python 3.12+
+- pnpm 9+
+- Docker + Docker Compose (for Postgres, ClickHouse, Redis)
+- Anthropic API key (for Layer 1 synthesis — set `ANTHROPIC_API_KEY`)
+
+### Clone and boot
 
 ```bash
 git clone https://github.com/JIUNG9/aegis.git
 cd aegis
-cp .env.example .env
-docker compose up -d
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Development
-
-```bash
-# Prerequisites: Node.js 20+, Go 1.22+, Python 3.12+, pnpm 9+
-
-# Install dependencies
+cp .env.example .env                  # fill in ANTHROPIC_API_KEY
 pnpm install
-
-# Start all services in dev mode
+docker compose up -d postgres clickhouse redis
 pnpm dev
-
-# Or start individually
-cd apps/web && pnpm dev                         # Frontend — http://localhost:3000
-cd apps/api && go run .                         # API      — http://localhost:8080
-cd apps/ai-engine && uvicorn main:app --reload  # AI       — http://localhost:8000
 ```
 
-### Build
+### Expected boot output
+
+```
+[docker] postgres      | ready on 5432
+[docker] clickhouse    | ready on 8123
+[docker] redis         | ready on 6379
+[web]    Next.js 16.0  | ready on http://localhost:3000
+[api]    Fiber         | listening on :8080
+[ai]     uvicorn       | listening on :8000
+[ai]     wiki engine   | loaded modules: ingester synthesizer contradiction staleness confluence_sync signoz_sync publisher
+[ai]     wiki engine   | vault path: ./vault (0 pages)
+[ai]     wiki engine   | budget: eco mode (Haiku 4.5), $15.00/mo cap
+```
+
+Open `http://localhost:3000`.
+
+### Build / lint / test
 
 ```bash
-pnpm build        # Build all packages
-pnpm lint         # Lint all packages
-pnpm type-check   # Type check all TypeScript
-pnpm test         # Run all tests
+pnpm build         # Turbo pipeline across web + api + ai-engine
+pnpm lint          # ESLint (web), golangci-lint (api), ruff (ai-engine)
+pnpm type-check    # tsc --noEmit across all TypeScript
+pnpm test          # vitest + go test + pytest
 ```
 
 ---
 
-## Tech Stack
+## Repo Structure
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 16, React 19, TypeScript 5, Tailwind CSS v4, shadcn/ui, Recharts, Zustand |
-| API | Go 1.22+, Fiber, JWT/OIDC, OpenAPI 3.1 |
-| AI Engine | Python 3.12+, FastAPI, Claude API (Haiku/Sonnet/Opus), MCP, LangGraph |
-| Databases | PostgreSQL 16, ClickHouse (logs/metrics), Redis 7 (cache/pubsub) |
-| Monorepo | pnpm 9, Turborepo |
-| Deployment | Docker, Kubernetes (Helm), Terraform |
-| CI/CD | GitHub Actions, Conventional Commits |
-| Observability | OpenTelemetry, SigNoz |
-| Design System | Dark-first terminal aesthetic, JetBrains Mono + Inter, 6 color presets, 3 density modes |
+```
+aegis/
+├── apps/
+│   ├── web/               Next.js 16 + React 19 + Tailwind v4 frontend (11 dashboard modules)
+│   ├── api/               Go + Fiber REST/WebSocket API, OIDC, 19 routes
+│   └── ai-engine/         Python + FastAPI. Layer 1 shipped: wiki/ submodule is the heart of Aegis.
+├── packages/
+│   ├── types/             Shared TypeScript types consumed by web and integrations
+│   ├── integrations/      Per-provider adapters (SigNoz, Datadog, PagerDuty, Slack, JIRA, GitHub)
+│   └── ui/                shadcn/ui component wrappers + design tokens
+├── docs/
+│   ├── ARCHITECTURE.md    Full 5-layer architecture, trust model, cost envelope
+│   └── architecture/      Per-layer design docs, ADRs, sequence diagrams
+├── articles/              The 8-part Medium series with LinkedIn post drafts per article
+├── infra/                 Terraform + Helm + docker-compose. Code-only — never applied from CI.
+└── scripts/               Dev utilities (seed vault, replay incidents, benchmark synthesis cost)
+```
+
+---
+
+## Read the Series
+
+The design decisions, trade-offs, and implementation details behind Aegis are documented as an eight-part Medium series. Every article maps to a real module in this repository and includes links back to the source.
+
+| # | Title | One-liner |
+|---|-------|-----------|
+| 1 | [Karpathy Killed RAG](articles/01-karpathy-killed-rag/article.md) | Why the LLM Wiki pattern beats chunk-based retrieval for operational knowledge. |
+| 2 | [Your AI Agent Is Lying](articles/02-ai-is-lying/article.md) | MCP tools that find contradictions between runbooks, Confluence, and post-mortems. |
+| 3 | [A Self-Maintaining SRE Knowledge Base](articles/03-self-maintaining-kb/article.md) | The Obsidian vault that updates itself from incident and source activity. |
+| 4 | [The 4-Stage Automation Ladder](articles/04-automation-ladder/article.md) | Observe → Recommend → Low-Auto → Full-Auto. Trust is earned, not configured. |
+| 5 | [Claude + MCP Replaced Our 3 AM Pager](articles/05-claude-mcp-pager/article.md) | A full investigation loop for fifteen dollars a month. |
+| 6 | [80% of Incidents on Monday 9 AM](articles/06-monday-patterns/article.md) | Time-based pattern analysis that pre-positions recommendations. |
+| 7 | [Production Guardrails Across 4 AWS Accounts](articles/07-multi-account-guardrails/article.md) | Risk tiers, dry-run, rollback-first, SOC2-ready audit trail. |
+| 8 | [Open-Sourcing Aegis](articles/08-open-sourcing-capstone/article.md) | The career capstone: SRE by day, platform author by night. |
+
+Each article directory also contains a `linkedin-post.md` with three variants (technical, career, hot-take) ready to post.
+
+---
+
+## Related Repos
+
+- **[github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki)** — the live, sanitized Obsidian vault published by the Aegis LLM Wiki Engine. This is what a self-maintaining SRE knowledge base looks like in practice. Recruiters and reviewers: start there.
+
+---
+
+## Design System
+
+Dark-first terminal aesthetic. JetBrains Mono for code and headings, Inter for body. Six color presets (Matrix, Cyan, Amber, Violet, Red, Frost). Three density modes (Compact, Comfortable, Spacious). Large components by default — metrics at 32px+, charts at 300px+, the dashboard fills the available space. Details in `packages/ui/tokens.ts` and `apps/web/src/app/globals.css`.
 
 ---
 
 ## Integrations
 
-Aegis connects to your existing stack via a plugin system:
+Plugin architecture under `packages/integrations/`:
 
 | Category | Providers |
 |----------|-----------|
-| **Observability** | SigNoz, Datadog, Prometheus, Grafana, CloudWatch |
-| **Incident** | PagerDuty, Opsgenie, Slack, Microsoft Teams |
-| **Ticketing** | JIRA, Linear, GitHub Issues |
-| **Cloud** | AWS, GCP, Azure, a regional cloud |
-| **Cost** | OpenCost, Kubecost, AWS Cost Explorer |
-| **Security** | Trivy, Snyk, Grype |
-| **CI/CD** | GitHub Actions, CircleCI, ArgoCD |
-| **Source Control** | GitHub, GitLab, Bitbucket |
+| Observability | SigNoz (primary), Datadog, Prometheus, Grafana, CloudWatch |
+| Incident | PagerDuty, Opsgenie, Slack, Microsoft Teams |
+| Ticketing | JIRA, Linear, GitHub Issues |
+| Cloud | AWS, GCP, Azure, a regional cloud (a regional cloud) |
+| Cost | OpenCost, Kubecost, AWS Cost Explorer |
+| Security | Trivy, Snyk, Grype |
+| CI/CD | GitHub Actions, CircleCI, ArgoCD |
+| Source | GitHub, GitLab, Bitbucket |
+
+All integrations use read-only IAM where infrastructure is involved. Aegis never provisions or mutates cloud resources — it observes, analyzes, and recommends. Any write action routes through the Layer 4 guardrails.
 
 ---
 
-## Multi-Cloud Support
+## Cost Envelope
 
-Aegis manages resources across multiple cloud providers and accounts:
+| Component | Monthly cost | Notes |
+|-----------|--------------|-------|
+| Claude Haiku 4.5 (wiki synthesis) | $0.50–$2 | 100-page vault, daily sync |
+| Claude Sonnet 4.6 (investigations) | $5–$10 | ~1 incident/day at $0.08 each |
+| Claude Opus 4.6 (deep analysis) | $0–$2 | Operator-triggered only |
+| SigNoz (self-hosted) | $0 | OSS, runs on the same VM |
+| Postgres + ClickHouse + Redis | $0 | Docker Compose on operator's box |
+| **Total** | **~$15** | Target: under the cost of one Datadog seat |
 
-- **AWS** — EC2, EKS, RDS, Lambda, S3, Cost Explorer, IAM
-- **GCP** — GKE, Cloud Run, Cloud SQL, BigQuery, Billing
-- **Azure** — AKS, App Service, Azure SQL, Cost Management
-- **a regional cloud** (a regional cloud) — Server, Kubernetes Service, Cloud DB
-
-Each account is configured with read-only IAM roles. Aegis never provisions or modifies infrastructure — it observes, analyzes, and recommends.
+Budget guardrails in `apps/web/src/app/(dashboard)/settings/` auto-downgrade to Eco at configurable thresholds. See [docs/ARCHITECTURE.md#cost-envelope](docs/ARCHITECTURE.md).
 
 ---
 
-## Internationalization (i18n)
+## About the Author
 
-Aegis supports multiple languages out of the box:
+**June Gu** (Jiung Gu). Site Reliability Engineer at [acme-corp](https://example.com), a subsidiary of a large tech company. Previously at a large e-commerce company, acme-it IT&E, and acme-retail Shopping. Aegis is a nights-and-weekends project built while operating multi-account AWS infrastructure, EKS clusters, and PostgreSQL fleets at day-job scale. Relocating to Canada in 2027.
 
-- **English** (default)
-- **Korean** (한국어)
-
-Language can be switched per-user in Settings > General > Default Language.
+- LinkedIn: [linkedin.com/in/jiung-gu](https://linkedin.com/in/jiung-gu)
+- Medium: [medium.com/@junegu](https://medium.com/@junegu)
+- GitHub: [github.com/JIUNG9](https://github.com/JIUNG9)
 
 ---
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the branch-naming convention, commit style (Conventional Commits), and local development setup. The short version:
 
 ```bash
-# Fork the repo, create a branch, make changes, submit a PR
 git checkout -b feat/my-feature
 # ... make changes ...
-git commit -m "feat(module): add my feature"
+git commit -m "feat(wiki): add my feature"
 git push origin feat/my-feature
+# open PR against main
 ```
 
-### Branch Naming
-
-```
-feat/     — New features
-fix/      — Bug fixes
-docs/     — Documentation
-refactor/ — Code refactoring
-perf/     — Performance improvements
-test/     — Tests
-ci/       — CI/CD changes
-chore/    — Maintenance
-```
+Branch prefixes: `feat/`, `fix/`, `docs/`, `refactor/`, `perf/`, `test/`, `ci/`, `chore/`.
 
 ---
 
 ## License
 
-Apache License 2.0 — see [LICENSE](LICENSE) for details.
+MIT. See [LICENSE](LICENSE). Fork it, self-host it, point your own LLM Wiki Engine at your own runbooks.
 
 ---
 
 <div align="center">
 
-Built with care by [June Gu](https://github.com/JIUNG9) | SRE at [acme-corp](https://example.com) (a large tech company)
+Built by [June Gu](https://github.com/JIUNG9) — SRE at my employer, ex-e-commerce.
 
 </div>

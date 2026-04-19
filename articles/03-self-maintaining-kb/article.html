@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I Built a Self-Maintaining SRE Knowledge Base — It Finds Stale Docs Automatically | June Gu</title>
+<meta name="description" content="Runbooks that update themselves when incidents resolve. A vault that archives its own dead pages. A public portfolio that never drifts from what I actually operate.">
+<meta name="author" content="June Gu">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      darkMode: true,
+      background: '#0A0A0F',
+      primaryColor: '#1E1E2A',
+      primaryTextColor: '#E6E6F0',
+      primaryBorderColor: '#2A2A3A',
+      lineColor: '#00FF88',
+      secondaryColor: '#1E1E2A',
+      tertiaryColor: '#1E1E2A'
+    },
+    fontFamily: 'JetBrains Mono, monospace'
+  });
+</script>
+<style>
+  :root {
+    --bg: #0A0A0F;
+    --card: #1E1E2A;
+    --card-alt: #16161F;
+    --border: #2A2A3A;
+    --text: #E6E6F0;
+    --text-dim: #9A9AB0;
+    --accent: #00FF88;
+    --accent-dim: #00B866;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    margin: 0;
+    padding: 0;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 780px; margin: 0 auto; padding: 80px 24px 120px; }
+  .eyebrow {
+    font-family: var(--mono);
+    color: var(--accent);
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-size: 2.6rem;
+    line-height: 1.15;
+    margin: 0 0 24px;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .subtitle {
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 40px;
+    line-height: 1.5;
+  }
+  .byline {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    margin-bottom: 56px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .byline .tag { color: var(--accent); }
+  h2 {
+    font-family: var(--mono);
+    font-size: 1.7rem;
+    letter-spacing: -0.01em;
+    color: #fff;
+    margin: 64px 0 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-family: var(--mono);
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin: 40px 0 14px;
+  }
+  p { margin: 0 0 20px; font-size: 1.05rem; }
+  strong { color: #fff; }
+  em { color: var(--text-dim); }
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  a:hover { border-bottom-color: var(--accent); }
+  blockquote {
+    border-left: 3px solid var(--accent);
+    background: var(--card);
+    padding: 20px 24px;
+    margin: 32px 0;
+    font-size: 1.1rem;
+    color: #fff;
+    border-radius: 0 6px 6px 0;
+  }
+  blockquote p { margin: 0; }
+  code {
+    font-family: var(--mono);
+    background: var(--card);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+  }
+  pre {
+    background: var(--card-alt) !important;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0;
+    margin: 28px 0;
+    overflow-x: auto;
+  }
+  pre code {
+    background: transparent;
+    color: var(--text);
+    padding: 20px 24px;
+    display: block;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 28px 0;
+    font-size: 0.95rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--card-alt);
+    font-family: var(--mono);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  tr:last-child td { border-bottom: none; }
+  td code { font-size: 0.85em; }
+  ul, ol { padding-left: 24px; margin: 20px 0; }
+  li { margin-bottom: 10px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 64px 0; }
+  .mermaid {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 28px 0;
+    text-align: center;
+  }
+  .cta {
+    background: linear-gradient(135deg, var(--card) 0%, var(--card-alt) 100%);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 32px;
+    margin: 56px 0;
+    text-align: center;
+  }
+  .cta h3 { margin-top: 0; color: var(--accent); font-size: 1.4rem; }
+  .cta a {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-weight: 600;
+    margin-top: 12px;
+    border: none;
+  }
+  .cta a:hover { background: #fff; border: none; }
+  .footer-note {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    font-style: italic;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    margin-top: 56px;
+  }
+  .tags {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 24px;
+  }
+  .tags span {
+    display: inline-block;
+    background: var(--card);
+    color: var(--accent);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin: 4px 8px 4px 0;
+    border: 1px solid var(--border);
+  }
+  @media (max-width: 640px) {
+    .container { padding: 40px 18px 80px; }
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.4rem; }
+    h3 { font-size: 1.1rem; }
+    pre code { padding: 14px 16px; font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+<article class="container">
+
+<div class="eyebrow">Aegis OSS Series &nbsp;/&nbsp; Article 03</div>
+
+<h1>I Built a Self-Maintaining SRE Knowledge Base — It Finds Stale Docs Automatically</h1>
+
+<p class="subtitle">Runbooks that update themselves when incidents resolve. A vault that archives its own dead pages. A public portfolio that never drifts from what I actually operate.</p>
+
+<div class="byline">
+  <span>By <strong>June Gu</strong> &middot; SRE at acme-corp (a large tech company subsidiary) &middot; ex-e-commerce</span>
+  <span class="tag">~11 min read</span>
+</div>
+
+<h2>The knowledge base updates itself</h2>
+
+<p>When a new incident resolves in SigNoz, the knowledge base writes the postmortem into the right runbook. When Confluence adds a page, the knowledge base merges the new knowledge into the existing topic. When a document hasn't been touched in 180 days, the knowledge base quietly moves it to <code>_archive/</code> and stops serving it to AI agents. The <code>overview.md</code> file at the vault root — the one index that ties everything together — rebuilds itself after every sync, preserving my manual notes above a fence and synthesizing everything else below.</p>
+
+<p>This isn't a thought experiment. It's what I run on my own machine today, and a sanitized mirror of it lives in public at <a href="https://github.com/JIUNG9/aegis-wiki">github.com/JIUNG9/aegis-wiki</a>. It's the documentation substrate for <a href="https://github.com/JIUNG9/aegis">Aegis</a>, the open-source DevSecOps command center I'm building as I prepare to relocate to Canada.</p>
+
+<blockquote><p>Runbooks rot not because anyone is lazy. Runbooks rot because nobody owns them, and ops teams are too busy keeping production alive to curate prose.</p></blockquote>
+
+<p>This article walks through how the self-maintaining vault works — the directory structure, the auto-sync jobs, the freshness tracking — and ends with an angle I don't see covered enough in SRE writing: <strong>what it looks like when your knowledge base is also your portfolio.</strong></p>
+
+<h2>Why runbooks rot</h2>
+
+<p>Let me describe the pattern at almost every company I've worked at, including a large e-commerce company, acme-it IT&amp;E, and my employer.</p>
+
+<ol>
+<li>An incident happens.</li>
+<li>Someone writes a runbook during the post-mortem.</li>
+<li>The runbook is pristine for 30 days.</li>
+<li>A dependency changes. The runbook is now 10% wrong.</li>
+<li>Nobody updates it. They fix the runbook in their head, next time.</li>
+<li>Six months later the runbook is 40% wrong.</li>
+<li>A new engineer joins, reads the runbook, gets confused, asks on Slack.</li>
+<li>The Slack answer becomes the new runbook. In Slack. Unsearchable.</li>
+<li>The written runbook gets ignored. It is now a liability — authoritative-looking, actually wrong.</li>
+</ol>
+
+<p>This loop is structural. SRE teams are optimized to keep systems alive, not to maintain documentation artifacts. You cannot solve it by asking engineers to be more disciplined. You solve it by making the artifacts maintain themselves as a side effect of the work that is already happening.</p>
+
+<p>Every time an alert fires in SigNoz and resolves, that is a signal. Every time a Confluence page changes, that is a signal. Every time somebody touches a runbook in git, that is a signal. The self-maintaining knowledge base is just the observation that these signals already exist; we just weren't plumbing them anywhere useful.</p>
+
+<blockquote><p>A knowledge base that requires humans to keep it up to date is a knowledge base that will always be out of date.</p></blockquote>
+
+<h2>The Obsidian vault architecture</h2>
+
+<p>The whole system is an Obsidian vault. Markdown files, YAML frontmatter, <code>[[wikilinks]]</code>, no database, no special client. You can open it on your phone in any markdown editor. You can grep it. You can commit it to git. When things go wrong, you can fix them with a text editor.</p>
+
+<p>This was a deliberate choice. Every "knowledge management platform" I've used at work — Confluence, Notion, internal wikis — ends up becoming the problem. Lock-in, bad search, brittle APIs, subtle formatting breakage on export. Obsidian is just files. If Obsidian disappeared tomorrow, the vault would still work in vim.</p>
+
+<pre><code class="language-text">~/Documents/obsidian-sre/
+├── overview.md              # Living synthesis, rebuilt after every sync
+├── README.md                # Vault conventions
+├── entities/                # Concrete things (services, clusters, accounts)
+│   ├── auth-service.md
+│   ├── prod-eks-cluster.md
+│   ├── rds-aurora-postgres.md
+│   └── signoz-observability.md
+├── concepts/                # Abstractions (SLOs, error budgets, patterns)
+│   ├── error-budget.md
+│   ├── hub-spoke-aws.md
+│   └── blue-green-deployment.md
+├── runbooks/                # What to do when X happens
+│   ├── runbook-auth-service.md
+│   ├── runbook-rds-failover.md
+│   └── runbook-eks-node-drain.md
+├── incidents/               # Postmortems, auto-generated from SigNoz
+├── _archive/                # Auto-moved stale pages
+├── _templates/              # New-page scaffolds
+└── _meta/                   # Sync state, reports, never rendered
+    ├── sync-state.json
+    ├── contradictions.json
+    └── staleness-report.json</code></pre>
+
+<p>Four page <em>kinds</em> — <code>entity</code>, <code>concept</code>, <code>runbook</code>, <code>incident</code> — map to four folders. Every page has a frontmatter block declaring its kind, sources, freshness, and tags:</p>
+
+<pre><code class="language-yaml">---
+title: auth-service
+type: entity
+last_updated: 2026-04-18T09:12:00Z
+sources:
+  - signoz:rule-auth-p99-latency
+  - confluence:PLATFORM:123456
+  - github:aegis/apps/api/auth
+freshness: current
+tags: [service, spring-boot, platform]
+aliases: [auth, auth-svc]
+---
+
+# auth-service
+
+Spring Boot microservice. Handles OIDC flows through Keycloak, maintains
+session state in HikariCP connection pools pinned to pod lifecycle.
+
+> **Scale policy**: never `kubectl scale --replicas=0`. Use
+> `kubectl rollout restart`. See [[runbook-auth-service]].
+
+## Dependencies
+- [[rds-aurora-postgres]] for user records
+- [[signoz-observability]] for RED metrics
+
+## Recent incidents
+- [[INC-EXAMPLE-001]] — HikariCP pool exhaustion (2026-02-10)</code></pre>
+
+<p>The <code>sources</code> array is what makes all of this work. Each source is a URI the sync engine can re-read. When SigNoz emits a new resolved alert on <code>rule-auth-p99-latency</code>, the Ingester knows which page to extend. When Confluence edits <code>PLATFORM:123456</code>, the new version gets merged in. The page is a view over multiple sources, not a hand-written document.</p>
+
+<h2>Auto-sync from SigNoz — incidents become runbooks</h2>
+
+<p>The <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/signoz_sync.py"><code>signoz_sync.py</code></a> module runs hourly. It pulls resolved incidents from SigNoz's <code>/api/v1/alerts</code> endpoint, enriches each one with the underlying rule definition, and feeds the merged payload to the Ingester.</p>
+
+<pre><code class="language-python"># apps/ai-engine/wiki/signoz_sync.py
+class SignozConfig(BaseModel):
+    """Connection + scheduling configuration for a SigNoz instance."""
+    base_url: str
+    api_key: SecretStr
+    sync_frequency: Literal["hourly", "daily", "manual"] = "hourly"
+    lookback_days: int = 30
+
+
+class SignozSyncResult(BaseModel):
+    synced_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+    alerts_fetched: int = 0
+    incidents_ingested: int = 0
+    errors: list[str] = Field(default_factory=list)</code></pre>
+
+<p>The trick is deduplication. Rerunning a sync can't re-ingest the same incident twice. The manifest lives at <code>_meta/signoz-synced.json</code> and keys on the incident_id SigNoz assigns:</p>
+
+<pre><code class="language-json">{
+  "last_sync": "2026-04-18T09:00:00Z",
+  "synced_incidents": {
+    "6a2c9e1f-...": {
+      "slug": "INC-EXAMPLE-001",
+      "rule_id": "rule-auth-p99-latency",
+      "first_fired_at": "2026-02-10T04:22:00Z",
+      "resolved_at": "2026-02-10T05:09:00Z",
+      "ingested_at": "2026-02-10T06:00:00Z"
+    }
+  }
+}</code></pre>
+
+<p>If the incident_id changes upstream — which happens rarely but does happen — the sync treats it as new and a human gets a duplicate. That's the right failure mode. Silent merging into the wrong page is worse than a visible duplicate.</p>
+
+<p>The generated incident page is intentionally minimal — just the facts SigNoz knows. Anything richer goes in <code>## Manual notes</code> above the auto-generated fence, the same pattern <code>overview.md</code> uses.</p>
+
+<h2>Auto-sync from Confluence — pages merge into topics</h2>
+
+<p>Confluence is trickier than SigNoz because it emits prose, not structured events. The <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/confluence_sync.py"><code>confluence_sync.py</code></a> module walks every page in a space via the REST API v2, feeds the body through the Ingester, and tracks the page_id so upstream deletions can be reflected locally.</p>
+
+<pre><code class="language-python"># apps/ai-engine/wiki/confluence_sync.py
+class ConfluenceConfig(BaseModel):
+    base_url: str
+    space_key: str
+    api_token: SecretStr
+    email: str
+    sync_frequency: Literal["hourly", "daily", "weekly", "manual"] = "daily"</code></pre>
+
+<p>The interesting behavior is what happens when a Confluence page is deleted upstream. The manifest at <code>_meta/confluence-synced.json</code> knew about it. The sync can see it's gone. A naive implementation would delete the vault page. That's wrong — the knowledge it contained might still be valid and other pages might link to it. The correct behavior is to flag it <code>archived</code> locally and leave the file in place so <code>[[wikilinks]]</code> don't break.</p>
+
+<pre><code class="language-python">async def handle_upstream_deletion(self, page_id: str, vault: Path):
+    local_slug = self.manifest.slug_for(page_id)
+    if not local_slug:
+        return
+    logger.info("confluence: upstream-deleted page_id=%s slug=%s", page_id, local_slug)
+    await self._mark_archived(vault / f"{local_slug}.md")</code></pre>
+
+<p>This is the difference between "your KB is a mirror of Confluence" and "your KB is a knowledge graph that <em>consumes</em> Confluence." The second one tolerates upstream volatility. The first one inherits it.</p>
+
+<p>Token hygiene: the <code>api_token</code> field uses Pydantic's <code>SecretStr</code>, which means tokens never appear in log output or exception messages by accident. Small detail, but I've worked at places where a Confluence admin token was logged into CloudWatch once, and it took three people half a day to rotate and clean up. Never again.</p>
+
+<h2>The living overview.md</h2>
+
+<p>The <code>overview.md</code> is the vault's home page. It's what you see when you open the vault in Obsidian. It's what a recruiter sees when they open the public mirror on GitHub. It is the single most-important page in the system, and the one I most want to never hand-edit.</p>
+
+<p>The <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/synthesizer.py"><code>synthesizer.py</code></a> module rebuilds it after every sync run. The structure is deliberate:</p>
+
+<pre><code class="language-markdown">---
+title: Overview
+type: concept
+last_updated: 2026-04-19T10:00:00Z
+sources: [aegis-wiki-engine:synthesis]
+freshness: current
+---
+
+# SRE Wiki Overview
+
+> This file is auto-synthesized by the Aegis LLM Wiki Engine. Manual
+> edits below the `<!-- AUTO-GENERATED BELOW -->` marker will be overwritten.
+
+## Manual notes (preserved across syntheses)
+
+- Platform team rotation follows the Korean work calendar; on-call
+  handoff is Monday 10:00 KST
+- All Terraform changes require /codex review before apply per team policy
+- PG 13 -> 16 migration is the top infrastructure priority for Q2 2026
+
+<!-- AUTO-GENERATED BELOW -->
+
+## Services
+| Service | Type | Owner | Runbook | Last Incident |
+|---------|------|-------|---------|---------------|
+...
+
+## Recent Incidents (last 30 days)
+
+## Known Patterns
+(synthesized by Claude from incident history and metrics correlation)
+- 80% of auth-service incidents occur Monday 09:00-11:00 KST
+- ArgoCD drift incidents cluster around manual kubectl edits
+
+## Document Health
+| Metric | Count |
+|--------|-------|
+| Total pages | 13 |
+| Current (updated <30d) | 13 |
+| Stale (30-90d) | 0 |</code></pre>
+
+<p>Two design decisions matter here.</p>
+
+<p><strong>First: the fence.</strong> Everything above <code>&lt;!-- AUTO-GENERATED BELOW --&gt;</code> is human-owned. Everything below is machine-owned. The synthesizer preserves the human half bit-for-bit, regenerates the machine half from vault state, and writes the file atomically. This solves the "LLM output ate my notes" problem cleanly. I can hand-edit the top half whenever I want, and nothing touches it.</p>
+
+<p><strong>Second: patterns are synthesized, not written.</strong> The "Known Patterns" section emerges from the incident corpus. The synthesizer asks Claude Sonnet to find temporal and topical clusters across incidents, services, and metrics. Output like "80% of auth-service incidents occur Monday 09:00-11:00 KST" is an actual pattern I noticed after months of running this — Monday-morning login spikes from weekend-away users hit HikariCP pools that haven't fully warmed. I didn't write that sentence. Claude did, from correlated incident frontmatter.</p>
+
+<blockquote><p>The best documentation isn't written. It's observed.</p></blockquote>
+
+<h2>Freshness tracking + orphan detection</h2>
+
+<p>The <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/staleness.py"><code>staleness.py</code></a> module runs daily. Every page gets a freshness label computed from <code>last_updated</code> minus per-source-type thresholds:</p>
+
+<table>
+<thead><tr><th>Source type</th><th>Stale at</th><th>Archive at</th></tr></thead>
+<tbody>
+<tr><td><code>confluence</code></td><td>90 days</td><td>180 days</td></tr>
+<tr><td><code>github_docs</code></td><td>60 days</td><td>180 days</td></tr>
+<tr><td><code>runbook</code></td><td>120 days</td><td>365 days</td></tr>
+<tr><td><code>incident</code></td><td>365 days</td><td>730 days</td></tr>
+<tr><td><code>manual</code></td><td>30 days</td><td>180 days</td></tr>
+</tbody>
+</table>
+
+<p>The labels get written back into the page's frontmatter. Obsidian's Dataview plugin then lets me render dashboards like "all stale runbooks" with a three-line query:</p>
+
+<pre><code class="language-sql">TABLE last_updated, freshness
+FROM "runbooks"
+WHERE freshness = "stale"
+SORT last_updated ASC</code></pre>
+
+<p>Orphan detection is a second pass. <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/staleness.py"><code>find_orphans</code></a> walks every page, extracts every <code>[[wikilink]]</code> target, and surfaces any page whose slug or title never appears as a target:</p>
+
+<pre><code class="language-python">async def find_orphans(self, pages: list["WikiPage"]) -> list["WikiPage"]:
+    """Return pages that no other page links to via [[wikilinks]]."""
+    linked: set[str] = set()
+    for p in pages:
+        for target in _extract_wikilink_targets(getattr(p, "body", "") or ""):
+            linked.add(target.lower())
+
+    orphans: list["WikiPage"] = []
+    for p in pages:
+        slug = (p.slug or "").lower()
+        title = (getattr(p, "title", "") or "").lower()
+        if slug and slug in linked:
+            continue
+        if title and title in linked:
+            continue
+        fm = getattr(p, "frontmatter", None) or {}
+        if isinstance(fm, dict) and fm.get("index_page") is True:
+            continue
+        orphans.append(p)
+    return orphans</code></pre>
+
+<p>Orphans almost always fall into one of three buckets: (1) a draft that never got integrated, (2) a historical page whose references were all archived, or (3) a legitimately standalone reference page. The <code>index_page: true</code> escape hatch handles case 3. Cases 1 and 2 are the real findings.</p>
+
+<p>Orphans + staleness together are the auto-maintenance loop. Stale orphans get archived first. Fresh orphans get a review flag. Nothing gets silently deleted.</p>
+
+<h2>The data flow, end to end</h2>
+
+<div class="mermaid">
+flowchart TB
+    subgraph Sources
+        A[SigNoz alerts API]
+        B[Confluence REST v2]
+        C[GitHub wikis]
+        D[Manual pages]
+    end
+    subgraph Engine[Wiki Engine apps/ai-engine/wiki/]
+        E[signoz_sync.py]
+        F[confluence_sync.py]
+        G[ingester.py]
+        H[synthesizer.py]
+        I[contradiction.py]
+        J[staleness.py]
+        K[publisher.py]
+    end
+    subgraph Vault[Obsidian Vault]
+        V1[entities/]
+        V2[concepts/]
+        V3[runbooks/]
+        V4[incidents/]
+        V5[overview.md]
+        V6[_archive/]
+    end
+    subgraph Publish
+        L[github.com/JIUNG9/aegis-wiki]
+    end
+    A --> E --> G
+    B --> F --> G
+    C --> G
+    D --> G
+    G --> V1 & V2 & V3 & V4
+    V1 & V2 & V3 & V4 --> H --> V5
+    V1 & V2 & V3 & V4 --> I
+    V1 & V2 & V3 & V4 --> J --> V6
+    V1 & V2 & V3 & V4 & V5 --> K --> L
+</div>
+
+<p>Every one of those modules is in <a href="https://github.com/JIUNG9/aegis/tree/main/apps/ai-engine/wiki"><code>apps/ai-engine/wiki/</code></a> today. This is the Layer 1 build of Aegis — the foundation the later layers sit on top of.</p>
+
+<h2>The portfolio angle</h2>
+
+<p>Here's the part I don't see anyone else doing.</p>
+
+<p>The same vault that keeps my team's operational knowledge fresh is also my most compelling job-search artifact. <a href="https://github.com/JIUNG9/aegis-wiki">github.com/JIUNG9/aegis-wiki</a> is the public mirror — a sanitized version of my real operational vault, auto-published through the <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/publisher.py"><code>publisher.py</code></a> module, with all internal identifiers and account IDs scrubbed by the redaction pass.</p>
+
+<p>When a Canadian tech recruiter clicks through to my GitHub, they don't see a neglected "coming soon" wiki. They see:</p>
+
+<ul>
+<li>A live-looking SRE knowledge base for a fictional-but-realistic production environment.</li>
+<li>Entity pages for services, databases, clusters — each with dependencies, runbooks, and incident history.</li>
+<li>Runbooks that cross-link to incidents that cross-link to services.</li>
+<li>An overview page with real synthesized patterns ("Monday login spikes", "ArgoCD drift correlated with manual kubectl edits").</li>
+<li>A document health table showing staleness stats in the single digits.</li>
+<li>Every page tagged with sources, freshness, and last-updated timestamps.</li>
+</ul>
+
+<p>It reads like a real operational vault because it is one — just with the names filed off. The engine doesn't care that the "customer-service" in the public mirror isn't the actual service name. All the operational reasoning is legitimate.</p>
+
+<blockquote><p>When a recruiter visits my GitHub, they see a live, real-looking SRE knowledge base. Not a blog post about how I <em>would</em> build one.</p></blockquote>
+
+<p>Compare that to the average SRE candidate's GitHub: a half-finished Terraform module, a forked kubernetes example, and a README.md. The knowledge-base portfolio demonstrates something every SRE lead actually wants to see — <em>can this person structure operational knowledge well enough that an AI agent could be trusted with it?</em> The vault itself is the answer.</p>
+
+<h2>A brief comparison</h2>
+
+<table>
+<thead><tr><th>Approach</th><th>Updates itself?</th><th>AI-agent safe?</th><th>Public portfolio?</th></tr></thead>
+<tbody>
+<tr><td>Confluence as-is</td><td>No</td><td>No (stale pages rank high)</td><td>No (behind SSO)</td></tr>
+<tr><td>GitHub wiki in team repo</td><td>Partial</td><td>Partial</td><td>No (private repo)</td></tr>
+<tr><td>Notion internal KB</td><td>No</td><td>No</td><td>No (paywalled)</td></tr>
+<tr><td>Hand-written personal README</td><td>No</td><td>N/A</td><td>Yes, but shallow</td></tr>
+<tr><td>Aegis LLM Wiki Engine (this)</td><td>Yes</td><td>Yes (reconciled context)</td><td>Yes, auto-published mirror</td></tr>
+</tbody>
+</table>
+
+<p>The engine is under 3,000 lines of Python. It runs on a laptop. The heavy lifting is a few Claude Sonnet calls per sync. Total cost in my testing is under $5/month.</p>
+
+<h2>Try it yourself</h2>
+
+<pre><code class="language-bash">git clone https://github.com/JIUNG9/aegis.git
+cd aegis/apps/ai-engine
+poetry install
+
+# Bootstrap a vault
+export AEGIS_VAULT=~/Documents/obsidian-sre
+poetry run aegis-wiki bootstrap
+
+# Sync from SigNoz
+export SIGNOZ_BASE_URL=https://signoz.example.com
+export SIGNOZ_API_KEY=your-key
+poetry run aegis-wiki sync signoz
+
+# Sync from Confluence
+export CONFLUENCE_BASE_URL=https://your-org.atlassian.net
+export CONFLUENCE_SPACE=PLATFORM
+export CONFLUENCE_EMAIL=you@example.com
+export CONFLUENCE_TOKEN=your-token
+poetry run aegis-wiki sync confluence
+
+# Lint, synthesize, publish
+poetry run aegis-wiki lint
+poetry run aegis-wiki synthesize
+poetry run aegis-wiki publish  # pushes sanitized mirror</code></pre>
+
+<p>Open the result in <a href="https://obsidian.md/">Obsidian</a>. Read <code>overview.md</code>. Run <code>sync</code> again tomorrow and watch the vault evolve without you touching it.</p>
+
+<div class="cta">
+  <h3>Star the repo &middot; Aegis on GitHub</h3>
+  <p>Open-source AI-Native DevSecOps Command Center. Layer 1 wiki engine is live today.</p>
+  <a href="https://github.com/JIUNG9/aegis">github.com/JIUNG9/aegis</a>
+</div>
+
+<h2>Next in the series</h2>
+
+<p>Next article: <strong>"The Automation Ladder — 5 Levels of SRE Automation, From Grep to MCP-Driven Agents."</strong> That one walks through the pattern language I use to decide what to automate, how far to take it, and where humans belong in the loop. It's the mental model that made all of this coherent instead of a pile of scripts.</p>
+
+<p class="footer-note">June Gu is an SRE at my employer and previously at a large e-commerce company. He's building Aegis in public as he prepares to relocate to Canada in February 2027. The sanitized public vault lives at <a href="https://github.com/JIUNG9/aegis-wiki">github.com/JIUNG9/aegis-wiki</a>.</p>
+
+<div class="tags">
+  <span>Obsidian</span><span>Knowledge Management</span><span>AI</span><span>SRE</span><span>Open Source</span><span>Career</span>
+</div>
+
+</article>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

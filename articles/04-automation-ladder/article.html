@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AI SRE Agent That Watches Before It Acts — The 4-Stage Automation Ladder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      background: '#0A0A0F',
+      primaryColor: '#1E1E2A',
+      primaryTextColor: '#E4E4E7',
+      primaryBorderColor: '#00FF88',
+      lineColor: '#00FF88',
+      secondaryColor: '#2A2A3A',
+      tertiaryColor: '#1E1E2A',
+      fontFamily: 'JetBrains Mono, monospace',
+    },
+  });
+</script>
+<style>
+  :root {
+    --bg: #0A0A0F;
+    --card: #1E1E2A;
+    --card-2: #2A2A3A;
+    --text: #E4E4E7;
+    --muted: #A1A1AA;
+    --accent: #00FF88;
+    --border: #2E2E3E;
+    --code-bg: #12121B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+  body {
+    font-family: Inter, -apple-system, system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px 120px; }
+  header.lede { margin-bottom: 56px; border-bottom: 1px solid var(--border); padding-bottom: 32px; }
+  header.lede .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 38px;
+    line-height: 1.15;
+    margin: 0 0 20px;
+    letter-spacing: -0.01em;
+  }
+  header.lede .sub {
+    color: var(--muted);
+    font-size: 18px;
+    font-style: italic;
+  }
+  h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    margin-top: 64px;
+    margin-bottom: 18px;
+    letter-spacing: -0.005em;
+  }
+  h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 19px;
+    margin-top: 36px;
+    margin-bottom: 12px;
+    color: var(--accent);
+  }
+  p { margin: 0 0 18px; }
+  strong { color: #fff; font-weight: 600; }
+  em { color: var(--muted); }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(0,255,136,0.3); }
+  a:hover { border-bottom-color: var(--accent); }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 48px 0; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #F0F0F5;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 24px 0;
+  }
+  pre code {
+    background: transparent;
+    padding: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  blockquote {
+    margin: 28px 0;
+    padding: 20px 24px;
+    border-left: 3px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    color: #fff;
+    font-size: 18px;
+  }
+  blockquote strong { color: var(--accent); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+  }
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--card);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  td code { font-size: 12.5px; }
+  .mermaid {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 28px 0;
+    text-align: center;
+  }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  footer.meta {
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .tags {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="lede">
+  <div class="kicker">Aegis v4.0 · Article 4 of 8</div>
+  <h1>AI SRE Agent That Watches Before It Acts — The 4-Stage Automation Ladder</h1>
+  <div class="sub">How I stopped being scared of giving an AI agent production access — by making it prove itself for a month first.</div>
+</header>
+
+<h2>Don't let an AI agent touch production on day one</h2>
+
+<p>I've watched a lot of teams do this wrong. A shiny new AI ops tool shows up, someone wires it to <code>kubectl</code> with cluster-admin, and two weeks later there's a postmortem titled "Why the bot scaled payment-service to zero at 2 AM."</p>
+
+<p>After that incident, nobody trusts the bot again. The tool gets shelved. The team goes back to pager rotation and 40-page runbooks. The vendor loses the account.</p>
+
+<p>The problem isn't the AI. The problem is that we gave it full production access before it earned the trust.</p>
+
+<p>I'm building <a href="https://github.com/JIUNG9/aegis">Aegis</a>, an AI-native DevSecOps command center, on nights and weekends. The whole point is that the AI investigates incidents, proposes fixes, and — eventually — executes low-risk ones autonomously. But "eventually" is the key word.</p>
+
+<p>Here's the trust-building ladder I designed into Aegis v4.0, and the slow arc I used on my own team at my employer to get from "AI watches only" to "AI acts on low-risk."</p>
+
+<blockquote><strong>The rule:</strong> An AI agent should earn each rung of autonomy. Skipping rungs is how you end up in a postmortem.</blockquote>
+
+<h2>The fear every ops team has</h2>
+
+<p>Every SRE I've talked to about AI agents has the same two-part anxiety:</p>
+
+<p><strong>Part 1:</strong> "What if the AI hallucinates a fix and breaks production?"</p>
+
+<p><strong>Part 2:</strong> "What if my team finds out I let the AI touch production and loses trust in me?"</p>
+
+<p>The second fear is bigger than the first. In Korean SRE culture — and honestly in any SRE culture — you don't get forgiven for letting an automated system break production. You get forgiven for humans making mistakes because the humans can explain themselves in a postmortem. An AI agent can't defend itself. It just sits there in the audit log, implicating you.</p>
+
+<p>So the question isn't "is the AI good enough?" The question is "how do I structure this so that when the AI is wrong, the blast radius is contained and the audit trail is clean?"</p>
+
+<p>That's what the automation ladder is for.</p>
+
+<h2>Conf42 SRE 2026: safety-first as industry pattern</h2>
+
+<p>I sat in on a bunch of Conf42 SRE 2026 talks earlier this year and noticed a pattern. Every team doing AI ops at scale — not just demos, but in production — had essentially the same four-stage rollout:</p>
+
+<ol>
+  <li><strong>Shadow mode</strong> — AI runs in parallel to humans, never takes action.</li>
+  <li><strong>Recommendation mode</strong> — AI surfaces suggestions, humans decide.</li>
+  <li><strong>Selective automation</strong> — AI auto-acts on clearly safe things.</li>
+  <li><strong>Bounded autonomy</strong> — AI auto-acts on most things, humans approve the scary ones.</li>
+</ol>
+
+<p>This isn't new. It's the same pattern autonomous driving uses (SAE Levels 0–5). It's the same pattern Google's auto-remediation playbook uses. It's the same pattern any sane safety engineer would design.</p>
+
+<p>The mistake people make is trying to skip to stage 3 on day one because "we already tested it in staging."</p>
+
+<blockquote><strong>Staging is not production.</strong> No amount of synthetic load testing prepares you for the emergent weirdness of real traffic at 3 AM on a Saturday.</blockquote>
+
+<p>The automation ladder is just an acknowledgment that trust is earned on a schedule measured in weeks, not hours.</p>
+
+<h2>The 4 stages, in detail</h2>
+
+<p>Here's how I structured it in Aegis. This maps directly to the <code>observation_mode.py</code> module I'm building in the <code>guardrails/</code> engine (coming in Layer 4 — see <a href="https://github.com/JIUNG9/aegis/blob/main/ARCHITECTURE.md">ARCHITECTURE.md</a> for the roadmap).</p>
+
+<h3>Stage 1: OBSERVE</h3>
+<p><strong>What it does:</strong> AI watches every alert, runs its investigation, generates a root-cause hypothesis, and logs everything. Nothing is shown to the operator. Nothing is acted on.</p>
+<p><strong>Why start here:</strong> You need a baseline. For two weeks, you let the AI run in complete silence, then you compare its conclusions to what humans actually did. How often was the AI right? Where did it confidently suggest something stupid? Which services does it understand well, and which does it guess on?</p>
+<p><strong>Exit criteria:</strong> When the AI's silent conclusions match human resolutions ~70% of the time on your common incident types.</p>
+
+<h3>Stage 2: RECOMMEND</h3>
+<p><strong>What it does:</strong> AI's investigation and proposed fixes appear in the Slack channel and on the incident dashboard. But the "execute" buttons are disabled. Humans read the recommendation, decide on their own, and act.</p>
+<p><strong>Why this stage matters:</strong> This is where the team starts <em>using</em> the AI as an augmentation. The on-call engineer gets paged, opens Slack, and sees "Aegis analysis: this looks like the connection-pool exhaustion pattern from three weeks ago; recommend rolling restart of <code>auth-service</code>; rollback plan attached." The engineer doesn't have to trust the AI — they can read the reasoning, check the metrics it cited, and decide.</p>
+<p>You'd be surprised how long this stage should last. I kept Aegis in Stage 2 for a full month at acme-corp before considering Stage 3. The first two weeks were mostly me reading recommendations during ambient hours and grading them. By week four, the team was asking "where's the Aegis summary?" when they got paged before looking at Grafana.</p>
+<p><strong>Exit criteria:</strong> Team actively uses the recommendations, and you have data showing the AI's suggestions would have been safe (no "good thing we didn't let it do that" moments).</p>
+
+<h3>Stage 3: LOW-AUTO</h3>
+<p><strong>What it does:</strong> AI auto-executes low-risk actions (read-only queries, scale-up for traffic spikes, cache flushes on specific services). Medium and high-risk actions still go through human approval.</p>
+<p><strong>Why low-only first:</strong> Low-risk actions are reversible and observable. If the AI scales <code>checkout-service</code> from 5 to 8 replicas at 10 AM during a traffic spike, the worst case is "it scaled when it didn't need to" — which costs you pennies and nothing else. That's a cheap way to prove the execution path itself works end-to-end.</p>
+<p>This is the stage I'm currently at with my internal instance, 10 weeks in. And I'm deliberately staying here for another two months before moving up.</p>
+<p><strong>Exit criteria:</strong> 100+ successful auto-executions with zero rollbacks triggered by post-validation.</p>
+
+<h3>Stage 4: FULL-AUTO</h3>
+<p><strong>What it does:</strong> AI auto-executes low and medium-risk actions. High-risk actions still require manual approval. Blocked actions (IAM changes, resource deletion, <code>terraform apply</code>) are never automated.</p>
+<p><strong>What this actually looks like:</strong> The AI can now restart pods, scale deployments, roll back recent releases, flush caches, and update non-prod config — all without waking you up. You see the audit log in the morning and confirm. High-risk stuff (multi-service changes, data migrations, anything touching production IAM) still requires you to type approve in Slack.</p>
+<p>I won't be at Stage 4 for another six months minimum.</p>
+
+<blockquote><strong>Stage 4 is not the end state for everything.</strong> Some actions should never be automated, no matter how much the AI earns your trust. IAM changes are one. Data deletion is another. Those stay at "blocked" forever.</blockquote>
+
+<h2>Risk classification — the table that decides what the AI can touch</h2>
+
+<p>Every proposed action gets classified by the <code>risk_assessor.py</code> module (planned — see <a href="https://github.com/JIUNG9/aegis/blob/main/ARCHITECTURE.md#layer-4-production-guardrails">Layer 4 spec</a>). The classification drives everything downstream: dry-run, approval gates, rollback requirements, audit verbosity.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Action</th><th>Risk</th><th>Stage 1</th><th>Stage 2</th><th>Stage 3</th><th>Stage 4</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td><code>query_logs</code>, <code>query_metrics</code>, <code>describe_pod</code></td><td>Read-only</td><td>auto</td><td>auto</td><td>auto</td><td>auto</td></tr>
+    <tr><td>Update staging env var</td><td>Low</td><td>observe</td><td>recommend</td><td>auto</td><td>auto</td></tr>
+    <tr><td><code>kubectl scale --replicas=N</code> (up)</td><td>Low</td><td>observe</td><td>recommend</td><td>auto</td><td>auto</td></tr>
+    <tr><td>Cache flush (single service)</td><td>Low</td><td>observe</td><td>recommend</td><td>auto</td><td>auto</td></tr>
+    <tr><td><code>kubectl rollout restart deployment/X</code></td><td>Medium</td><td>observe</td><td>recommend</td><td>recommend</td><td>auto</td></tr>
+    <tr><td><code>kubectl rollout undo</code></td><td>Medium</td><td>observe</td><td>recommend</td><td>recommend</td><td>auto</td></tr>
+    <tr><td>Scale-down prod deployment</td><td>Medium</td><td>observe</td><td>recommend</td><td>recommend</td><td>auto</td></tr>
+    <tr><td>Update prod config (non-secret)</td><td>Medium</td><td>observe</td><td>recommend</td><td>recommend</td><td>auto</td></tr>
+    <tr><td><code>terraform apply</code> (any)</td><td>High</td><td>observe</td><td>recommend</td><td>recommend</td><td>approval</td></tr>
+    <tr><td>Multi-service rollback</td><td>High</td><td>observe</td><td>recommend</td><td>recommend</td><td>approval</td></tr>
+    <tr><td><code>kubectl delete</code> anything</td><td>High</td><td>observe</td><td>recommend</td><td>recommend</td><td>approval</td></tr>
+    <tr><td>IAM role / policy change</td><td>Blocked</td><td>never</td><td>never</td><td>never</td><td>never</td></tr>
+    <tr><td>Data mutation / deletion</td><td>Blocked</td><td>never</td><td>never</td><td>never</td><td>never</td></tr>
+  </tbody>
+</table>
+
+<p>The classifier isn't a free-form LLM call. It's a rule engine with LLM fallback. The rules cover 90% of actions (regex on commands, service tags, namespace). The LLM only adjudicates ambiguous ones, and it has to justify its classification in the audit log.</p>
+
+<blockquote><strong>Why regex first, LLM second:</strong> I don't want a hallucinated risk score. For anything that matches a rule, the AI's risk opinion doesn't matter. The rule wins.</blockquote>
+
+<h2>Pre-validation: dry-run before you commit</h2>
+
+<p>Before any action at Stage 3 or 4 actually runs, it goes through <code>pre_validator.py</code> (planned at <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails">apps/ai-engine/guardrails/pre_validator.py</a>). This is not the same as the LLM reasoning about whether the action is safe. This is a mechanical check.</p>
+
+<pre><code class="language-python"># Pseudocode from the planned pre_validator
+async def dry_run(action: ProposedAction) -> DryRunResult:
+    if action.command.startswith("kubectl"):
+        # Every kubectl action must dry-run first
+        result = await shell(f"{action.command} --dry-run=server")
+        if result.exit_code != 0:
+            return DryRunResult(safe=False, reason=result.stderr)
+
+    if action.command.startswith("terraform"):
+        # Terraform apply never executes from AI — planning only
+        return DryRunResult(safe=False, reason="terraform_apply_blocked")
+
+    if action.target_namespace in PROTECTED_NAMESPACES:
+        return DryRunResult(safe=False, reason="protected_namespace")
+
+    return DryRunResult(safe=True, plan=result.stdout)
+</code></pre>
+
+<p>The dry-run output gets stored with the audit entry. If the AI later claims "I scaled auth-service," there's a paired record of what the server said the action <em>would</em> do before it happened. That's how you debug the AI being wrong about its own actions.</p>
+
+<h2>Post-validation: did the metrics actually improve?</h2>
+
+<p>This is the part most AI ops tools skip, and it's the part that matters most at 3 AM. After an action executes, the AI has to prove it worked — not by the AI's own judgment, but by measurable change in SigNoz metrics.</p>
+
+<p>The <code>post_validator.py</code> module (planned) does this:</p>
+
+<pre><code class="language-python">async def verify_action(action: ExecutedAction) -> VerificationResult:
+    # Wait for metrics to stabilize
+    await asyncio.sleep(60)
+
+    # Compare the 5-minute window before action vs. after
+    metrics_before = action.metrics_snapshot
+    metrics_after = await signoz.fetch_metrics(
+        service=action.target_service,
+        window_minutes=5,
+    )
+
+    # Did the target metric actually improve?
+    improvement = compare(metrics_before, metrics_after, action.target_metric)
+
+    if improvement &lt; action.expected_improvement * 0.5:
+        # Not enough improvement — roll back
+        await rollback_manager.execute(action.rollback_plan)
+        return VerificationResult(success=False, rolled_back=True)
+
+    return VerificationResult(success=True, improvement=improvement)
+</code></pre>
+
+<p>Rollback-first is the core discipline. Every action must come with a rollback plan before it's allowed to execute. The <code>rollback_manager.py</code> (planned) refuses to run any action where <code>action.rollback_plan</code> is <code>None</code>. That's non-negotiable.</p>
+
+<blockquote><strong>If the AI can't articulate how to undo it, the AI can't do it.</strong> This rule alone filters out 80% of the worst mistakes before they happen.</blockquote>
+
+<h2>Approval gates: Slack for the uncertain middle</h2>
+
+<p>Medium-risk actions go through <code>approval_gate.py</code> (planned). The flow:</p>
+
+<div class="mermaid">
+sequenceDiagram
+    participant Alert as SigNoz Alert
+    participant CT as Claude Control Tower
+    participant GR as Guardrails Engine
+    participant Slack as Slack Channel
+    participant Human as On-Call Engineer
+    participant Target as Target System
+
+    Alert->>CT: Alert fires
+    CT->>CT: Investigate (RAG + SigNoz + patterns)
+    CT->>GR: Propose action: rollout restart auth-service
+    GR->>GR: Risk = medium
+    GR->>GR: Dry-run (safe)
+    GR->>GR: Rollback plan (present)
+    GR->>Slack: Post approval card (30s timeout default)
+    Slack->>Human: Notification
+    Human->>Slack: Click "Approve" or "Reject"
+    Slack-->>GR: approved
+    GR->>Target: Execute
+    GR->>GR: Post-validate metrics
+    GR->>Slack: Post outcome
+</div>
+
+<p>The Slack card has four buttons: <strong>Approve</strong>, <strong>Reject</strong>, <strong>Modify</strong>, <strong>Escalate</strong>. The on-call engineer sees the full context — the alert, the investigation, the proposed command, the dry-run output, the rollback plan, the historical success rate of similar actions.</p>
+
+<p>The important detail: <strong>no auto-approve on timeout</strong>. If nobody answers in 30 seconds, the action does not proceed. I've seen tools default to "no response = approved" and it's the single most dangerous default I can think of.</p>
+
+<h2>Audit trail: SOC2-compliant decision log</h2>
+
+<p>Every AI decision — every single one, including the ones that got rejected at the guardrails stage — goes into the audit log via <code>audit_logger.py</code> (planned at <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails">apps/ai-engine/guardrails/audit_logger.py</a>).</p>
+
+<p>A real log entry looks like this:</p>
+
+<pre><code class="language-json">{
+  "timestamp": "2026-04-19T10:30:00Z",
+  "investigation_id": "INV-2026-042",
+  "trigger": "signoz_alert:auth-service-error-rate-high",
+  "automation_stage": 3,
+  "proposed_action": {
+    "command": "kubectl rollout restart deployment/auth-service -n prod",
+    "target_service": "auth-service",
+    "expected_improvement": "error_rate &lt; 1%"
+  },
+  "risk_classification": {
+    "level": "medium",
+    "classifier": "rule_engine",
+    "rule": "kubectl_rollout_restart_prod"
+  },
+  "pre_validation": {
+    "dry_run_exit_code": 0,
+    "dry_run_output": "deployment.apps/auth-service restarted (dry run)"
+  },
+  "rollback_plan": {
+    "present": true,
+    "command": "kubectl rollout undo deployment/auth-service -n prod",
+    "to_revision": 47
+  },
+  "approval": {
+    "gate": "slack",
+    "approver": "junegu",
+    "approved_at": "2026-04-19T10:30:47Z",
+    "decision_latency_seconds": 47
+  },
+  "execution": {
+    "started_at": "2026-04-19T10:30:47Z",
+    "completed_at": "2026-04-19T10:31:03Z",
+    "exit_code": 0
+  },
+  "post_validation": {
+    "window_minutes": 5,
+    "metrics_before": {"error_rate_pct": 5.2, "p99_latency_ms": 1200},
+    "metrics_after": {"error_rate_pct": 0.3, "p99_latency_ms": 280},
+    "success": true
+  },
+  "model": "claude-sonnet-4-6",
+  "tokens": {"input": 8420, "output": 3980},
+  "cost_usd": 0.08
+}
+</code></pre>
+
+<p>This log is append-only, signed, and exportable to any SOC2 auditor. When somebody asks "did the AI do anything weird last quarter?" — here's your answer, structured, timestamped, with evidence.</p>
+
+<h2>The real story: the slow arc</h2>
+
+<p>Here's the honest timeline of how this actually went on my team.</p>
+
+<p><strong>Week 1–2 — Stage 1 (OBSERVE).</strong> I wired Aegis up to our staging SigNoz instance and let it run silent. At the end of week two, I had a spreadsheet of 47 alerts the AI had analyzed. It was dead-right on 34, wrong-but-not-dangerous on 9, confidently wrong on 4. The 4 confident-wrongs were all on one service I knew had sparse documentation. Lesson: the AI is as good as the runbooks it has to read.</p>
+
+<p><strong>Week 3–6 — Stage 2 (RECOMMEND).</strong> I flipped on the Slack integration so the team could see recommendations on every alert. I didn't announce it. The first week, nobody commented. Week two, one of my peers said, "Hey, the Aegis summary saved me 10 minutes on that database alert." Week three, a second engineer started quoting Aegis in the incident channel. By week six, the team was asking "what does Aegis think?" before opening their own Grafana tabs.</p>
+
+<p><strong>Week 7 — The "thank god it didn't act" moment.</strong> Aegis recommended restarting the user-service pods during what turned out to be an upstream Keycloak degradation. The pods were fine; the problem was that Keycloak was slow. If we'd been at Stage 3 for medium-risk actions, the AI would have restarted perfectly healthy pods while the real issue got worse. That moment bought me another six weeks of Stage 2 before I dared touch Stage 3.</p>
+
+<p><strong>Week 10 — Stage 3 (LOW-AUTO), low-risk only.</strong> I enabled auto-execution for exactly four action types: scale-up during confirmed traffic spikes, single-service cache flush, specific HPA-override reverts, and staging env var updates. Every other action type stays at recommend. Ten weeks in at Stage 3 as of writing, and I'm planning to stay here for another two months.</p>
+
+<p><strong>The takeaway:</strong> If I'd skipped to Stage 3 on day one, I'd have restarted healthy pods during the Keycloak incident, eaten a postmortem, and lost the team's trust permanently. The ladder saved me from my own optimism.</p>
+
+<blockquote><strong>The cost of going slow is some extra human toil for a few weeks. The cost of going fast is a production incident and a project that never recovers credibility.</strong></blockquote>
+
+<h2>Code you can read now</h2>
+
+<p>Aegis v4.0 is OSS. The guardrails engine is in-progress as Layer 4 of the architecture. Here are the roadmap files:</p>
+
+<ul>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails"><code>apps/ai-engine/guardrails/engine.py</code></a> — main guardrails orchestrator (planned)</li>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails"><code>apps/ai-engine/guardrails/risk_assessor.py</code></a> — rule-based + LLM-fallback classifier (planned)</li>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails"><code>apps/ai-engine/guardrails/observation_mode.py</code></a> — automation ladder state machine (planned)</li>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails"><code>apps/ai-engine/guardrails/approval_gate.py</code></a> — Slack + manual approval integration (planned)</li>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails"><code>apps/ai-engine/guardrails/pre_validator.py</code></a> — dry-run + input validation (planned)</li>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails"><code>apps/ai-engine/guardrails/post_validator.py</code></a> — metrics-based verification (planned)</li>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails"><code>apps/ai-engine/guardrails/rollback_manager.py</code></a> — rollback plan enforcement (planned)</li>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/guardrails"><code>apps/ai-engine/guardrails/audit_logger.py</code></a> — SOC2-compliant decision log (planned)</li>
+</ul>
+
+<p>The existing orchestrator at <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/agents/orchestrator.py"><code>apps/ai-engine/agents/orchestrator.py</code></a> already has the state machine (<code>InvestigationState.PROPOSE_REMEDIATION</code> → <code>AWAIT_APPROVAL</code>). Layer 4 wires the guardrails engine between those two states.</p>
+
+<h2>Try it yourself</h2>
+
+<p>Clone Aegis and run the dashboard locally:</p>
+
+<pre><code class="language-bash">git clone https://github.com/JIUNG9/aegis
+cd aegis
+pnpm install
+pnpm dev
+</code></pre>
+
+<p>Open the AI settings page at <code>/settings/ai-tokens</code> and you'll see the <strong>Safety &amp; Guardrails</strong> section with the automation ladder selector (currently defaulting to Stage 2 — Recommend). That selector will wire into the real <code>observation_mode.py</code> state machine as Layer 4 lands.</p>
+
+<p>If you're doing anything similar on your team, I'd love to hear what stages you've landed at and what surprised you. Reply to this post, or file an issue on <a href="https://github.com/JIUNG9/aegis">github.com/JIUNG9/aegis</a> with your automation war stories.</p>
+
+<h2>Next article</h2>
+
+<p>I'm writing about how the Claude API + MCP stack replaced my 3 AM pager — for about $15/month. That's the flip-side of this article. Guardrails are the "no" half of the automation story. The Control Tower is the "yes" half: the actual investigation flow that makes the AI worth having around in the first place.</p>
+
+<p>Read it here: <a href="https://github.com/JIUNG9/aegis/tree/main/articles/05-claude-mcp-pager">How Claude API + MCP Replaced Our 3 AM Pager — For $15/month</a>.</p>
+
+<footer class="meta">
+  <em>June Gu is an SRE at my employer in Seoul, ex-a large e-commerce company. He's building <a href="https://github.com/JIUNG9/aegis">Aegis</a> — an open-source AI-native DevSecOps command center — on evenings and weekends. He's relocating to Canada in February 2027 and is open to SRE and DevOps roles in the Toronto area.</em>
+  <div class="tags">#AI #SRE #DevOps #Automation #Safety</div>
+</footer>
+
+</div>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

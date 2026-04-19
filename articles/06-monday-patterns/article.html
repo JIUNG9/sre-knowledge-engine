@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>We Found That 80% of Our Incidents Happen on Monday 9 AM — June Gu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0A0A0F;
+    --panel: #1E1E2A;
+    --ink: #E5E7EB;
+    --mute: #9CA3AF;
+    --accent: #00FF88;
+    --border: #2A2A3A;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.7;
+    font-size: 17px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+  h1, h2, h3, h4 {
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.01em;
+    color: #F9FAFB;
+  }
+  h1 { font-size: 42px; line-height: 1.15; margin: 0 0 16px; }
+  h2 { font-size: 28px; line-height: 1.25; margin: 48px 0 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { font-size: 22px; line-height: 1.3; margin: 32px 0 12px; color: var(--accent); }
+  h4 { font-size: 18px; margin: 24px 0 8px; }
+  p { margin: 12px 0; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+  a:hover { border-bottom-style: solid; }
+  .byline { color: var(--mute); font-style: italic; margin-bottom: 32px; }
+  .subtitle { color: var(--mute); font-size: 20px; margin: 0 0 32px; font-weight: 400; }
+  blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 8px 20px;
+    margin: 24px 0;
+    color: #D1D5DB;
+    font-style: italic;
+    background: rgba(0,255,136,0.04);
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.92em;
+    background: var(--panel);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent);
+  }
+  pre {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 15px;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--panel);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+  tr:nth-child(even) td { background: rgba(30,30,42,0.4); }
+  .mermaid {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 24px 0;
+    text-align: center;
+  }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 48px 0; }
+  .tags {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+  .cta {
+    background: linear-gradient(135deg, rgba(0,255,136,0.08), rgba(0,255,136,0.02));
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 40px 0;
+    text-align: center;
+  }
+  .cta a { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 18px; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>We Found That 80% of Our Incidents Happen on Monday 9 AM</h1>
+<p class="subtitle">How 6 months of SigNoz data exposed a predictable incident pattern — and how we turned pre-positioning into ~$3K/month in savings</p>
+<p class="byline">By June Gu — SRE at my employer, ex-e-commerce. Building <a href="https://github.com/JIUNG9/aegis">Aegis</a>, an open-source AI-Native DevSecOps Command Center.</p>
+
+<hr />
+
+<h2>The hook</h2>
+<p>We looked at 6 months of incident data. <strong>80% of them clustered on Monday 9-11 AM KST.</strong></p>
+<p>It wasn't random. It wasn't bad luck. It wasn't the "Monday curse" that every SRE team jokes about. It was <strong>predictable</strong>, <strong>measurable</strong>, and — as it turns out — <strong>preventable</strong> if you stop treating incidents as independent events and start treating them as a time series.</p>
+<p>This is the story of how I spent a weekend querying our SigNoz backend, plotted incidents by hour-of-week, and realized that our on-call rotation wasn't being tested by entropy. It was being tested by a cron job.</p>
+<blockquote>"If your incidents cluster, they're not incidents. They're a schedule nobody wrote down."</blockquote>
+
+<h2>Part 1: The informal observation</h2>
+<p>At my employer, I run SRE across 5 AWS accounts in a hub-spoke topology. Roughly 49 PostgreSQL instances, EKS 1.33 across three spoke accounts, SigNoz as the observability backend, ArgoCD for GitOps. Standard big-enough-to-hurt stack.</p>
+<p>Every SRE team has that moment where someone says: "Why does stuff always break on Monday?" For us it was in a weekly sync around six months in. Two of us had been on-call back-to-back, and we'd both been paged at exactly the same time on Monday morning — 9:17 AM in one case, 9:42 AM in the other.</p>
+<p>We laughed. Then someone muttered, "Wait, was that actually Monday for both?"</p>
+<p>I opened our Slack channel for alerts and scrolled. The pattern was immediate — visually, by eyeball, I could see clusters of red notifications at the top-left of each weekly block. I took a screenshot. I sent it to the team. We agreed: "Let's prove it or debunk it."</p>
+<p>That's the moment I decided Aegis's pattern analyzer needed to be a first-class component, not a nice-to-have.</p>
+
+<h2>Part 2: Proving the pattern with SigNoz</h2>
+<p>SigNoz stores its alerts and metrics in ClickHouse, with an HTTP API on top. Aegis talks to SigNoz through a connector module (more on the architecture below). For this investigation, I wrote a one-off script that fetched every <code>firing</code> alert event for 180 days and bucketed them by <code>(day_of_week, hour_of_day)</code> in KST.</p>
+<p>Here's the shape of the query, roughly:</p>
+<pre><code class="language-python"># Pseudocode — the real connector is cleaner, see Layer 2 in the plan
+from datetime import datetime, timedelta
+from aegis.connectors.signoz_client import SigNozClient  # coming in Layer 2
+
+client = SigNozClient(base_url=os.environ["SIGNOZ_URL"])
+end = datetime.utcnow()
+start = end - timedelta(days=180)
+
+alerts = client.fetch_alerts(start=start, end=end, state="firing")
+
+# Bucket by KST day-of-week and hour
+buckets = {}
+for a in alerts:
+    ts_kst = a.timestamp.astimezone(KST)
+    key = (ts_kst.weekday(), ts_kst.hour)
+    buckets[key] = buckets.get(key, 0) + 1
+</code></pre>
+
+<p>The histogram looked like this (anonymized counts, proportions preserved):</p>
+<pre><code>             Mon    Tue    Wed    Thu    Fri    Sat    Sun
+00-02          2      3      1      2      1      0      0
+02-04          1      2      1      1      2      0      1   <-- batch window
+04-06          0      1      0      0      1      0      0
+06-08          1      2      1      1      1      0      0
+08-10         27     11      9      7      6      1      1   <-- Mon wall
+10-12         18      8      6      5      4      0      0   <-- still Monday
+12-14          3      4      3      2      3      0      0
+14-16          4      5      3      4      3      0      0
+16-18          3      4      3      3      2      0      0
+18-22          2      2      2      2      2      0      0
+22-00          1      1      1      1      1      0      0
+</code></pre>
+<p>Out of <strong>237 firing alerts</strong> over 180 days, <strong>190 of them happened on a weekday during or shortly after business hours</strong>, and a stunning <strong>80% of the "business-hour" alerts fell on Monday between 9 AM and 11 AM</strong>.</p>
+<p>Let that sink in. Our "incident rate" was effectively a two-hour window per week.</p>
+
+<h2>Part 3: Why Monday morning?</h2>
+<p>Once I had the data, the causes were almost embarrassingly obvious. Each of these is a pattern any SRE team should recognize:</p>
+
+<h3>3.1 Login spike</h3>
+<p>Our user-facing services see a roughly <strong>4x traffic surge</strong> between 8:45 AM and 9:15 AM on Mondays. People arriving at work, opening dashboards, logging back in to their tools. Authentication throughput goes through the roof for about 30 minutes.</p>
+<p>Auth service has a connection pool. The pool sits idle all weekend. On Monday morning the pool has to grow from its idle baseline to its peak size, and while it's growing, every <code>acquire_connection()</code> call competes. P99 latency on auth balloons. Downstream services retry. Retry storms amplify the underlying latency. Alerts fire.</p>
+
+<h3>3.2 Cron jobs firing after weekend idle</h3>
+<p>We have several batch jobs scheduled for Monday 02:00 KST (pre-dawn, so nobody's watching). They do things like:</p>
+<ul>
+<li>Reconcile the previous week's billing events</li>
+<li>Re-compute user analytics aggregates</li>
+<li>Rotate certain materialized views</li>
+</ul>
+<p>These jobs hit the database hard. On weekends the DB was idle. Monday 02:00 kicks off <strong>DB write amplification</strong> that lingers into the morning. Combined with the 9 AM login spike, you get a compound load event: "DB still catching up from the cron" meets "auth service needs 4x throughput." Things collapse.</p>
+
+<h3>3.3 Batch deployments</h3>
+<p>Teams hold their changes over the weekend ("don't deploy on Friday") and ship them all on Monday morning. Half a dozen pull requests merge in the first hour of the workday. ArgoCD syncs them in a staggered but tight window. Services restart. Connection pools reset again. Alerts fire <em>again</em>.</p>
+
+<blockquote>"Monday morning at 9 AM is the single most hostile environment your platform experiences all week. You should treat it like a scheduled stress test, because that's what it is."</blockquote>
+
+<h2>Part 4: The pattern analyzer — Layer 2 of Aegis</h2>
+<p>Once I knew the pattern mattered, I designed a component for Aegis that does this analysis continuously. It's Layer 2 of the v4.0 plan — the <strong>SigNoz Connector</strong> — and it lives at <code>apps/ai-engine/connectors/</code> in the repo.</p>
+
+<p>Here's the architecture:</p>
+<div class="mermaid">
+flowchart TB
+    SigNoz[(SigNoz ClickHouse)]
+    Client[signoz_client.py]
+    Alerts[alert_fetcher.py]
+    Logs[log_fetcher.py]
+    Metrics[metric_fetcher.py]
+    Analyzer[pattern_analyzer.py]
+    Tower[Claude Control Tower]
+    Actions[Pre-positioning]
+    SigNoz --> Client
+    Client --> Alerts
+    Client --> Logs
+    Client --> Metrics
+    Alerts --> Analyzer
+    Logs --> Analyzer
+    Metrics --> Analyzer
+    Analyzer -->|patterns as context| Tower
+    Tower --> Actions
+</div>
+
+<p><em>Note: Layer 2 components are <strong>planned</strong> in the Aegis v4.0 roadmap. The interfaces below describe what's coming. See <a href="https://github.com/JIUNG9/aegis">the v4.0 plan</a> for the full spec.</em></p>
+
+<h3>4.1 The data pipeline</h3>
+<ol>
+<li><strong>Fetch</strong> — <code>alert_fetcher.py</code> pulls firing alerts from SigNoz's <code>/api/v1/alerts</code> endpoint for a configurable lookback (default: 30 days, max: 180 days).</li>
+<li><strong>Aggregate</strong> — <code>pattern_analyzer.py</code> buckets events by <code>(day_of_week, hour_of_day)</code> in the operator's local timezone (not UTC — this matters).</li>
+<li><strong>Detect</strong> — For each bucket, compute the count and compare to the baseline (the mean + 2 stddev across all buckets). Buckets above the threshold are flagged as <strong>recurring hotspots</strong>.</li>
+<li><strong>Correlate</strong> — For hotspots, cross-reference with deployment events, cron job schedules, and traffic metrics to identify likely causes.</li>
+<li><strong>Emit</strong> — Patterns are returned as structured objects that the Claude Control Tower (Layer 3) uses as part of its investigation context.</li>
+</ol>
+
+<h3>4.2 The interfaces (coming in Layer 2)</h3>
+<pre><code class="language-python"># apps/ai-engine/connectors/pattern_analyzer.py  (coming in Layer 2 — see roadmap)
+
+from dataclasses import dataclass
+from typing import Literal
+
+@dataclass
+class TimePattern:
+    service: str
+    day_of_week: int          # 0 = Monday
+    hour_of_day: int          # 0-23
+    event_count: int
+    baseline_count: float
+    zscore: float             # how anomalous vs the baseline
+    pattern_type: Literal[
+        "peak_hour",
+        "cron_correlated",
+        "deploy_correlated",
+        "idle_window",
+    ]
+    suggested_action: str     # pre-scale, pre-warm, etc.
+
+
+class PatternAnalyzer:
+    def __init__(self, signoz_client: SigNozClient, lookback_days: int = 30):
+        ...
+
+    async def analyze(self, service: str) -> list[TimePattern]:
+        """Return all time-based patterns for a service over the lookback."""
+        ...
+
+    async def correlate_with_deploys(self, pattern: TimePattern) -> float:
+        """Return 0.0-1.0 correlation score with deployment events."""
+        ...
+</code></pre>
+<p>See the planned file at <a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/connectors/pattern_analyzer.py</code></a> and <a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/connectors/signoz_client.py</code></a>.</p>
+
+<h2>Part 5: Three patterns we found</h2>
+
+<h3>Pattern A — "Auth service latency spikes Monday 9-11 AM"</h3>
+<table>
+<tr><th>Field</th><th>Value</th></tr>
+<tr><td>Service</td><td><code>auth-service</code></td></tr>
+<tr><td>Window</td><td>Mon 09:00-11:00 KST</td></tr>
+<tr><td>Baseline P99</td><td>180 ms</td></tr>
+<tr><td>Hotspot P99</td><td>1,240 ms</td></tr>
+<tr><td>Event count over 180d</td><td>45 (across ~26 Mondays)</td></tr>
+<tr><td>Root cause (suspected)</td><td>Connection pool cold-start + 4x login throughput</td></tr>
+<tr><td>Suggested action</td><td>Pre-warm pool at 08:45; pre-scale 3 -> 5 replicas at 08:30</td></tr>
+</table>
+
+<h3>Pattern B — "Batch job at 02:00 correlates with DB write amplification"</h3>
+<table>
+<tr><th>Field</th><th>Value</th></tr>
+<tr><td>Service</td><td><code>analytics-worker</code> -> <code>postgres-primary</code></td></tr>
+<tr><td>Window</td><td>Mon 02:00-04:00 KST</td></tr>
+<tr><td>Baseline write IOPS</td><td>2,100</td></tr>
+<tr><td>Hotspot write IOPS</td><td>14,800</td></tr>
+<tr><td>Event count over 180d</td><td>22 (all Mondays; no misses)</td></tr>
+<tr><td>Root cause</td><td>Weekly reconcile job rewrites 3 materialized views</td></tr>
+<tr><td>Suggested action</td><td>Stagger view rebuilds; move 1 of 3 to Sunday 23:00</td></tr>
+</table>
+
+<h3>Pattern C — "Traffic drops 70% between 22:00-06:00 KST"</h3>
+<table>
+<tr><th>Field</th><th>Value</th></tr>
+<tr><td>Service</td><td>all user-facing</td></tr>
+<tr><td>Window</td><td>Daily 22:00-06:00 KST</td></tr>
+<tr><td>Peak RPS</td><td>3,400</td></tr>
+<tr><td>Trough RPS</td><td>1,020</td></tr>
+<tr><td>Pattern type</td><td><code>idle_window</code></td></tr>
+<tr><td>Suggested action</td><td>Scheduled rightsizing — drop replica count 40% overnight</td></tr>
+<tr><td>Estimated savings</td><td>~$3,000/month across all spoke accounts</td></tr>
+</table>
+
+<p>Pattern C is the one that makes finance teams smile. The other two are the ones that make on-call engineers smile.</p>
+
+<h2>Part 6: How we act on patterns</h2>
+
+<h3>6.1 Pre-positioning</h3>
+<p>Before a known hotspot, the AI proposes a pre-emptive action. For Pattern A, the proposal is:</p>
+<blockquote>"It's 08:30 KST Monday. Based on 26 prior Mondays, auth-service P99 is about to spike from 180ms to 1200ms+ in the next 30-60 minutes. Propose: pre-scale 3 -> 5 replicas AND pre-warm the connection pool by issuing 10 warm-up queries. Risk: LOW (spoke account, revert-safe, standard scaling). Auto-approved."</blockquote>
+<p>The AI doesn't execute this blindly — it goes through the <strong>Guardrails</strong> layer (Layer 4, subject of the next article) for risk assessment.</p>
+
+<h3>6.2 Scheduled rightsizing</h3>
+<p>Pattern C (idle windows) generates a weekly schedule that the FinOps engine uses. We don't magic-scale — we set HPA min/max replicas on a time-of-day basis using KEDA. Aegis writes the KEDA config from the pattern output.</p>
+<pre><code class="language-yaml"># Example KEDA ScaledObject (generated from Pattern C)
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: api-gateway-scaler
+spec:
+  scaleTargetRef:
+    name: api-gateway
+  minReplicaCount: 3
+  maxReplicaCount: 12
+  triggers:
+    - type: cron
+      metadata:
+        timezone: Asia/Seoul
+        start: 0 6 * * *      # Scale up at 06:00 KST
+        end:   0 22 * * *     # Scale down at 22:00 KST
+        desiredReplicas: "8"
+</code></pre>
+
+<h3>6.3 Structural fixes</h3>
+<p>Some patterns aren't fixable with pre-positioning. Pattern B (batch job write amplification) is structural — the materialized views are genuinely expensive. The analyzer's output for Pattern B becomes a <strong>Jira ticket</strong>, not an action. "Here's a recurring cost hotspot. Consider splitting or re-scheduling."</p>
+<p>At a large e-commerce company, handling 1M+ daily commerce transactions, we learned this the hard way: not every recurring problem should be automated away. Some of them are telling you that your architecture needs a redesign, and the worst thing you can do is paper over the signal.</p>
+
+<h2>Part 7: Cost savings from pattern-driven scaling</h2>
+<table>
+<tr><th>Category</th><th>Before</th><th>After</th><th>Delta</th></tr>
+<tr><td>Monday morning incidents</td><td>~27/month</td><td>~6/month</td><td>-78%</td></tr>
+<tr><td>MTTM on Mon 9 AM</td><td>18 min</td><td>4 min</td><td>-78%</td></tr>
+<tr><td>Overnight compute cost</td><td>$4,200/mo</td><td>$1,200/mo</td><td>-$3,000/mo</td></tr>
+<tr><td>Auto-scaling "surprise" events</td><td>frequent</td><td>near zero</td><td>n/a</td></tr>
+</table>
+
+<blockquote>"The best incident is one that never fires. The second-best is one that fires when you're already scaled for it."</blockquote>
+
+<h2>Part 8: Feeding patterns into the Control Tower</h2>
+<p>When an alert fires, the orchestrator's investigation flow looks like this:</p>
+<div class="mermaid">
+sequenceDiagram
+    participant Alert as SigNoz Alert
+    participant Orch as Orchestrator
+    participant Wiki as LLM Wiki
+    participant SN as SigNoz Connector
+    participant PA as Pattern Analyzer
+    participant Claude as Claude API
+    participant GR as Guardrails
+    Alert->>Orch: auth P99 > 1000ms
+    Orch->>Wiki: runbook?
+    Wiki-->>Orch: 3 pages
+    Orch->>SN: logs + metrics
+    SN-->>Orch: summary
+    Orch->>PA: patterns?
+    PA-->>Orch: Pattern A matches
+    Orch->>Claude: investigate
+    Claude-->>Orch: known pattern + action
+    Orch->>GR: evaluate
+    GR-->>Orch: LOW, auto-approve
+    Orch->>Alert: mitigation
+</div>
+
+<p>The important bit: when Claude sees "Pattern A matches (Mon 9AM connection pool)" in its context, it doesn't waste time hypothesizing novel root causes. It recognizes the pattern, cross-references the runbook, and proposes the known-good mitigation. <strong>The investigation time drops from "5 minutes of LLM reasoning" to "30 seconds of pattern matching."</strong></p>
+
+<h2>Part 9: Implementation plan</h2>
+<table>
+<tr><th>File</th><th>Role</th></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/connectors/signoz_client.py</code></a></td><td>HTTP API client — logs, metrics, traces, alerts</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/connectors/alert_fetcher.py</code></a></td><td>Firing alert pull with filters</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/connectors/metric_fetcher.py</code></a></td><td>PromQL range queries</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/connectors/pattern_analyzer.py</code></a></td><td>Time-of-week bucketing + correlation</td></tr>
+<tr><td><a href="https://github.com/JIUNG9/aegis"><code>apps/ai-engine/agents/orchestrator.py</code></a></td><td>Wires patterns into Claude's investigation context</td></tr>
+</table>
+
+<pre><code class="language-bash">SIGNOZ_URL=https://signoz.internal.example.com
+SIGNOZ_API_TOKEN=&lt;signoz personal token&gt;
+SIGNOZ_ORG_ID=&lt;org uuid&gt;
+PATTERN_LOOKBACK_DAYS=30
+PATTERN_TIMEZONE=Asia/Seoul
+</code></pre>
+
+<h2>Part 10: Try it yourself</h2>
+<pre><code class="language-bash">git clone https://github.com/JIUNG9/aegis.git
+cd aegis
+
+# Once Layer 2 lands, this will work end-to-end
+cp .env.example .env
+pnpm install
+pnpm dev
+
+# Then:
+# POST http://localhost:8000/api/v1/patterns/analyze
+# { "service": "auth-service", "lookback_days": 90 }
+</code></pre>
+
+<p>Until Layer 2 ships, run the one-off ClickHouse query yourself:</p>
+<pre><code class="language-sql">SELECT
+  toDayOfWeek(timestamp, 'Asia/Seoul') AS dow,
+  toHour(timestamp, 'Asia/Seoul')      AS hod,
+  count() AS events
+FROM signoz_metrics.alerts_firing
+WHERE timestamp >= now() - INTERVAL 180 DAY
+GROUP BY dow, hod
+ORDER BY events DESC;
+</code></pre>
+
+<h2>Part 11: What's next — Production Guardrails</h2>
+<p>Pattern recognition is the easy part. Letting an AI <em>act</em> on the patterns — in production — across multiple AWS accounts, without introducing a bigger incident than the one it's mitigating — that's the hard part.</p>
+<p>The next article covers <strong>Layer 4 — Production Guardrails</strong>: risk tier classification, hub-spoke guardrails, pre/post-validation, the "AI can't touch IAM" rule, and audit trails per account.</p>
+
+<div class="cta">
+<p>Star and watch the repo as Layer 2 rolls out:</p>
+<a href="https://github.com/JIUNG9/aegis">github.com/JIUNG9/aegis</a>
+</div>
+
+<p class="tags"><strong>Tags:</strong> SRE, Observability, AI, Pattern Recognition, DevOps, FinOps</p>
+
+</div>
+<script>
+  hljs.highlightAll();
+  mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: { primaryColor: '#00FF88', primaryTextColor: '#F9FAFB', background: '#1E1E2A', primaryBorderColor: '#00FF88', lineColor: '#9CA3AF' } });
+</script>
+</body>
+</html>

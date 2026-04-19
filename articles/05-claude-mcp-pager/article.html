@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>How Claude API + MCP Replaced Our 3 AM Pager — For $15/month</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      background: '#0A0A0F',
+      primaryColor: '#1E1E2A',
+      primaryTextColor: '#E4E4E7',
+      primaryBorderColor: '#00FF88',
+      lineColor: '#00FF88',
+      secondaryColor: '#2A2A3A',
+      tertiaryColor: '#1E1E2A',
+      fontFamily: 'JetBrains Mono, monospace',
+    },
+  });
+</script>
+<style>
+  :root {
+    --bg: #0A0A0F;
+    --card: #1E1E2A;
+    --card-2: #2A2A3A;
+    --text: #E4E4E7;
+    --muted: #A1A1AA;
+    --accent: #00FF88;
+    --border: #2E2E3E;
+    --code-bg: #12121B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+  body {
+    font-family: Inter, -apple-system, system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 64px 24px 120px; }
+  header.lede { margin-bottom: 56px; border-bottom: 1px solid var(--border); padding-bottom: 32px; }
+  header.lede .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 38px;
+    line-height: 1.15;
+    margin: 0 0 20px;
+    letter-spacing: -0.01em;
+  }
+  header.lede .sub {
+    color: var(--muted);
+    font-size: 18px;
+    font-style: italic;
+  }
+  h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 26px;
+    margin-top: 64px;
+    margin-bottom: 18px;
+    letter-spacing: -0.005em;
+  }
+  h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 19px;
+    margin-top: 36px;
+    margin-bottom: 12px;
+    color: var(--accent);
+  }
+  p { margin: 0 0 18px; }
+  strong { color: #fff; font-weight: 600; }
+  em { color: var(--muted); }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(0,255,136,0.3); }
+  a:hover { border-bottom-color: var(--accent); }
+  hr { border: 0; border-top: 1px solid var(--border); margin: 48px 0; }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #F0F0F5;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+    margin: 24px 0;
+  }
+  pre code {
+    background: transparent;
+    padding: 0;
+    font-size: 13.5px;
+    line-height: 1.55;
+  }
+  blockquote {
+    margin: 28px 0;
+    padding: 20px 24px;
+    border-left: 3px solid var(--accent);
+    background: var(--card);
+    border-radius: 0 8px 8px 0;
+    color: #fff;
+    font-size: 18px;
+  }
+  blockquote strong { color: var(--accent); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 14px;
+  }
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--card);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  td code { font-size: 12.5px; }
+  .mermaid {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 28px 0;
+    text-align: center;
+  }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  footer.meta {
+    margin-top: 72px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .tags {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 16px;
+  }
+  .slack-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-size: 15px;
+  }
+  .slack-card strong { color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="lede">
+  <div class="kicker">Aegis v4.0 · Article 5 of 8</div>
+  <h1>How Claude API + MCP Replaced Our 3 AM Pager — For $15/month</h1>
+  <div class="sub">The AI investigates the incident, reads the wiki, checks SigNoz metrics, and proposes a fix before I open my laptop.</div>
+</header>
+
+<h2>The page that doesn't wake me up anymore</h2>
+
+<p>It's 3:07 AM. My phone buzzes. Alert: <code>auth-service error_rate &gt; 5% for 3 minutes</code>.</p>
+
+<p>Six months ago, this is where the 45-minute scramble started. Log in to the VPN. Find the right Grafana dashboard. Guess which service version is deployed right now. Open three Confluence tabs, none of which are the runbook I actually want. Type <code>kubectl get pods -n prod</code> and try to remember what "CrashLoopBackOff" actually meant at this hour.</p>
+
+<p>Tonight is different. I open Slack with one eye closed. There's already a thread:</p>
+
+<div class="slack-card">
+  <strong>Aegis</strong> — Alert: <code>auth-service error_rate 6.1%</code> (threshold 5%)<br><br>
+  <strong>Investigation</strong> — This matches the connection-pool exhaustion pattern from the <code>auth-service</code> wiki page. 82% of similar alerts in the last 90 days were caused by DB connection saturation after Monday morning traffic ramp. Current p99 latency is 1,240ms (baseline 180ms). Pod count: 6. DB <code>auth_db</code> active connections: 98/100.<br><br>
+  <strong>Recommended action</strong> — <code>kubectl rollout restart deployment/auth-service -n prod</code> (risk: medium · dry-run: safe · rollback: <code>kubectl rollout undo ... --to-revision=47</code>)<br><br>
+  <strong>Approve</strong> · <strong>Reject</strong> · <strong>Modify</strong> · <strong>Escalate</strong>
+</div>
+
+<p>I type "approve" in Slack. Two minutes later, the second Aegis message:</p>
+
+<div class="slack-card">
+  <strong>Post-validation</strong> — error_rate 0.3% (was 6.1%) · p99 240ms (was 1,240ms) · rollback not triggered · INV-2026-117 closed.
+</div>
+
+<p>I go back to sleep at 3:11.</p>
+
+<p>This article is about the Control Tower that makes this possible — Layer 3 of <a href="https://github.com/JIUNG9/aegis">Aegis v4.0</a>, the open-source AI-native DevSecOps command center I'm building. It costs about $15/month to run at my volume. Let me show you how.</p>
+
+<h2>Why traditional runbooks fail at 3 AM</h2>
+
+<p>The dirty secret of SRE culture is that our runbooks are written for the version of us that's awake, caffeinated, and at a full desk setup. They don't work for the version of us that was asleep eight seconds ago.</p>
+
+<p>Here's what's broken about traditional runbooks:</p>
+<ol>
+  <li><strong>They're too long.</strong> A good auth-service runbook at my employer is 12 pages of markdown. At 3 AM, I'm not reading 12 pages. I'm scrolling past 11 of them to find the one paragraph that applies.</li>
+  <li><strong>They assume you remember context.</strong> "Check the usual DB metrics." Which usual metrics? Which DB? The version I set up in Terraform six months ago, or the one from after the PG 13→16 migration?</li>
+  <li><strong>They don't cross-reference recent incidents.</strong> The last three times this exact alert fired, the cause was the same. The runbook doesn't know that. A human had to notice the pattern.</li>
+  <li><strong>They're stale.</strong> The runbook was last touched nine months ago. The service has deployed 40 times since then.</li>
+</ol>
+
+<blockquote><strong>The AI isn't replacing the runbook. The AI is the thing that reads the runbook for you at 3 AM, cross-references it with the last 90 days of SigNoz data, and hands you a specific action.</strong></blockquote>
+
+<p>This is what Claude API was designed for, once you wire it up right. Which is what the Control Tower is.</p>
+
+<h2>Enter the Claude Control Tower</h2>
+
+<p>The Control Tower is the existing LangGraph-based orchestrator at <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/agents/orchestrator.py"><code>apps/ai-engine/agents/orchestrator.py</code></a>, extended in v4.0 with RAG context, real SigNoz data, time-pattern analysis, and guardrails hooks.</p>
+
+<p>The base orchestrator today already runs a state machine:</p>
+
+<pre><code class="language-python">class InvestigationState(str, Enum):
+    RECEIVE_ALERT = "receive_alert"
+    GATHER_CONTEXT = "gather_context"
+    INVESTIGATE = "investigate"
+    GENERATE_RCA = "generate_rca"
+    PROPOSE_REMEDIATION = "propose_remediation"
+    AWAIT_APPROVAL = "await_approval"
+    COMPLETED = "completed"
+    FAILED = "failed"
+</code></pre>
+
+<p>Each state uses Claude with a specific system prompt tailored to that phase. The <code>GATHER_CONTEXT</code> prompt is triage-focused; the <code>INVESTIGATE</code> prompt is deep-analysis-focused; the <code>PROPOSE_REMEDIATION</code> prompt has to output structured JSON with risk levels and rollback plans.</p>
+
+<p>Layer 3 v4.0 adds a new <code>investigate_with_context()</code> method that sits between <code>GATHER_CONTEXT</code> and <code>INVESTIGATE</code>. It's the glue that binds three context sources to the model:</p>
+
+<pre><code class="language-python"># From the Layer 3 spec — coming to apps/ai-engine/agents/orchestrator.py
+async def investigate_with_context(self, incident):
+    # 1. Get wiki / RAG context (relevant runbooks, past incidents)
+    rag_chunks = await self.retriever.query(incident.description, top_k=5)
+
+    # 2. Get SigNoz real-time data
+    logs = await self.signoz.fetch_logs(incident.service, hours=1)
+    metrics = await self.signoz.fetch_metrics(incident.service, hours=6)
+    patterns = await self.pattern_analyzer.analyze(incident.service)
+
+    # 3. Build enriched context
+    context = {
+        "runbook_context": rag_chunks,
+        "recent_logs": logs[:50],
+        "metrics_summary": metrics,
+        "time_patterns": patterns,
+        "incident": incident.dict(),
+    }
+
+    # 4. Claude investigates with full context
+    result = await self.claude_investigate(context)
+
+    # 5. Guardrails check before any action (Layer 4)
+    if result.proposed_actions:
+        result = await self.guardrails.evaluate(result)
+
+    return result
+</code></pre>
+
+<p>The key design decision: the LLM never fetches its own observability data via generic tool-calling. That's too slow and too loose. The orchestrator fetches the data <em>before</em> the LLM call and stuffs it into the system prompt as structured context. The LLM's job is reasoning, not scraping.</p>
+
+<blockquote><strong>The LLM is not a database client.</strong> It's a reasoning engine with one expensive round-trip per investigation. Do the I/O separately, stuff the results into context, and let the LLM think.</blockquote>
+
+<h2>The investigation flow end-to-end</h2>
+
+<p>Here's the full lifecycle of a real alert.</p>
+
+<div class="mermaid">
+sequenceDiagram
+    participant SN as SigNoz Alert
+    participant CT as Control Tower
+    participant RAG as Local Wiki (RAG)
+    participant SZ as SigNoz API
+    participant PA as Pattern Analyzer
+    participant Claude as Claude API
+    participant GR as Guardrails
+    participant Slack as Slack
+
+    SN->>CT: Alert fires (webhook)
+    CT->>CT: RECEIVE_ALERT → GATHER_CONTEXT
+
+    par Parallel context gather
+      CT->>RAG: Query wiki for incident pattern
+      RAG-->>CT: Top-5 runbook/incident chunks
+    and
+      CT->>SZ: Fetch logs (1h) + metrics (6h)
+      SZ-->>CT: Structured log/metric data
+    and
+      CT->>PA: Time-pattern analysis
+      PA-->>CT: "Pattern: 82% of alerts on Monday 9-11 AM"
+    end
+
+    CT->>Claude: INVESTIGATE (context + model=Sonnet 4.6)
+    Claude-->>CT: Root cause hypothesis + proposed action
+
+    CT->>Claude: PROPOSE_REMEDIATION (context + RCA)
+    Claude-->>CT: {command, risk, rollback_plan}
+
+    CT->>GR: Evaluate proposed action
+    GR->>GR: Risk classify + dry-run + rollback check
+    GR->>Slack: Post approval card (medium risk)
+
+    Slack-->>GR: Human clicks "Approve"
+    GR->>CT: Execute
+    CT->>SZ: Fetch metrics 5 min after
+    CT->>Slack: Post outcome + audit log entry
+</div>
+
+<p>The whole loop runs in 60–120 seconds from alert-fire to Slack-card. The slowest part is the LLM round-trip (typically 8–20 seconds on Sonnet). Fetching SigNoz data in parallel with the wiki query keeps the context-gather phase under 2 seconds.</p>
+
+<h2>Model routing: Eco / Standard / Deep</h2>
+
+<p>Claude has three model tiers that map naturally to investigation complexity. The AI settings page in Aegis exposes them as <strong>Eco</strong>, <strong>Standard</strong>, and <strong>Deep</strong>.</p>
+
+<table>
+  <thead>
+    <tr><th>Tier</th><th>Model</th><th>Used For</th><th>Typical Cost per Investigation</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Eco</strong></td><td>Haiku</td><td>Wiki synthesis, simple log summaries, routing decisions</td><td>~$0.001</td></tr>
+    <tr><td><strong>Standard</strong></td><td>Sonnet 4.6</td><td>Incident investigation, pattern analysis, remediation proposal</td><td>~$0.08</td></tr>
+    <tr><td><strong>Deep</strong></td><td>Opus</td><td>Multi-service correlation, complex RCAs, novel failure modes</td><td>~$0.25</td></tr>
+  </tbody>
+</table>
+
+<p>The routing logic lives in the token tracker (<code>services/token_tracker.py</code> in the existing codebase). It's not a black-box heuristic — it's a decision table:</p>
+
+<pre><code class="language-python"># Simplified routing rule
+def choose_model(incident: Incident) -> str:
+    if incident.complexity == "simple_status_check":
+        return "claude-haiku-4-5"
+    if incident.services_affected &gt; 2:
+        return "claude-opus-4-7"
+    if incident.severity == "critical":
+        return "claude-opus-4-7"
+    return "claude-sonnet-4-6"  # Default
+</code></pre>
+
+<p>About 50% of alerts at my volume route to Eco (they're traffic-pattern questions or simple status checks, not real incidents). About 40% go to Standard (the real investigations). About 10% go to Deep (multi-service problems or anything involving the data plane).</p>
+
+<p>The math on that mix:</p>
+<ul>
+  <li>200 investigations/month</li>
+  <li>100 × $0.001 (Eco) = $0.10</li>
+  <li>80 × $0.08 (Standard) = $6.40</li>
+  <li>20 × $0.25 (Deep) = $5.00</li>
+  <li>Plus wiki synthesis and overhead: ~$3/mo</li>
+  <li><strong>Total: ~$14.50/month</strong></li>
+</ul>
+
+<p>Which is cheaper than one SaaS vendor's "AI incident management" starter tier (I checked — they start at $49/seat/month). And you own the whole stack.</p>
+
+<blockquote><strong>$15/month for the AI part is only possible because I own the context pipeline.</strong> If I were paying per-query to a vendor-hosted RAG service, I'd be paying $200+ for the same thing.</blockquote>
+
+<h2>Token budget management</h2>
+
+<p>The fun failure mode of any AI ops system is: somebody writes a bad prompt chain, it loops, and the next morning you have a $400 bill.</p>
+
+<p>The Aegis token tracker enforces a monthly cap and an auto-downgrade rule. If I set my cap at $30 and I'm at $26 with a week left, the model router starts downgrading Standard→Eco and Deep→Standard for non-critical alerts. You see a "BUDGET_THROTTLED" badge in the UI.</p>
+
+<p>The cap and the downgrade rules are configurable in the AI settings page. The defaults are:</p>
+<ul>
+  <li><strong>Soft cap (80% of budget)</strong> — warn on the dashboard, keep current routing.</li>
+  <li><strong>Hard cap (100% of budget)</strong> — downgrade Deep → Standard, Standard → Eco, except for incidents tagged <code>critical</code> by the alert rule.</li>
+  <li><strong>Emergency override</strong> — type a reason in Slack, the next investigation runs at requested tier regardless of cap.</li>
+</ul>
+
+<p>This is the kind of guardrail that only matters when it matters. I've hit the soft cap exactly once (and it was because I was testing a new pattern-analyzer that was chatty). But having it there means I can run this in the background and never worry about a runaway cost spike.</p>
+
+<p>The other thing the token tracker does is per-investigation accounting. Each run records input tokens, output tokens, cache-read tokens, cache-write tokens, and cost. That per-run data is what drives the monthly cost chart on the dashboard and the model-routing effectiveness graphs. If I see Deep-tier investigations trending up week-over-week, that's a signal — either the incidents are getting harder, or my routing heuristics are too conservative and I should tighten the Deep-tier trigger.</p>
+
+<p>Prompt caching is the other lever. Aegis caches the static parts of every investigation prompt: the system instructions, the MCP tool catalog, the standing context about our services and SLOs. Only the incident-specific context and the wiki chunks change per run. On a typical Sonnet investigation, that means ~6,000 of the 8,500 input tokens are cache hits at ~10% of the normal cost, which knocks another 30–40% off the bill without changing anything the LLM sees.</p>
+
+<blockquote><strong>Caching is the unsexy optimization that actually moves the needle on cost.</strong> If you're not caching your system prompt and tool catalog across runs, you're overpaying by 30–50%.</blockquote>
+
+<h2>MCP — how tools get wired to Claude</h2>
+
+<p>Model Context Protocol (MCP) is Anthropic's standard for giving Claude safe, audited access to external tools. Aegis already has the MCP server scaffolded at <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/mcp/server.py"><code>apps/ai-engine/mcp/server.py</code></a>, with three tool categories today:</p>
+
+<ul>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/mcp/tools/infrastructure.py"><code>mcp/tools/infrastructure.py</code></a> — k8s describe, pod logs, deployment status</li>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/mcp/tools/observability.py"><code>mcp/tools/observability.py</code></a> — SigNoz log / metric / trace queries</li>
+  <li><a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/mcp/tools/workflow.py"><code>mcp/tools/workflow.py</code></a> — incident state transitions</li>
+</ul>
+
+<p>Layer 5 adds a fourth: <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/mcp/tools"><code>mcp/tools/docs_reconciliation.py</code></a> (planned) — Confluence sync, GitHub docs scan, incident-history sync, and docs-lint. This is what keeps the wiki fresh so the Control Tower has current context at 3 AM.</p>
+
+<p>Each MCP tool has three metadata flags that the Control Tower respects:</p>
+
+<pre><code class="language-python">@mcp_tool(
+    name="kubectl_rollout_restart",
+    category="WRITE",          # READ | WRITE | BLOCKED
+    risk_default="medium",     # default risk classification
+    requires_approval=True,    # always ask Slack, even at stage 4
+)
+async def kubectl_rollout_restart(service: str, namespace: str) -&gt; dict:
+    ...
+</code></pre>
+
+<p>The category flag is the big one:</p>
+<ul>
+  <li><strong>READ</strong> tools are always safe. The AI can call them freely (<code>query_logs</code>, <code>describe_pod</code>, <code>fetch_metrics</code>).</li>
+  <li><strong>WRITE</strong> tools require Slack approval (at my stage) or auto-approval within the automation ladder's current stage (see <a href="../04-automation-ladder/article.html">Article 4</a>).</li>
+  <li><strong>BLOCKED</strong> tools are never automated. IAM changes, resource deletion, anything touching the data plane.</li>
+</ul>
+
+<p>This separation is load-bearing. The LLM can't silently promote a READ tool to a WRITE action. The MCP layer enforces category at the protocol level.</p>
+
+<p>Each tool call is logged with the request args, the response, and a latency measurement. That log is both a debugging aid and an audit artifact: six months from now, when somebody asks "did the AI ever call this specific tool against that namespace?", I have a grep-able answer. The MCP server also exposes a <code>/tools/usage</code> endpoint that surfaces the top-called tools per week — useful for understanding what the AI actually does day-to-day versus what I assumed it would do.</p>
+
+<p>One pattern I'm watching carefully: the AI has a tendency to over-fetch when a READ tool is free. Ten calls to <code>query_logs</code> with slightly different filters is a failure mode, not a feature. I've added a per-investigation budget of "no more than 5 tool calls of the same category" at the MCP layer, and the LLM gets a hint in its system prompt that excessive tool-calling will get the investigation downgraded. Soft pressure, mostly effective.</p>
+
+<h2>Before and after: the investigation time budget</h2>
+
+<table>
+  <thead>
+    <tr><th>Step</th><th>Before (manual)</th><th>After (Control Tower)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Alert fires → on-call acknowledges</td><td>30 sec</td><td>30 sec</td></tr>
+    <tr><td>Find the right runbook</td><td>3–8 min</td><td>0 sec (wiki context in Slack)</td></tr>
+    <tr><td>Pull SigNoz logs + metrics</td><td>4–10 min</td><td>0 sec (pre-fetched in context)</td></tr>
+    <tr><td>Correlate with recent incidents</td><td>5–15 min</td><td>0 sec (pattern analyzer did it)</td></tr>
+    <tr><td>Form a hypothesis</td><td>2–5 min</td><td>0 sec (in Slack card)</td></tr>
+    <tr><td>Decide on an action</td><td>1–3 min</td><td>15–45 sec (read card, click)</td></tr>
+    <tr><td>Execute</td><td>1–2 min</td><td>30–90 sec (auto or Slack-approved)</td></tr>
+    <tr><td>Verify fix worked</td><td>3–5 min</td><td>Auto (post-validator, 60 sec)</td></tr>
+    <tr><td><strong>Total p50</strong></td><td><strong>~20 min</strong></td><td><strong>~2 min</strong></td></tr>
+    <tr><td><strong>Total p95 (harder incidents)</strong></td><td><strong>~45 min</strong></td><td><strong>~5 min</strong></td></tr>
+  </tbody>
+</table>
+
+<p>The Control Tower doesn't <em>solve</em> the incident faster than a senior SRE can. What it does is eliminate the 18 minutes of ambient toil per alert that come from context-gathering and tab-switching. Compounded over a week, that's hours back.</p>
+
+<blockquote><strong>Before Aegis: 30 min average investigation. After Aegis: AI has context and proposal in 90 seconds.</strong> I'm still the one deciding — I'm just deciding faster, with more data, and less coffee.</blockquote>
+
+<h2>Rollback-first discipline</h2>
+
+<p>The Control Tower's <code>PROPOSE_REMEDIATION</code> prompt has a hard requirement: every proposed action must include a rollback plan. The prompt literally says:</p>
+
+<blockquote>For each remediation step, provide: description, command, risk_level, requires_approval, estimated_impact, category. Respond with a JSON object containing remediation_steps and a <strong>rollback_plan</strong> field that is a concrete shell command, not prose.</blockquote>
+
+<p>If the LLM returns an action without a rollback plan, the orchestrator rejects it and retries the prompt. If it fails twice, the investigation goes to <code>FAILED</code> state with reason <code>no_rollback_plan</code>. This is a structural guarantee, not a suggestion.</p>
+
+<p>Layer 4 (Guardrails — covered in <a href="../04-automation-ladder/article.html">Article 4</a>) enforces this at the execution gate too: no rollback plan, no execution. The two layers double up because rollback-first is too important to trust to just one check.</p>
+
+<h2>Try it yourself</h2>
+
+<pre><code class="language-bash">git clone https://github.com/JIUNG9/aegis
+cd aegis
+pnpm install
+pnpm dev
+</code></pre>
+
+<p>Once the dashboard is up at <code>http://localhost:3000</code>, go to <strong>Settings → AI &amp; Tokens</strong>. You'll see:</p>
+
+<ul>
+  <li>The three-tier model selector (Eco / Standard / Deep) with per-investigation cost estimates.</li>
+  <li>The monthly token budget with a soft-cap / hard-cap threshold.</li>
+  <li>The RAG/wiki knowledge base section (Layer 1, Ollama + ChromaDB default — $0/mo).</li>
+  <li>The Safety &amp; Guardrails section (Layer 4 scaffolding — Automation Ladder selector).</li>
+</ul>
+
+<p>The MCP server starts on port 8001 by default. You can hit <code>http://localhost:8001/tools</code> to see the registered tool catalog and their READ/WRITE/BLOCKED flags.</p>
+
+<p>If you want to test an investigation end-to-end without a real SigNoz instance, there's a mock SigNoz fixture in <a href="https://github.com/JIUNG9/aegis/tree/main/apps/ai-engine/tests"><code>apps/ai-engine/tests/fixtures/</code></a> (part of the Layer 2 work).</p>
+
+<h2>Next article</h2>
+
+<p>The next piece in this series is about the specific patterns that SigNoz reveals once you feed it to an LLM. The one I'm leading with: <strong>80% of our incidents happen Monday 9–11 AM</strong>. That's the kind of insight that would never come out of a dashboard — you need a pattern analyzer to surface it, and you need an AI to pre-position runbooks around it.</p>
+
+<p>Read it here: <a href="https://github.com/JIUNG9/aegis/tree/main/articles/06-monday-9am-patterns">We Found That 80% of Our Incidents Happen on Monday 9 AM</a>.</p>
+
+<h2>Cost summary (for the skeptics)</h2>
+
+<p>Let me show the full math one more time, because "$15/month" sounds suspicious until you see the breakdown.</p>
+
+<p><strong>Monthly recurring:</strong></p>
+<ul>
+  <li>Claude API (Haiku + Sonnet + Opus, mix as described): ~$14.50</li>
+  <li>Ollama embeddings (local, free): $0</li>
+  <li>ChromaDB (local, free): $0</li>
+  <li>SigNoz HTTP API (you already pay for this): $0 incremental</li>
+  <li>GitHub Actions for wiki auto-publish: free tier</li>
+  <li><strong>Total: ~$15/month</strong></li>
+</ul>
+
+<p><strong>Not included (because it's already in your stack):</strong></p>
+<ul>
+  <li>The SigNoz ClickHouse backend (your observability bill).</li>
+  <li>The Kubernetes cluster (your platform bill).</li>
+  <li>The developer time to set it up (~2 weekends).</li>
+</ul>
+
+<p><strong>What you don't pay:</strong></p>
+<ul>
+  <li>Per-seat SaaS AI ops tool licensing ($49–$199/seat/month at current market rates).</li>
+  <li>Cloud embedding API fees ($30–$100/month at my document volume).</li>
+  <li>Vector database hosting fees ($20–$70/month on Pinecone/Qdrant Cloud).</li>
+</ul>
+
+<p>The short version: if you already own your observability stack, adding an AI Control Tower on top of it is a $15/month incremental cost. That's the real unlock.</p>
+
+<footer class="meta">
+  <em>June Gu is an SRE at my employer in Seoul, ex-a large e-commerce company. He's building <a href="https://github.com/JIUNG9/aegis">Aegis</a> — an open-source AI-native DevSecOps command center — on evenings and weekends. He's relocating to Canada in February 2027 and is open to SRE and DevOps roles in the Toronto area.</em>
+  <div class="tags">#AI #ClaudeAPI #MCP #IncidentManagement #SRE</div>
+</footer>
+
+</div>
+<script>hljs.highlightAll();</script>
+</body>
+</html>

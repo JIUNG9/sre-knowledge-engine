@@ -5,6 +5,22 @@ with the ``ToolManifest``. The manifest — not this package — decides
 which tools are surfaced to the agent.
 """
 
-from mcp.tools.read import log_search, metric_query, runbook_lookup  # noqa: F401
+from mcp.tools.read import (  # noqa: F401
+    docs_find,
+    docs_link_check,
+    docs_reconcile,
+    docs_staleness,
+    log_search,
+    metric_query,
+    runbook_lookup,
+)
 
-__all__ = ["log_search", "metric_query", "runbook_lookup"]
+__all__ = [
+    "docs_find",
+    "docs_link_check",
+    "docs_reconcile",
+    "docs_staleness",
+    "log_search",
+    "metric_query",
+    "runbook_lookup",
+]

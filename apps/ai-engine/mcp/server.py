@@ -312,7 +312,7 @@ class MCPServer:
                     "timestamp": "2026-04-10T14:23:15Z",
                     "level": "error",
                     "service": service,
-                    "message": f"Connection timeout to upstream dependency after 5000ms",
+                    "message": "Connection timeout to upstream dependency after 5000ms",
                     "trace_id": "abc123def456",
                 },
                 {

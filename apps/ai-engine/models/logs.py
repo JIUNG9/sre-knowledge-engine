@@ -4,7 +4,6 @@ Defines request and response schemas for log summarization, natural language
 query translation, and anomaly detection features.
 """
 
-from datetime import datetime
 
 from pydantic import BaseModel, Field
 

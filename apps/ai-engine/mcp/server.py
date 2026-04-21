@@ -19,9 +19,16 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
+from mcp.manifest import manifest as tool_manifest
+from mcp.scope_config import MCPScopeConfig
 from mcp.tools.infrastructure import INFRASTRUCTURE_TOOLS
 from mcp.tools.observability import OBSERVABILITY_TOOLS
 from mcp.tools.workflow import WORKFLOW_TOOLS
+
+# Importing these packages triggers @scoped_tool registration.
+import mcp.tools.blocked  # noqa: F401
+import mcp.tools.read  # noqa: F401
+import mcp.tools.write  # noqa: F401
 
 logger = logging.getLogger("aegis.mcp")
 
@@ -84,18 +91,48 @@ class MCPServer:
     for write operations.
     """
 
-    def __init__(self):
+    def __init__(self, scope_config: MCPScopeConfig | None = None):
         self.tools: list[dict] = []
         self._audit_log: list[ToolExecutionAuditEntry] = []
         self._max_audit_entries: int = 5000
         self._pending_approvals: dict[str, dict] = {}
+        self._scope_config = scope_config or MCPScopeConfig()
         self._register_tools()
 
     def _register_tools(self) -> None:
-        """Register all available MCP tools."""
-        self.tools.extend(OBSERVABILITY_TOOLS)
-        self.tools.extend(INFRASTRUCTURE_TOOLS)
-        self.tools.extend(WORKFLOW_TOOLS)
+        """Register all available MCP tools.
+
+        The manifest layer (``mcp.manifest``) is the source of truth for
+        which scoped tools are surfaced to the agent. BLOCKED tools are
+        dropped at this stage — they never appear in ``self.tools`` and
+        therefore never reach the Claude ``tool_use`` API. Legacy
+        schema-based catalogues (observability / infrastructure /
+        workflow) are also filtered through the blocklist so no blocked
+        tool can leak through the older code path.
+        """
+        blocked_names = set(self._scope_config.blocked_tool_names)
+
+        def _not_blocked(tool: dict) -> bool:
+            return tool.get("name") not in blocked_names
+
+        # Legacy catalogues — pass through the blocklist filter.
+        self.tools.extend(t for t in OBSERVABILITY_TOOLS if _not_blocked(t))
+        self.tools.extend(t for t in INFRASTRUCTURE_TOOLS if _not_blocked(t))
+        self.tools.extend(t for t in WORKFLOW_TOOLS if _not_blocked(t))
+
+        # Layer in scoped tools — BLOCKED tools are filtered out by the
+        # manifest and never reach this list.
+        for loaded in tool_manifest.load_all_allowed(self._scope_config):
+            if loaded.name in blocked_names:
+                continue  # defence in depth
+            self.tools.append(
+                {
+                    "name": loaded.name,
+                    "description": (loaded.fn.__doc__ or "").strip().split("\n")[0],
+                    "input_schema": {"type": "object", "properties": {}},
+                    "scope": loaded.scope,
+                }
+            )
 
     def get_tools(self) -> list[dict]:
         """Return all registered tool schemas for Claude API tool_use."""

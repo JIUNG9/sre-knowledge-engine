@@ -76,20 +76,20 @@ def test_outbound_message_is_redacted() -> None:
     proxy.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=128,
-        system="You are an SRE assistant investigating db01.prod.example.com",
+        system="You are an SRE assistant investigating db01.prod.internal",
         messages=[
             {
                 "role": "user",
-                "content": "User june@example.com from 10.0.0.42 hit acct 123456789012",
+                "content": "User alice.dev@acme-corp.com from 10.0.0.42 hit acct 123456789012",
             }
         ],
     )
 
     sent = fake.messages.received_kwargs
     assert sent is not None
-    assert "db01.prod.example.com" not in sent["system"]
+    assert "db01.prod.internal" not in sent["system"]
     body = sent["messages"][0]["content"]
-    assert "june@example.com" not in body
+    assert "alice.dev@acme-corp.com" not in body
     assert "10.0.0.42" not in body
     assert "123456789012" not in body
     # Placeholders are present in the redacted payload.
@@ -117,16 +117,16 @@ def test_response_is_restored_end_to_end() -> None:
             {
                 "role": "user",
                 "content": (
-                    "Alert: june@example.com logged in from 10.0.0.42 "
-                    "on host db01.prod.example.com"
+                    "Alert: alice.dev@acme-corp.com logged in from 10.0.0.42 "
+                    "on host db01.prod.internal"
                 ),
             }
         ],
     )
 
-    assert "june@example.com" in resp.content[0].text
+    assert "alice.dev@acme-corp.com" in resp.content[0].text
     assert "10.0.0.42" in resp.content[0].text
-    assert "db01.prod.example.com" in resp.content[0].text
+    assert "db01.prod.internal" in resp.content[0].text
     assert "<EMAIL_1>" not in resp.content[0].text
 
 
@@ -135,7 +135,7 @@ def test_passthrough_when_disabled() -> None:
     fake.messages.reply = _FakeMessage(content=[_FakeTextBlock(text="hi")])
     proxy = AnthropicProxy(fake, PIIProxyConfig(enabled=False))
 
-    original = "contact june@example.com"
+    original = "contact alice.dev@acme-corp.com"
     proxy.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=16,
@@ -152,7 +152,7 @@ def test_caller_input_is_not_mutated() -> None:
     proxy = AnthropicProxy(fake, PIIProxyConfig())
 
     original_msgs = [
-        {"role": "user", "content": "email june@example.com"}
+        {"role": "user", "content": "email alice.dev@acme-corp.com"}
     ]
     proxy.messages.create(
         model="claude-sonnet-4-6",
@@ -160,7 +160,7 @@ def test_caller_input_is_not_mutated() -> None:
         messages=original_msgs,
     )
     # Caller's list must be untouched.
-    assert original_msgs[0]["content"] == "email june@example.com"
+    assert original_msgs[0]["content"] == "email alice.dev@acme-corp.com"
 
 
 def test_streaming_restores_deltas() -> None:
@@ -179,12 +179,12 @@ def test_streaming_restores_deltas() -> None:
         messages=[
             {
                 "role": "user",
-                "content": "user june@example.com from 10.0.0.42",
+                "content": "user alice.dev@acme-corp.com from 10.0.0.42",
             }
         ],
     )
     collected: list[str] = [e.delta.text for e in stream]
-    assert "".join(collected) == "user june@example.com from 10.0.0.42"
+    assert "".join(collected) == "user alice.dev@acme-corp.com from 10.0.0.42"
 
 
 def test_content_list_text_blocks_are_redacted() -> None:

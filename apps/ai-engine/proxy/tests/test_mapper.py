@@ -25,15 +25,15 @@ def test_round_trip_restores_original_text(
     mapper: PlaceholderMapper, detector: PIIDetector
 ) -> None:
     text = (
-        "User june@example.com from 10.0.0.42 hit host "
-        "db01.prod.example.com in account 123456789012"
+        "User alice.dev@acme-corp.com from 10.0.0.42 hit host "
+        "db01.prod.internal in account 123456789012"
     )
     scope = mapper.new_scope()
     redacted = mapper.redact(scope, text, detector.detect(text))
     # Placeholders should have replaced the PII.
-    assert "june@example.com" not in redacted
+    assert "alice.dev@acme-corp.com" not in redacted
     assert "10.0.0.42" not in redacted
-    assert "db01.prod.example.com" not in redacted
+    assert "db01.prod.internal" not in redacted
     assert "123456789012" not in redacted
     # Round-trip via restore yields the original.
     assert mapper.restore(scope, redacted) == text
@@ -124,7 +124,7 @@ def test_thread_safety_smoke() -> None:
         try:
             for _ in range(50):
                 scope = mapper.new_scope()
-                text = f"src=10.0.0.{1} user@example.com"
+                text = f"src=10.0.0.{1} user@acme-corp.com"
                 red = mapper.redact(scope, text, detector.detect(text))
                 assert mapper.restore(scope, red) == text
                 mapper.drop_scope(scope)

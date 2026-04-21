@@ -4,9 +4,11 @@
 
 Each fixture is a tuple ``(line, expected_categories)`` where
 ``expected_categories`` is a multiset of category labels that must appear
-somewhere in the detector's output. Fixtures exercise Korean employee
-emails, a large tech company / a large e-commerce company / acme-corp internal hostnames, AWS account IDs,
-access keys, IPv6, JWT and PEM blocks.
+somewhere in the detector's output. Fixtures exercise a mix of employee
+emails, generic ``.internal`` / ``.local`` / ``.corp`` hostnames, AWS
+account IDs, access keys, IPv6, JWT, and PEM blocks. A separate test
+validates that deployment-specific suffixes (e.g. ``acme-corp.co.kr``)
+can be added via ``custom_patterns``.
 """
 
 from __future__ import annotations
@@ -22,18 +24,18 @@ REGEX_DETECTOR = PIIDetector(provider="regex")
 
 
 LOG_FIXTURES: list[tuple[str, list[str]]] = [
-    # Korean employee emails.
+    # Employee emails (various TLDs including ccTLDs).
     (
-        "User june@example.com logged in from 10.0.12.34",
+        "User alice.dev@acme-corp.co.kr logged in from 10.0.12.34",
         ["EMAIL", "IPV4"],
     ),
     (
-        "Contact sre-oncall@acme.com — check with ops@acme-retail.com",
+        "Contact sre-oncall@example.com — check with ops@example.org",
         ["EMAIL", "EMAIL"],
     ),
-    # Internal hostnames across a large tech company / a large e-commerce company / acme-corp / generic suffixes.
+    # Internal hostnames — generic suffixes the built-in regex handles.
     (
-        "db01.prod.example.com is unreachable from api.acme.co.kr",
+        "db01.prod.internal is unreachable from api.prod.internal",
         ["HOST", "HOST"],
     ),
     (
@@ -97,7 +99,7 @@ LOG_FIXTURES: list[tuple[str, list[str]]] = [
     ),
     # Mixed realistic incident line.
     (
-        "oncall@example.com paged after db01.prod.example.com hit 100% CPU "
+        "oncall@acme-corp.com paged after db01.prod.internal hit 100% CPU "
         "(aws acct 123456789012, src 10.20.30.40)",
         ["EMAIL", "HOST", "AWS_ACCOUNT", "IPV4"],
     ),
@@ -131,7 +133,7 @@ def test_detections_match_expectations(line: str, expected: list[str]) -> None:
 
 def test_detections_are_sorted_and_nonoverlapping() -> None:
     text = (
-        "Host db01.prod.example.com (10.0.1.2) reported by user@example.com; "
+        "Host db01.prod.internal (10.0.1.2) reported by user@acme-corp.com; "
         "aws 123456789012 key AKIAIOSFODNN7EXAMPLE."
     )
     hits = REGEX_DETECTOR.detect(text)
@@ -147,6 +149,21 @@ def test_custom_patterns_detected() -> None:
     hits = detector.detect("See INCIDENT-0042 for details")
     assert [h.category for h in hits] == ["CUSTOM"]
     assert hits[0].value == "INCIDENT-0042"
+
+
+def test_custom_patterns_extend_built_in_hostname_matcher() -> None:
+    """Real deployments use company-specific hostname suffixes
+    (e.g. ``*.acme-corp.co.kr``) that the built-in generic regex
+    will not match. The OSS contract is that operators extend
+    coverage via ``custom_patterns``, not by forking the detector.
+    """
+    detector = PIIDetector(
+        provider="regex",
+        custom_patterns=[r"\b[a-zA-Z0-9][\w-]*(?:\.[a-zA-Z0-9_-]+)*\.acme-corp\.co\.kr\b"],
+    )
+    hits = detector.detect("db01.prod.acme-corp.co.kr is unreachable")
+    assert [h.category for h in hits] == ["CUSTOM"]
+    assert hits[0].value == "db01.prod.acme-corp.co.kr"
 
 
 def test_email_inside_hostname_resolves_to_email_plus_none() -> None:

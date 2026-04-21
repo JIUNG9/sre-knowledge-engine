@@ -84,7 +84,7 @@ class AnthropicProxy:
         >>> resp = client.messages.create(
         ...     model="claude-sonnet-4-6",
         ...     max_tokens=256,
-        ...     messages=[{"role": "user", "content": "investigate db01.example.com"}],
+        ...     messages=[{"role": "user", "content": "investigate db01.acme.internal"}],
         ... )
     """
 

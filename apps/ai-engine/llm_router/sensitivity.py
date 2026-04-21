@@ -201,7 +201,7 @@ def classify_sensitivity(
             score += 2
             break
 
-    # Deployment-specific keywords (acme-corp, a large tech company, customer codenames…)
+    # Deployment-specific keywords (your company name, customer codenames, etc.)
     if extra_keywords:
         for kw in extra_keywords:
             if kw and kw.lower() in lowered:

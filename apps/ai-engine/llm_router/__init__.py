@@ -10,7 +10,7 @@ Typical usage::
     from llm_router import LLMRouter, LLMRouterConfig
 
     router = LLMRouter(
-        config=LLMRouterConfig(sensitive_keywords=["acme-corp", "a large tech company"]),
+        config=LLMRouterConfig(sensitive_keywords=["acme-corp", "customer-xyz"]),
     )
 
     # Auto-classify:

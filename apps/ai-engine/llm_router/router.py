@@ -109,7 +109,7 @@ class LLMRouter:
     Example::
 
         router = LLMRouter(
-            config=LLMRouterConfig(sensitive_keywords=["acme-corp", "a large tech company"]),
+            config=LLMRouterConfig(sensitive_keywords=["acme-corp", "customer-xyz"]),
         )
         resp = await router.complete(
             [{"role": "user", "content": "What is kubernetes?"}]

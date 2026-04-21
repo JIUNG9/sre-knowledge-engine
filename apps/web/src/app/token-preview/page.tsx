@@ -240,7 +240,7 @@ function OptionB() {
             <span style={{ color: t.text, fontSize: 14, fontWeight: 600 }}>When rate-limited or budget exhausted:</span>
           </div>
           <ul className="space-y-1.5 ml-8">
-            <li style={{ color: t.muted, fontSize: 13 }}>• Show "Token budget exhausted. Resets on May 1st. Increase budget in Settings."</li>
+            <li style={{ color: t.muted, fontSize: 13 }}>• Show &ldquo;Token budget exhausted. Resets on May 1st. Increase budget in Settings.&rdquo;</li>
             <li style={{ color: t.muted, fontSize: 13 }}>• Offer to switch to Eco mode (cheaper, may still work)</li>
             <li style={{ color: t.muted, fontSize: 13 }}>• Show countdown to reset</li>
             <li style={{ color: t.muted, fontSize: 13 }}>• All dashboard data still works — only AI features paused</li>

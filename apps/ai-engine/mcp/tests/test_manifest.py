@@ -109,9 +109,10 @@ def test_loaded_tool_count_matches_expected():
     write_read = shared_manifest.load_scope("read", write_cfg)
     write_write = shared_manifest.load_scope("write", write_cfg)
 
-    # Three read tools: log_search, metric_query, runbook_lookup.
-    assert len(default_read) == 3
-    assert len(write_read) == 3
+    # Read tools: log_search, metric_query, runbook_lookup +
+    # Layer 5 docs_*: find_docs, reconcile_docs, detect_stale_docs, check_doc_links.
+    assert len(default_read) == 7
+    assert len(write_read) == 7
     # Two write tools: slack_post, jira_create_ticket.
     assert len(write_write) == 2
 
@@ -122,21 +123,22 @@ def test_loaded_tool_count_matches_expected():
 
 
 def test_load_all_allowed_respects_config():
-    assert {t.name for t in shared_manifest.load_all_allowed(MCPScopeConfig())} == {
+    read_only = {
         "log_search",
         "metric_query",
         "runbook_lookup",
+        "find_docs",
+        "reconcile_docs",
+        "detect_stale_docs",
+        "check_doc_links",
     }
+    assert {
+        t.name for t in shared_manifest.load_all_allowed(MCPScopeConfig())
+    } == read_only
     assert {
         t.name
         for t in shared_manifest.load_all_allowed(MCPScopeConfig(load_write=True))
-    } == {
-        "log_search",
-        "metric_query",
-        "runbook_lookup",
-        "slack_post",
-        "jira_create_ticket",
-    }
+    } == read_only | {"slack_post", "jira_create_ticket"}
 
 
 # ---------------------------------------------------------------------- #

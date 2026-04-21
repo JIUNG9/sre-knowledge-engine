@@ -1,0 +1,76 @@
+name: demo-smoke
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/demo/**'
+      - 'apps/ai-engine/**'
+      - 'apps/web/**'
+      - '.github/workflows/demo-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Boot demo stack + smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install smoke-test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install httpx==0.27.2 boto3==1.35.0
+
+      - name: Free disk space (runner)
+        run: |
+          docker system prune -af || true
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost || true
+
+      - name: Start demo stack
+        working-directory: deploy/demo
+        run: |
+          docker compose -f docker-compose.demo.yml --env-file .env.demo up -d --remove-orphans
+
+      - name: Wait for core services
+        working-directory: deploy/demo
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fs http://localhost:8000/health \
+              && curl -fs http://localhost:8090/healthz \
+              && curl -fs http://localhost:4566/_localstack/health ; then
+              echo "ready"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "services did not come up in time"
+          docker compose -f docker-compose.demo.yml ps
+          docker compose -f docker-compose.demo.yml logs --tail=200
+          exit 1
+
+      - name: Seed demo data
+        working-directory: deploy/demo
+        run: |
+          python seed/seed_confluence.py  --url http://localhost:8090 || true
+          python seed/seed_localstack.py  --endpoint http://localhost:4566 || true
+          python seed/seed_incidents.py   --api http://localhost:8000 --count 48 || true
+
+      - name: Smoke test
+        working-directory: deploy/demo
+        run: python tests/smoke_test.py
+
+      - name: Dump logs on failure
+        if: failure()
+        working-directory: deploy/demo
+        run: docker compose -f docker-compose.demo.yml logs --tail=300
+
+      - name: Tear down
+        if: always()
+        working-directory: deploy/demo
+        run: docker compose -f docker-compose.demo.yml down -v --remove-orphans

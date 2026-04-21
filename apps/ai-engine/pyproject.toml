@@ -18,9 +18,26 @@ dependencies = [
     "python-dotenv>=1.0.0",
 ]
 
+[project.optional-dependencies]
+# Microsoft Presidio is an optional, heavier dependency pulled in only when
+# higher-precision PII detection (person names, phone numbers, credit cards)
+# is desired. The proxy degrades cleanly to regex-only when it is absent.
+presidio = [
+    "presidio-analyzer>=2.2.0",
+]
+# Test extras. Kept in the optional group so `pip install .` stays lean.
+test = [
+    "pytest>=8.0.0",
+    "respx>=0.21.0",
+]
+
 [build-system]
 requires = ["setuptools>=75.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["agents*", "mcp*", "models*", "routers*"]
+include = ["agents*", "mcp*", "models*", "proxy*", "routers*"]
+
+[tool.pytest.ini_options]
+testpaths = ["proxy/tests"]
+pythonpath = ["."]

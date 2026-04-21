@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, List, Optional, Sequence
 from .registry import HoneyTokenRegistry
 
 if TYPE_CHECKING:
-    from .generator import HoneyToken
+    pass
 
 log = logging.getLogger("aegis.honeytokens.scanner")
 

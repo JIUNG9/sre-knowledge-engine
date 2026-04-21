@@ -40,7 +40,7 @@ class _FakeBackend:
         if self.raise_unavailable:
             raise OllamaUnavailable("fake unavailable")
         self.calls.append(messages)
-        for piece in (f"hello from ", self.name):
+        for piece in ("hello from ", self.name):
             yield piece
 
 

@@ -337,7 +337,6 @@ class MCPServer:
     async def _handle_query_logs(self, params: dict) -> dict:
         """Query logs from the centralized logging system."""
         service = params.get("service", "unknown")
-        severity = params.get("severity", "error")
         time_range = params.get("time_range", "1h")
         return {
             "status": "success",

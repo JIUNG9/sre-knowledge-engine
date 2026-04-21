@@ -18,15 +18,15 @@ _AI_ENGINE = Path(__file__).resolve().parents[2]
 if str(_AI_ENGINE) not in sys.path:
     sys.path.insert(0, str(_AI_ENGINE))
 
-from opentelemetry import trace
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+from opentelemetry import trace  # noqa: E402
+from opentelemetry.sdk.resources import Resource  # noqa: E402
+from opentelemetry.sdk.trace import TracerProvider  # noqa: E402
+from opentelemetry.sdk.trace.export import SimpleSpanProcessor  # noqa: E402
+from opentelemetry.sdk.trace.export.in_memory_span_exporter import (  # noqa: E402
     InMemorySpanExporter,
 )
 
-from telemetry import reset_for_tests
+from telemetry import reset_for_tests  # noqa: E402
 
 _TEST_PROVIDER: TracerProvider | None = None
 

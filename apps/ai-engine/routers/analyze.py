@@ -8,7 +8,7 @@ by the Aegis dashboard to surface intelligent observability insights.
 from fastapi import APIRouter
 
 from agents.analyzer import LogAnalyzer, MetricAnalyzer
-from models.analysis import AnomalyResult, LogAnalysisRequest, LogAnalysisResult
+from models.analysis import AnomalyResult, LogAnalysisRequest, LogAnalysisResult, MetricAnalysisRequest
 
 router = APIRouter(prefix="/api/v1/analyze", tags=["analysis"])
 

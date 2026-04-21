@@ -249,8 +249,6 @@ class ConfluenceSync:
                 links = data.get("_links") or {}
                 next_rel = links.get("next")
                 if next_rel:
-                    # Extract host from base_url (drop the /wiki suffix if any).
-                    host = base
                     # _links.next already starts with "/wiki/..." so we
                     # need just the scheme+host from base_url.
                     parsed = httpx.URL(base)

@@ -18,6 +18,9 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "redis>=5.0.0",
     "typer>=0.12.0",
+    "opentelemetry-api>=1.27.0",
+    "opentelemetry-sdk>=1.27.0",
+    "opentelemetry-exporter-otlp-proto-http>=1.27.0",
 ]
 
 [project.optional-dependencies]
@@ -43,7 +46,7 @@ requires = ["setuptools>=75.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["agents*", "mcp*", "models*", "proxy*", "routers*", "killswitch*", "cli*", "services*", "wiki*"]
+include = ["agents*", "mcp*", "models*", "proxy*", "routers*", "killswitch*", "cli*", "services*", "wiki*", "telemetry*"]
 
 [tool.pytest.ini_options]
 testpaths = ["proxy/tests", "killswitch/tests", "honeytokens/tests", "telemetry/tests", "mcp/tests"]

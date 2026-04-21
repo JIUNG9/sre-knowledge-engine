@@ -15,7 +15,7 @@ const t = {
 };
 
 function CollapsibleSection({ title, icon: Icon, color, defaultOpen, children }: {
-  title: string; icon: any; color: string; defaultOpen?: boolean; children: React.ReactNode;
+  title: string; icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>; color: string; defaultOpen?: boolean; children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
   return (

@@ -293,35 +293,35 @@ const TEAM_MEMBERS: TeamMember[] = [
   {
     id: "mem-1",
     name: "June Gu",
-    email: "june.gu@acme-corp.ai",
+    email: "june.gu@acme-corp.com",
     role: "Admin",
     initials: "JG",
   },
   {
     id: "mem-2",
     name: "Seungho Park",
-    email: "sh.park@acme-corp.ai",
+    email: "sh.park@acme-corp.com",
     role: "Admin",
     initials: "SP",
   },
   {
     id: "mem-3",
     name: "Minjae Kim",
-    email: "mj.kim@acme-corp.ai",
+    email: "mj.kim@acme-corp.com",
     role: "Member",
     initials: "MK",
   },
   {
     id: "mem-4",
     name: "Yujin Lee",
-    email: "yj.lee@acme-corp.ai",
+    email: "yj.lee@acme-corp.com",
     role: "Member",
     initials: "YL",
   },
   {
     id: "mem-5",
     name: "Donghyun Choi",
-    email: "dh.choi@acme-corp.ai",
+    email: "dh.choi@acme-corp.com",
     role: "Viewer",
     initials: "DC",
   },
@@ -401,7 +401,7 @@ function GeneralTab() {
             <div className="space-y-2">
               <Label className="font-mono text-xs">Team Name</Label>
               <Input
-                defaultValue="acme-corp SRE"
+                defaultValue="Platform SRE"
                 className="font-mono text-sm"
               />
             </div>
@@ -613,7 +613,7 @@ function IntegrationCard({ integration }: { integration: Integration }) {
                   <Input
                     defaultValue={
                       integration.status === "connected"
-                        ? `https://${integration.name.toLowerCase()}.example.com`
+                        ? `https://${integration.name.toLowerCase()}.your-company.internal`
                         : ""
                     }
                     placeholder="https://..."
@@ -2506,7 +2506,7 @@ function AddMemberDialog() {
             <Label className="font-mono text-xs">Email</Label>
             <Input
               type="email"
-              placeholder="e.g., jane@acme-corp.ai"
+              placeholder="e.g., jane@acme-corp.com"
               className="font-mono text-sm"
             />
           </div>

@@ -1,0 +1,89 @@
+# Aegis GCP Custom Role — Read-Only Agent Identity
+# Apply with (DRY-RUN ONLY — never run without approval):
+#   gcloud iam roles create aegisReadOnlyAgent \
+#     --project=YOUR_PROJECT_ID \
+#     --file=readonly-role.yaml
+#
+# Replace YOUR_PROJECT_ID before apply. Do NOT assign roles/viewer alongside —
+# viewer is broader and includes actAs-adjacent permissions.
+
+title: "Aegis Read-Only Agent"
+description: >
+  Least-privilege custom role for the Aegis AI agent. Grants read-only
+  observability access across Compute, GKE, Cloud Logging, Cloud Monitoring,
+  Cloud Storage, and Cloud SQL. NO setIamPolicy, NO create/update/delete,
+  NO access to Secret Manager payloads, NO Billing API.
+stage: GA
+includedPermissions:
+  # ----- Compute Engine (read-only) -----
+  - compute.instances.get
+  - compute.instances.list
+  - compute.instances.getEffectiveFirewalls
+  - compute.disks.get
+  - compute.disks.list
+  - compute.networks.get
+  - compute.networks.list
+  - compute.subnetworks.get
+  - compute.subnetworks.list
+  - compute.firewalls.get
+  - compute.firewalls.list
+  - compute.zones.list
+  - compute.regions.list
+
+  # ----- GKE (read-only) -----
+  - container.clusters.get
+  - container.clusters.list
+  - container.nodes.get
+  - container.nodes.list
+  - container.pods.get
+  - container.pods.list
+  - container.deployments.get
+  - container.deployments.list
+  - container.services.get
+  - container.services.list
+
+  # ----- Cloud Logging (read-only) -----
+  - logging.logs.list
+  - logging.logEntries.list
+  - logging.logMetrics.get
+  - logging.logMetrics.list
+  - logging.sinks.get
+  - logging.sinks.list
+  - logging.views.get
+  - logging.views.list
+
+  # ----- Cloud Monitoring (read-only) -----
+  - monitoring.metricDescriptors.get
+  - monitoring.metricDescriptors.list
+  - monitoring.timeSeries.list
+  - monitoring.alertPolicies.get
+  - monitoring.alertPolicies.list
+  - monitoring.uptimeCheckConfigs.get
+  - monitoring.uptimeCheckConfigs.list
+  - monitoring.dashboards.get
+  - monitoring.dashboards.list
+
+  # ----- Cloud Storage (read-only, object-level) -----
+  - storage.buckets.get
+  - storage.buckets.list
+  - storage.objects.get
+  - storage.objects.list
+
+  # ----- Cloud SQL (metadata only, NO data access) -----
+  - cloudsql.instances.get
+  - cloudsql.instances.list
+  - cloudsql.databases.get
+  - cloudsql.databases.list
+
+  # ----- Resource manager / identity (self-identification only) -----
+  - resourcemanager.projects.get
+  - iam.serviceAccounts.get
+  - iam.serviceAccounts.list
+
+# NOTE: The following are deliberately EXCLUDED — do not add:
+#   - secretmanager.versions.access          (reads secret payloads)
+#   - iam.serviceAccounts.actAs              (impersonation)
+#   - iam.serviceAccountKeys.create          (key creation)
+#   - resourcemanager.projects.setIamPolicy  (grants permissions)
+#   - billing.accounts.get                   (billing API costs money)
+#   - any *.create, *.update, *.delete, *.patch, *.setIamPolicy

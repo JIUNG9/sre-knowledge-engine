@@ -1,0 +1,58 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SessionScopedReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeInstances",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeVpcs",
+        "logs:FilterLogEvents",
+        "logs:GetLogEvents",
+        "logs:DescribeLogGroups",
+        "cloudwatch:GetMetricData",
+        "cloudwatch:GetMetricStatistics",
+        "cloudwatch:ListMetrics",
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBClusters",
+        "eks:DescribeCluster",
+        "eks:ListClusters",
+        "sts:GetCallerIdentity"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestedRegion": [
+            "us-east-1",
+            "us-west-2"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "SessionDenyAllMutations",
+      "Effect": "Deny",
+      "Action": [
+        "*:Create*",
+        "*:Delete*",
+        "*:Put*",
+        "*:Update*",
+        "*:Modify*",
+        "*:Write*",
+        "*:Attach*",
+        "*:Detach*",
+        "*:Start*",
+        "*:Stop*",
+        "*:Terminate*",
+        "iam:*",
+        "secretsmanager:*",
+        "organizations:*",
+        "ce:*",
+        "kms:Decrypt"
+      ],
+      "Resource": "*"
+    }
+  ],
+  "_comment": "Apply via aws sts assume-role --policy file://session-policy-example.json. Effective permissions = intersection(role policy, this session policy). Scope to specific regions to contain blast radius."
+}

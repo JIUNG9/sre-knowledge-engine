@@ -18,7 +18,6 @@ if str(_AI_ENGINE) not in sys.path:
 @pytest.fixture
 def tmp_vault(tmp_path: Path) -> Path:
     """Create an Obsidian-shaped vault with a few fixture files."""
-    now = datetime(2026, 4, 21, tzinfo=timezone.utc)
     (tmp_path / "runbooks").mkdir()
     (tmp_path / "_meta").mkdir()
     (tmp_path / "_archive").mkdir()

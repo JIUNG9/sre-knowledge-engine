@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Honey Tokens and Kill Switches — Three Defenses Before You Let AI Read Your Logs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" />
+<style>
+:root {
+  --bg: #0A0A0F;
+  --card: #1E1E2A;
+  --border: #2A2A38;
+  --text: #E6E6EC;
+  --muted: #9898A6;
+  --accent: #00FF88;
+  --accent-soft: rgba(0, 255, 136, 0.1);
+  --amber: #FFB347;
+  --red: #FF5C5C;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 64px 24px 128px;
+}
+h1, h2, h3, h4 {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+h1 {
+  font-size: 42px;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.subtitle {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 18px;
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+h2 {
+  font-size: 28px;
+  margin: 56px 0 16px;
+  color: var(--accent);
+}
+h3 {
+  font-size: 20px;
+  margin: 32px 0 12px;
+  color: var(--text);
+}
+p { margin: 0 0 20px; }
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.35);
+  transition: border-color 0.15s;
+}
+a:hover { border-bottom-color: var(--accent); }
+strong { color: var(--text); font-weight: 600; }
+em { color: var(--muted); }
+blockquote {
+  margin: 32px 0;
+  padding: 20px 24px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 18px;
+  font-style: normal;
+  border-radius: 0 6px 6px 0;
+}
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 24px; margin: 0 0 20px; }
+li { margin-bottom: 8px; }
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 48px 0;
+}
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+pre {
+  background: #13131B;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 24px 0;
+}
+pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 15px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  background: #25253A;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--accent); }
+.mermaid {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin: 32px 0;
+  text-align: center;
+}
+.byline {
+  font-size: 14px;
+  color: var(--muted);
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  margin-top: 48px;
+}
+.tags {
+  margin-top: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+}
+.tags strong { color: var(--accent); }
+.cta {
+  display: inline-block;
+  margin: 8px 0;
+  padding: 14px 24px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  border-radius: 6px;
+  border-bottom: none;
+}
+.cta:hover { background: #33FFA2; border-bottom: none; }
+</style>
+</head>
+<body>
+<article class="wrap">
+
+<h1>Honey Tokens and Kill Switches — Three Defenses Before You Let AI Read Your Logs</h1>
+<p class="subtitle">Your PII proxy catches the obvious leaks. These two tools catch the ones it misses — and give you a panic button when everything else has failed.</p>
+
+<hr/>
+
+<p>In the previous piece in this series I wrote about the PII-redacting reverse proxy that sits between <a href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">Aegis</a> and the Claude API. That proxy is the <em>everyday</em> defense — it scrubs emails, IPs, hostnames, and secrets out of every outbound prompt automatically.</p>
+
+<p>But the proxy has known limits. It catches PII that matches a pattern. It does not catch:</p>
+
+<ul>
+<li>A secret in a format you have never seen before</li>
+<li>A confidential summary that the model paraphrases in plain English</li>
+<li>A social-engineering attack that convinces your agent to include the wrong file</li>
+<li>An MCP tool accidentally wired to do something you thought you blocked</li>
+</ul>
+
+<p>For those, you need a <em>second</em> and a <em>third</em> defense. This article is about the other two layers I shipped in Aegis's Layer 0 safety foundation:</p>
+
+<ol>
+<li><strong>Honey tokens</strong> — tripwires seeded in your knowledge base that alert you if they ever leak.</li>
+<li><strong>A kill switch with a panic CLI</strong> — a single command that stops every agent tool and, if you opt in, attaches a <code>Deny *</code> policy to your AWS role.</li>
+</ol>
+
+<p>Each is around 300 lines of Python. Together with the PII proxy they are the <em>defense-in-depth</em> version of "I let an LLM read my production data and I can sleep at night."</p>
+
+<blockquote>
+<strong>Repo:</strong> <a href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">github.com/JIUNG9/aegis</a><br/>
+<strong>Modules:</strong> <code>apps/ai-engine/honeytokens/</code>, <code>apps/ai-engine/killswitch/</code>
+</blockquote>
+
+<hr/>
+
+<h2>Defense #1 — Honey tokens (tripwires in your own data)</h2>
+
+<p>A honey token is a fake credential or identifier that <em>should never appear anywhere</em> — not in a log line, not in a LLM response, not in an external system. If you ever see the string, you have hard evidence that something you thought was private leaked somewhere.</p>
+
+<p>Thinkst Canarytokens has been doing this for AWS credentials for years. The pattern is old. The <em>new</em> application is planting them in the context your LLM agent reads, and monitoring every outbound hop for their presence.</p>
+
+<h3>The threat model</h3>
+
+<p>Imagine your proxy misses a leak — a novel secret format, a cleverly worded summary, a new SigNoz field your regex doesn't know about. The leak goes to Anthropic's servers. Nothing obvious breaks. You have no idea.</p>
+
+<p>Now imagine that alongside the real SigNoz data, your agent's vault contains a synthetic record like:</p>
+
+<pre><code class="language-yaml"># runbook: emergency-db-failover.md
+...
+## break-glass credentials (rotated 2026-04-12)
+admin_user: aegis-honey-root-7f3a91b8c4
+admin_secret: AEGIS-HONEY-SECRET-9d2e5c1a4b</code></pre>
+
+<p>The <code>aegis-honey-*</code> strings are fake. They map to nothing real. The LLM has no way to know they are fake, because they look like every other secret in the vault. But Aegis knows — they are registered in a local SQLite file — and Aegis scans every outbound payload and every OTel trace for them.</p>
+
+<p>If any of those strings ever show up in:</p>
+
+<ul>
+<li>A Claude API request body</li>
+<li>An OTel span attribute</li>
+<li>An external webhook payload</li>
+<li>A log line on your SIEM</li>
+</ul>
+
+<p>You receive an immediate alert. You now <em>know</em> you have a leak. You can see exactly where the leak surfaced. You can reproduce and patch.</p>
+
+<h3>How the module works</h3>
+
+<p>Three pieces:</p>
+
+<pre><code class="language-python"># apps/ai-engine/honeytokens/generator.py
+
+CATEGORIES = Literal[
+    "aws_key", "email", "hostname",
+    "db_password", "api_key", "pem_block",
+]
+
+@dataclass
+class HoneyToken:
+    id: str                 # sha256[:12] — globally unique
+    category: str
+    value: str              # the string we plant in the data
+    created_at: datetime
+    seeded_in: list[str]    # where we planted it (for debugging)
+
+class HoneyTokenGenerator:
+    def create(self, category: CATEGORIES) -&gt; HoneyToken:
+        token_id = hashlib.sha256(os.urandom(32)).hexdigest()[:12]
+        value = self._render(category, token_id)
+        self._registry.insert(HoneyToken(id=token_id, category=category, value=value, ...))
+        return ...</code></pre>
+
+<p>The render step produces something that looks like the category — an AWS key becomes <code>AKIA</code> + 16 random chars, a PEM block becomes a full-looking PEM with a marker in the subject, etc. The twist: every value contains the substring <code>AEGIS-HONEY-{token_id}</code> somewhere inside, so the scanner can find it with O(n) multi-pattern matching even on large payloads.</p>
+
+<pre><code class="language-python"># apps/ai-engine/honeytokens/scanner.py
+
+class OutboundScanner:
+    def __init__(self, registry: HoneyTokenRegistry):
+        self._automaton = ahocorasick.Automaton()
+        for token in registry.all():
+            self._automaton.add_word(token.value, token.id)
+        self._automaton.make_automaton()
+
+    def scan(self, text: str) -&gt; list[HoneyTokenHit]:
+        return [
+            HoneyTokenHit(token_id=token_id, offset=offset, context=text[offset-40:offset+40])
+            for offset, (token_id,) in self._automaton.iter(text)
+        ]</code></pre>
+
+<p>Aho-Corasick gives us O(n) time regardless of registry size — so even a thousand honey tokens scanning a megabyte payload adds well under a millisecond. The scanner is wired into the PII proxy, the MCP tool dispatcher, and an OTel span processor. Every outbound byte gets checked.</p>
+
+<p>When a hit fires, three things happen:</p>
+
+<ol>
+<li>An OTel span is emitted with error status and the token category</li>
+<li>A webhook POST goes to your alert endpoint if configured</li>
+<li>A loud stderr warning in ANSI red surfaces on the operator console</li>
+</ol>
+
+<p>You can choose not to alert — some people just want to see the span show up in Jaeger — but the default is "scream."</p>
+
+<h3>What this is <em>not</em></h3>
+
+<p>It is not a prevention. It is a detection. The leak still happens. The value is that you <em>know</em> it happened, within milliseconds, with full context. Compared to the usual "we learned a year later from a breach report" timeline, that is a significant upgrade.</p>
+
+<hr/>
+
+<h2>Defense #3 — The kill switch and <code>aegis panic</code></h2>
+
+<p>The proxy catches obvious leaks. The honey tokens catch the subtle ones. What stops an agent that is <em>actively misbehaving right now</em>?</p>
+
+<p>Nothing, unless you build it. So I did.</p>
+
+<h3>The model</h3>
+
+<p>A simple flag, checked on every MCP tool invocation, with three backends:</p>
+
+<ul>
+<li><strong>Redis</strong> (default) — <code>GET aegis:killswitch</code> in under 5ms</li>
+<li><strong>File</strong> (fallback when Redis is down) — one stat() call per tool</li>
+<li><strong>Explicit revoke</strong> (opt-in, nuclear) — attach an IAM inline policy that denies everything</li>
+</ul>
+
+<pre><code class="language-python"># apps/ai-engine/killswitch/switch.py
+
+class KillSwitch:
+    def trip(self, reason: str, operator: str) -&gt; None:
+        payload = {"active": True, "reason": reason, "operator": operator, "at": now()}
+        self._backend.set("aegis:killswitch", json.dumps(payload))
+        self._audit.append({"event": "trip", **payload})
+
+    def is_active(self) -&gt; bool:
+        raw = self._backend.get("aegis:killswitch")
+        return bool(raw and json.loads(raw).get("active"))</code></pre>
+
+<p>Every MCP tool is decorated:</p>
+
+<pre><code class="language-python"># apps/ai-engine/killswitch/gate.py
+
+def killswitch_gate(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if killswitch.is_active():
+            status = killswitch.status()
+            raise KillSwitchTripped(
+                f"Aegis is halted (tripped by {status['operator']}): {status['reason']}"
+            )
+        return func(*args, **kwargs)
+    return wrapper</code></pre>
+
+<p>Every MCP tool — read, write, whatever — calls through this decorator before doing anything. If the switch is active, the tool raises before making a single HTTP call, touching a single resource, or invoking a single other tool.</p>
+
+<h3>The <code>aegis panic</code> CLI</h3>
+
+<pre><code class="language-bash">$ aegis panic
+Operator name: june
+Reason: seeing unexpected S3 list calls in Datadog
+[y/N] Also revoke AWS session for arn:aws:iam::123456789012:role/aegis? (requires boto3) y
+
+[!] KILL SWITCH TRIPPED at 2026-04-21T14:07:33+09:00
+[!] Reason: seeing unexpected S3 list calls in Datadog
+[!] AWS role aegis-readonly: attached deny-all session policy
+[!] All 37 loaded MCP tools will refuse calls until released.
+
+Audit log: ./aegis-audit.jsonl
+Release:   aegis release</code></pre>
+
+<p>Two typed lines and the agent is frozen. If you opted in, the AWS role is also frozen — any in-flight session using that role starts receiving <code>AccessDenied</code> on its next API call.</p>
+
+<h3>Why "opt in" on the AWS revoke</h3>
+
+<p>Because panic buttons with side effects get tested. If the default was "also revoke AWS credentials," someone would run <code>aegis panic</code> during a demo to show how it works, and that someone would have a bad day. Explicit opt-in means the revoke path runs when the operator meant it to run. For most deployments the in-process kill switch is enough. For a deployment where the agent role can read sensitive data that an attacker could exfiltrate in the milliseconds it takes to notice, the AWS revoke path buys time.</p>
+
+<h3>Graceful degradation</h3>
+
+<p>Redis going down should not disable the kill switch — that would be the worst possible failure mode. The switch checks Redis first, and if Redis returns an error, it falls back to the file backend and logs a warning. Both backends are authoritative; whichever is active wins.</p>
+
+<p>Tests use <code>fakeredis</code> so CI does not need a real Redis. The <code>aegis panic</code> CLI is tested with Typer's <code>CliRunner</code>. The AWS revoke path is tested against moto.</p>
+
+<hr/>
+
+<h2>How the three defenses compose</h2>
+
+<p>Here is the mental model for why you want all three:</p>
+
+<table>
+<thead><tr><th>Layer</th><th>Catches</th><th>Misses</th><th>Response time</th></tr></thead>
+<tbody>
+<tr><td><strong>PII proxy</strong> (Article #9)</td><td>Pattern-matchable PII, secrets, hostnames</td><td>Paraphrased summaries, novel formats</td><td>0ms (prevention)</td></tr>
+<tr><td><strong>Honey tokens</strong> (this article)</td><td>Anything that leaks verbatim, including unseen patterns</td><td>Paraphrased or re-keyed content</td><td>~1ms per scan (detection)</td></tr>
+<tr><td><strong>Kill switch</strong> (this article)</td><td>Active misbehavior, runaway tool calls</td><td>Past leaks (cannot un-send)</td><td>~5ms check, ~2s to fully halt</td></tr>
+</tbody>
+</table>
+
+<p>You want the proxy because it prevents the common case cheaply. You want honey tokens because the proxy is not perfect and you need <em>some</em> way to know when it misses. You want the kill switch because sometimes you see something weird in your telemetry and you need to stop the world <em>now</em> while you figure out what it was.</p>
+
+<p>One without the others leaves a hole. All three together give you something that can legitimately be called "safe to deploy against production data."</p>
+
+<hr/>
+
+<h2>What you do with it</h2>
+
+<p>Install:</p>
+
+<pre><code class="language-bash">pip install -e "apps/ai-engine[safety]"</code></pre>
+
+<p>Seed some honey tokens into your demo vault:</p>
+
+<pre><code class="language-bash">aegis honeytokens seed --vault ~/Documents/obsidian-sre --per-category 3</code></pre>
+
+<p>This creates three fake AWS keys, three fake emails, three fake hostnames, etc., each with a unique <code>AEGIS-HONEY-*</code> marker, registered in <code>./honeytokens.db</code>. They are scattered across your real vault pages in realistic-looking positions — the idea is that a human browsing the vault would not immediately spot them, but the scanner can.</p>
+
+<p>Run your agent. The proxy and the scanner run on every outbound call. Any honey token hit fires an alert.</p>
+
+<p>If something goes wrong, panic:</p>
+
+<pre><code class="language-bash">aegis panic</code></pre>
+
+<p>Release after you have investigated:</p>
+
+<pre><code class="language-bash">aegis release</code></pre>
+
+<hr/>
+
+<h2>A note on threat modeling</h2>
+
+<p>These three tools are designed against <strong>operator mistakes</strong> and <strong>agent misconfigurations</strong>, not against <strong>nation-state adversaries</strong>. Someone who owns your laptop can disable any of them. Someone who controls your Anthropic API key can do whatever they want. The point is to raise the bar from "a single oversight leaks your prod data forever" to "you have to make three independent mistakes to lose."</p>
+
+<p>For the kinds of mistakes I have actually made in production over the years, three layers is enough. Your threat model may differ. The point is that the rules I used to hold in my head — sanitize, watch for leaks, have a way to stop the agent — are now three shipped features in the repo. Anyone who deploys Aegis gets them, whether they read the docs or not.</p>
+
+<p>That is the Layer 0 thesis.</p>
+
+<hr/>
+
+<h2>What's next in the series</h2>
+
+<ul>
+<li><strong>Article #11</strong> — <em>Deploying an AI SRE Agent in a Regulated Enterprise (PIPA Case Study)</em> — how I use all of the above, plus Layer 0.4's Ollama router, to keep Aegis on the right side of the amended Korean Personal Information Protection Act.</li>
+</ul>
+
+<hr/>
+
+<blockquote>The cheapest time to catch a leak is before it leaves the laptop. The second cheapest time is a millisecond later, when a honey token trips. The third cheapest is while it is still happening, with a panic command. Any deployment of an AI agent over production data should have all three.</blockquote>
+
+<hr/>
+
+<p style="text-align:center;margin:48px 0;"><a class="cta" href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">Try it yourself → github.com/JIUNG9/aegis</a></p>
+
+<hr/>
+
+<p class="byline"><em>Written by June Gu. Site Reliability Engineer at my employer. Previously a large e-commerce company, acme-it IT&amp;E, acme-retail Shopping. Targeting a Canadian relocation February 2027. Find me on <a href="https://www.linkedin.com/in/jiung-gu" target="_blank" rel="noopener">LinkedIn</a>.</em></p>
+
+<p><strong>Try it:</strong></p>
+<ul>
+<li>Repo: <a href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">github.com/JIUNG9/aegis</a></li>
+<li>Honey tokens: <code>apps/ai-engine/honeytokens/</code></li>
+<li>Kill switch: <code>apps/ai-engine/killswitch/</code></li>
+<li>Panic CLI: <code>aegis panic</code></li>
+</ul>
+
+<p style="text-align:center;margin:48px 0;"><em>Next: <a href="../11-pipa-case-study/article.html">Article #11 — Deploying an AI SRE Agent in a Regulated Enterprise (PIPA Case Study)</a></em></p>
+
+<p class="tags"><strong>Tags:</strong> AI &middot; SRE &middot; Security &middot; LLM &middot; Open Source</p>
+
+</article>
+
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  hljs.highlightAll();
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1E1E2A',
+      primaryTextColor: '#E6E6EC',
+      primaryBorderColor: '#00FF88',
+      lineColor: '#00FF88',
+      secondaryColor: '#25253A',
+      tertiaryColor: '#0A0A0F',
+      background: '#0A0A0F',
+      mainBkg: '#1E1E2A',
+      textColor: '#E6E6EC',
+      nodeBorder: '#00FF88',
+      clusterBkg: '#13131B',
+      clusterBorder: '#2A2A38'
+    }
+  });
+</script>
+</body>
+</html>

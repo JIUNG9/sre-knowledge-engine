@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>I Built a PII-Redacting Proxy for Claude — Because My SRE Agent Almost Leaked Production Data to Anthropic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" />
+<style>
+:root {
+  --bg: #0A0A0F;
+  --card: #1E1E2A;
+  --border: #2A2A38;
+  --text: #E6E6EC;
+  --muted: #9898A6;
+  --accent: #00FF88;
+  --accent-soft: rgba(0, 255, 136, 0.1);
+  --amber: #FFB347;
+  --red: #FF5C5C;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 64px 24px 128px;
+}
+h1, h2, h3, h4 {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+h1 {
+  font-size: 42px;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.subtitle {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 18px;
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+h2 {
+  font-size: 28px;
+  margin: 56px 0 16px;
+  color: var(--accent);
+}
+h3 {
+  font-size: 20px;
+  margin: 32px 0 12px;
+  color: var(--text);
+}
+p { margin: 0 0 20px; }
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.35);
+  transition: border-color 0.15s;
+}
+a:hover { border-bottom-color: var(--accent); }
+strong { color: var(--text); font-weight: 600; }
+em { color: var(--muted); }
+blockquote {
+  margin: 32px 0;
+  padding: 20px 24px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 18px;
+  font-style: normal;
+  border-radius: 0 6px 6px 0;
+}
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 24px; margin: 0 0 20px; }
+li { margin-bottom: 8px; }
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 48px 0;
+}
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+pre {
+  background: #13131B;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 24px 0;
+}
+pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 15px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  background: #25253A;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--accent); }
+.mermaid {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin: 32px 0;
+  text-align: center;
+}
+.byline {
+  font-size: 14px;
+  color: var(--muted);
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  margin-top: 48px;
+}
+.tags {
+  margin-top: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+}
+.tags strong { color: var(--accent); }
+.cta {
+  display: inline-block;
+  margin: 8px 0;
+  padding: 14px 24px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  border-radius: 6px;
+  border-bottom: none;
+}
+.cta:hover { background: #33FFA2; border-bottom: none; }
+</style>
+</head>
+<body>
+<article class="wrap">
+
+<h1>I Built a PII-Redacting Proxy for Claude — Because My SRE Agent Almost Leaked Production Data to Anthropic</h1>
+<p class="subtitle">An AI agent that reads your prod telemetry is one HTTPS call away from being a compliance incident. Here's the ~400 lines of Python I added between my agent and <code>api.anthropic.com</code>.</p>
+
+<hr/>
+
+<p>I run an open-source AI SRE platform called <a href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">Aegis</a>. It reads SigNoz logs, Confluence runbooks, AWS descriptions, and feeds the relevant context into Claude so the model can reason about incidents. Layer 1 ships an LLM-backed wiki. Layer 2 wires in SigNoz. Layer 3 is the Claude "Control Tower" that stitches everything together.</p>
+
+<p>The day I started wiring Layer 3, I looked at my outbound HTTP traffic and saw this:</p>
+
+<pre><code class="language-http">POST https://api.anthropic.com/v1/messages
+Content-Type: application/json
+
+{
+  "model": "claude-opus-4-7",
+  "system": "You are an SRE analyst...",
+  "messages": [
+    {"role": "user", "content": "Investigate this alert.\n\n2026-04-18 09:13:42 ERROR
+      user=kim.jiho@example.com ip=203.0.113.42 host=prod-db-01.example.com
+      db=acme_orders_prod msg=\"failed login after 5 attempts\""}
+  ]
+}</code></pre>
+
+<p>That is a real internal hostname, a real coworker's email, a real production database name, and a real source IP leaving my laptop in Seoul and ending up on a server in the United States — because my helpful AI agent fetched a real log line and shoved it into the prompt.</p>
+
+<p>Nothing had been pushed to GitHub. The repo was clean. The vault wasn't committed yet. But the data <em>had</em> crossed a national border. Every time the agent ran.</p>
+
+<p>This article is about the ~400-line proxy I wrote to stop that, and why it ships <em>inside</em> Aegis — not as a thing each user is supposed to remember — so any engineer who clones the repo gets the protection automatically.</p>
+
+<blockquote>
+<strong>Repo:</strong> <a href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">github.com/JIUNG9/aegis</a><br/>
+<strong>Module:</strong> <code>apps/ai-engine/proxy/</code>
+</blockquote>
+
+<hr/>
+
+<h2>The problem nobody writes about</h2>
+
+<p>Most LLM-agent tutorials skip deployment entirely. The ones that do mention safety say something like:</p>
+
+<blockquote>"Remember to sanitize sensitive data before sending prompts to the LLM."</blockquote>
+
+<p>That's not a design. That's a prayer. It treats the human operator as the last line of defense — which worked fine when "the LLM" was a chat window you pasted into. It does not work when "the LLM" is an autonomous loop that pulls data from ten sources and fires off API calls on its own.</p>
+
+<p>The structural problem is:</p>
+
+<ol>
+<li>Your agent reads <strong>real production telemetry</strong> — that's literally its job.</li>
+<li>That telemetry contains <strong>real PII and secrets</strong> — hostnames, emails, IPs, account IDs, connection strings.</li>
+<li>The agent decides <strong>on its own</strong> what context to include in each prompt.</li>
+<li>Every prompt goes to a <strong>third-party server</strong>, often in a different jurisdiction.</li>
+</ol>
+
+<p>Nothing in that chain involves a human reviewing what gets sent. The "sanitize before you share" rule applied to push-to-GitHub, where there is an obvious checkpoint (the <code>git push</code>). There is no equivalent checkpoint between your agent and the LLM API.</p>
+
+<p>Here is the checkpoint I added.</p>
+
+<hr/>
+
+<h2>The architecture: a redacting reverse proxy</h2>
+
+<p>The mental model is simple — stick a proxy between the agent and Anthropic, scrub PII on the way out, put it back on the way in.</p>
+
+<div class="mermaid">
+flowchart LR
+    A[Aegis Agent] --&gt; P[PII Proxy<br/>detect · replace · reverse-map]
+    P --&gt; AN[api.anthropic.com]
+    AN --&gt; P
+    P --&gt; A
+    P --- M[(per-request<br/>mapping table<br/>in-memory · TTL)]
+</div>
+
+<p>Four moving parts:</p>
+
+<ol>
+<li><strong>Detector</strong> — scans every outbound message for PII and secrets. Regex for the obvious stuff, optionally Microsoft Presidio for the harder stuff (names, organization-specific patterns).</li>
+<li><strong>Mapper</strong> — deterministic placeholder generator. <code>kim.jiho@example.com</code> becomes <code>&lt;USER_1&gt;</code>. Same input in the same request gets the same placeholder, so downstream reasoning still works. Different requests get independent mappings, so nothing leaks across.</li>
+<li><strong>Proxy</strong> — a thin wrapper around <code>anthropic.Anthropic</code> that runs detector + mapper before <code>messages.create(...)</code> and reverses the substitutions on the response.</li>
+<li><strong>Config</strong> — Pydantic settings. On by default, <code>enabled=False</code> gives you a passthrough.</li>
+</ol>
+
+<p>That's it. No magic. The whole module is around 400 lines including tests.</p>
+
+<hr/>
+
+<h2>What the detector catches</h2>
+
+<p>Here is the regex layer, trimmed to the shape (real implementation has boundary anchors and a few exceptions):</p>
+
+<pre><code class="language-python"># apps/ai-engine/proxy/detector.py
+
+PATTERNS = {
+    "email":            r"[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
+    "ipv4":             r"\b(?:\d{1,3}\.){3}\d{1,3}\b",
+    "aws_account_id":   r"\b\d{12}\b",
+    "aws_access_key":   r"\b(?:AKIA|ASIA)[0-9A-Z]{16}\b",
+    "internal_host":    r"\b[\w-]+\.(?:internal|local|corp|intranet)\b",
+    "jwt":              r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b",
+    "bearer":           r"(?i)bearer\s+[A-Za-z0-9._~+/-]+=*",
+    "pem_block":        r"-----BEGIN [A-Z ]+-----[\s\S]+?-----END [A-Z ]+-----",
+}</code></pre>
+
+<p>Optional second layer: if <code>presidio-analyzer</code> is installed, the detector hands the text to Presidio for ML-backed recognition of person names, organizations, medical terms, and so on. For a solo operator this is often overkill. For a team shipping Aegis at a hospital it is the difference between "you can deploy this" and "you cannot deploy this." Both paths live behind the same interface, so you flip <code>provider="hybrid"</code> in config and it works.</p>
+
+<p>The detector emits a list of <strong>spans</strong> — <code>(start, end, category, original_text)</code>. No mutation yet. That's the mapper's job.</p>
+
+<hr/>
+
+<h2>What the mapper does with those spans</h2>
+
+<p>Two rules:</p>
+
+<ol>
+<li><strong>Deterministic within a request.</strong> If <code>kim.jiho@example.com</code> appears three times in the same prompt, all three become <code>&lt;USER_1&gt;</code>. Claude can still reason about "this user did X and then Y and then Z" because the placeholder is stable.</li>
+<li><strong>Independent across requests.</strong> If two different users investigate two different incidents, their <code>&lt;USER_1&gt;</code>s refer to different people. This is enforced by scoping the map to a per-request context, not a singleton.</li>
+</ol>
+
+<pre><code class="language-python"># apps/ai-engine/proxy/mapper.py  (sketch)
+
+class RedactionMap:
+    def __init__(self, ttl_seconds: int = 3600):
+        self._map: dict[str, str] = {}           # placeholder → original
+        self._reverse: dict[str, str] = {}       # original → placeholder
+        self._counters: dict[str, int] = defaultdict(int)
+        self._expires_at = time.time() + ttl_seconds
+
+    def placeholder_for(self, original: str, category: str) -> str:
+        if original in self._reverse:
+            return self._reverse[original]
+        self._counters[category] += 1
+        placeholder = f"&lt;{category.upper()}_{self._counters[category]}&gt;"
+        self._map[placeholder] = original
+        self._reverse[original] = placeholder
+        return placeholder
+
+    def reverse(self, text: str) -&gt; str:
+        for placeholder, original in self._map.items():
+            text = text.replace(placeholder, original)
+        return text</code></pre>
+
+<p>The <code>reverse</code> method is how your eyes — and only your eyes — see the real hostnames in the answer Claude gives you. The placeholder left the laptop. The real name never did.</p>
+
+<hr/>
+
+<h2>The proxy itself</h2>
+
+<p>The wrapper is the boring part, and that is the point:</p>
+
+<pre><code class="language-python"># apps/ai-engine/proxy/proxy.py  (sketch)
+
+class AnthropicProxy:
+    def __init__(self, inner: anthropic.Anthropic, config: PIIProxyConfig):
+        self._inner = inner
+        self._config = config
+        self._detector = Detector(config)
+
+    def messages_create(self, *, system=None, messages, **kwargs):
+        if not self._config.enabled:
+            return self._inner.messages.create(system=system, messages=messages, **kwargs)
+
+        redaction = RedactionMap(ttl_seconds=self._config.mapping_ttl_seconds)
+        redacted_system, redacted_messages = self._detector.redact(
+            system=system, messages=messages, mapping=redaction
+        )
+
+        response = self._inner.messages.create(
+            system=redacted_system, messages=redacted_messages, **kwargs
+        )
+
+        # Reverse-substitute placeholders in the response content
+        return _apply_reverse(response, redaction)</code></pre>
+
+<p>If <code>enabled=False</code>, it is a direct passthrough — zero runtime cost, zero behavioral difference from the bare Anthropic client. If enabled, every outbound payload is scanned, every PII span is swapped for a placeholder, and the response content is post-processed to restore real names before your agent sees it.</p>
+
+<p>Streaming is supported because the reverse substitution is applied per-chunk as the response comes back. Tool use (the <code>tool_use</code> content blocks Anthropic returns) is handled the same way — placeholders in the tool arguments get restored before you dispatch the tool call.</p>
+
+<hr/>
+
+<h2>Wiring it in — one line of change</h2>
+
+<p>Here's what a user of Aegis has to do to turn this on:</p>
+
+<pre><code class="language-python"># Before:
+from anthropic import Anthropic
+client = Anthropic()
+
+# After:
+from anthropic import Anthropic
+from aegis.proxy import AnthropicProxy, PIIProxyConfig
+
+client = AnthropicProxy(Anthropic(), PIIProxyConfig())  # default: enabled</code></pre>
+
+<p>That's it. Every call site that used <code>client.messages.create(...)</code> continues to work. The agent does not know the proxy exists. The user does not need to remember to sanitize anything — the proxy handles every call, every time.</p>
+
+<p><strong>This is the whole point.</strong> Safety is a shipped feature, not a user discipline. The rule I had in my head — "June should sanitize before sending" — became a line of code. Any engineer who clones Aegis gets the same protection for free, with no docs to read, no checklist to follow.</p>
+
+<hr/>
+
+<h2>Why this matters for Korean law</h2>
+
+<p>On April 15, 2026, the amended <strong>Personal Information Protection Act (PIPA)</strong> came into force in Korea. Two bits of the amendment are directly relevant to anyone running an AI agent that touches production data:</p>
+
+<ol>
+<li><strong>Cross-border data transfers</strong> now require explicit consent architecture. Silently sending a log line containing a customer email to a US server is the pattern PIPC has been prosecuting since the DeepSeek ruling.</li>
+<li><strong>CEO personal liability</strong> attaches to violations, with fines up to 10% of turnover.</li>
+</ol>
+
+<p>That changes the calculus of "move fast and break things" for any Korean-headquartered org. The PII proxy plus the local-LLM router (Layer 0.4 in Aegis) together give a deployer a defensible position: <em>"Real prod data never left the country. Only sanitized placeholders crossed the border, and we have OTel traces proving it."</em></p>
+
+<p>For a regulated organization, the proxy is not a nice-to-have. It is the difference between "Aegis is deployable under PIPA" and "Aegis is a lawsuit waiting to happen."</p>
+
+<p>This is also why it ships inside the repo, not as a recipe on the wiki. A recipe gets skipped. A hard dependency in <code>apps/ai-engine/main.py</code> does not.</p>
+
+<hr/>
+
+<h2>Threat model — what this does and does not catch</h2>
+
+<p>Let me be specific so nobody thinks this is a silver bullet.</p>
+
+<p><strong>What the proxy catches well:</strong></p>
+<ul>
+<li>Structured PII (emails, IPs, AWS IDs, well-formed secrets)</li>
+<li>Hostnames matching your internal-domain patterns</li>
+<li>Secrets that follow recognizable formats (AKIA keys, JWTs, PEM blocks)</li>
+<li>Anything your <code>custom_patterns</code> config adds</li>
+</ul>
+
+<p><strong>What it catches with Presidio enabled:</strong></p>
+<ul>
+<li>Person names in natural-language text</li>
+<li>Organization names and locations</li>
+<li>Medical terms, credit card numbers (if you need them)</li>
+</ul>
+
+<p><strong>What it does NOT catch:</strong></p>
+<ul>
+<li>Novel secret formats your regexes do not know about (rotate your patterns when you rotate your secrets)</li>
+<li>PII embedded in free-text prose without any marker ("the engineer who was oncall last Tuesday")</li>
+<li>Business-sensitive context that is not PII but is still confidential (pricing, org charts)</li>
+<li>Data that the agent <em>describes</em> rather than <em>quotes verbatim</em></li>
+</ul>
+
+<p>Those last two are real limitations. If your agent summarizes a confidential document in plain English, the summary may leak intent even if no literal PII string appears. The proxy cannot help with that. Honey tokens (Layer 0.6) and OTel GenAI audit traces (Layer 0.5) cover a different angle of the same problem, and together with the proxy they form a defense-in-depth posture rather than a single silver bullet.</p>
+
+<hr/>
+
+<h2>Performance cost</h2>
+
+<p>The detector runs in O(n) with respect to prompt size. In practice on prompts up to 50 KB I measured <strong>~4 ms</strong> of added latency on an M2 MacBook, which is well under the network round-trip to Anthropic's API. The mapping table is an in-memory dict that disappears at the end of the request scope, so memory overhead is bounded by the size of a single prompt's PII set — typically a few dozen spans per incident.</p>
+
+<p>If you enable Presidio, expect latency to jump to <strong>~30–80 ms</strong> depending on language model and prompt size. Worth it for a regulated deployment, overkill for a homelab demo. The config lets you pick.</p>
+
+<hr/>
+
+<h2>What you do with it</h2>
+
+<p>Clone the repo, install, run:</p>
+
+<pre><code class="language-bash">git clone https://github.com/JIUNG9/aegis
+cd aegis
+pip install -e "apps/ai-engine[proxy]"</code></pre>
+
+<p>Hook it into your existing Claude usage:</p>
+
+<pre><code class="language-python">from anthropic import Anthropic
+from aegis.proxy import AnthropicProxy, PIIProxyConfig
+
+client = AnthropicProxy(
+    Anthropic(),
+    PIIProxyConfig(
+        enabled=True,
+        provider="hybrid",              # regex + presidio if installed
+        mapping_ttl_seconds=3600,
+        custom_patterns=[
+            r"\bprod-[a-z0-9-]+\.mycorp\.internal\b",  # your hostnames
+        ],
+    ),
+)
+
+# Use exactly like anthropic.Anthropic — proxy is transparent.
+resp = client.messages.create(
+    model="claude-opus-4-7",
+    system="You are an SRE analyst.",
+    messages=[{"role": "user", "content": "Investigate the alert I just fetched from SigNoz."}],
+    max_tokens=1024,
+)</code></pre>
+
+<p>The first time you run a prompt with real data through it, check your outbound HTTPS traffic with <code>mitmproxy</code> or similar. You should see <code>&lt;USER_1&gt;</code>, <code>&lt;HOST_1&gt;</code>, <code>&lt;IP_1&gt;</code> in the payload — not the original strings. If you see the originals, file an issue on the repo and I will fix it.</p>
+
+<hr/>
+
+<h2>What's next in the series</h2>
+
+<p>This is Article #9 in the Aegis OSS series. The PII proxy is one of eight features in <strong>Layer 0: Safety Foundation</strong> — the set of protections that ship <em>inside</em> the software so that any engineer deploying Aegis gets them by default, with no docs to read and no checklist to follow.</p>
+
+<p>Upcoming pieces in the Layer 0 arc:</p>
+
+<ul>
+<li><strong>Article #10</strong> — <em>Honey Tokens + Kill Switches: 3 Defenses for LLM Agents</em> (tripwires that catch prompt leaks, plus the <code>aegis panic</code> CLI)</li>
+<li><strong>Article #11</strong> — <em>Deploying an AI SRE Agent in a Regulated Enterprise (PIPA Case Study)</em> (how Layer 0.4's Ollama router keeps you on the right side of Korean law)</li>
+</ul>
+
+<hr/>
+
+<h2>The one-line takeaway</h2>
+
+<blockquote>If your AI agent reads production data, the moment its data <strong>and</strong> the LLM API live in different jurisdictions, you have a compliance problem — and you cannot solve it with a checklist. Solve it with code that runs on every call, every time, whether anyone remembers to run it or not.</blockquote>
+
+<hr/>
+
+<p style="text-align:center;margin:48px 0;"><a class="cta" href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">Try it yourself → github.com/JIUNG9/aegis</a></p>
+
+<hr/>
+
+<p class="byline"><em>Written by June Gu. Site Reliability Engineer at my employer. Previously a large e-commerce company, acme-it IT&amp;E, acme-retail Shopping. Targeting a Canadian relocation February 2027. Find me on <a href="https://www.linkedin.com/in/jiung-gu" target="_blank" rel="noopener">LinkedIn</a>.</em></p>
+
+<p><strong>Try it:</strong></p>
+<ul>
+<li>Repo: <a href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">github.com/JIUNG9/aegis</a></li>
+<li>PII Proxy module: <code>apps/ai-engine/proxy/</code></li>
+<li>Full Layer 0 spec: <code>docs/ARCHITECTURE.md#layer-0</code></li>
+</ul>
+
+<p style="text-align:center;margin:48px 0;"><em>Next: <a href="../10-honey-tokens-killswitches/article.html">Article #10 — Honey Tokens and Kill Switches</a></em></p>
+
+<p class="tags"><strong>Tags:</strong> AI &middot; SRE &middot; DevOps &middot; Privacy &middot; Open Source</p>
+
+</article>
+
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  hljs.highlightAll();
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1E1E2A',
+      primaryTextColor: '#E6E6EC',
+      primaryBorderColor: '#00FF88',
+      lineColor: '#00FF88',
+      secondaryColor: '#25253A',
+      tertiaryColor: '#0A0A0F',
+      background: '#0A0A0F',
+      mainBkg: '#1E1E2A',
+      textColor: '#E6E6EC',
+      nodeBorder: '#00FF88',
+      clusterBkg: '#13131B',
+      clusterBorder: '#2A2A38'
+    }
+  });
+</script>
+</body>
+</html>

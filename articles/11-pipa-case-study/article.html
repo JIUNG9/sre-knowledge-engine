@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Deploying an AI SRE Agent in a Regulated Enterprise — A PIPA Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css" />
+<style>
+:root {
+  --bg: #0A0A0F;
+  --card: #1E1E2A;
+  --border: #2A2A38;
+  --text: #E6E6EC;
+  --muted: #9898A6;
+  --accent: #00FF88;
+  --accent-soft: rgba(0, 255, 136, 0.1);
+  --amber: #FFB347;
+  --red: #FF5C5C;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 17px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 64px 24px 128px;
+}
+h1, h2, h3, h4 {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+h1 {
+  font-size: 42px;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.subtitle {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 18px;
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+h2 {
+  font-size: 28px;
+  margin: 56px 0 16px;
+  color: var(--accent);
+}
+h3 {
+  font-size: 20px;
+  margin: 32px 0 12px;
+  color: var(--text);
+}
+p { margin: 0 0 20px; }
+a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.35);
+  transition: border-color 0.15s;
+}
+a:hover { border-bottom-color: var(--accent); }
+strong { color: var(--text); font-weight: 600; }
+em { color: var(--muted); }
+blockquote {
+  margin: 32px 0;
+  padding: 20px 24px;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 18px;
+  font-style: normal;
+  border-radius: 0 6px 6px 0;
+}
+blockquote strong { color: var(--accent); }
+ul, ol { padding-left: 24px; margin: 0 0 20px; }
+li { margin-bottom: 8px; }
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 48px 0;
+}
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+pre {
+  background: #13131B;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 24px 0;
+}
+pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 15px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  background: #25253A;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--accent); }
+.mermaid {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin: 32px 0;
+  text-align: center;
+}
+.byline {
+  font-size: 14px;
+  color: var(--muted);
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  margin-top: 48px;
+}
+.tags {
+  margin-top: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+}
+.tags strong { color: var(--accent); }
+.cta {
+  display: inline-block;
+  margin: 8px 0;
+  padding: 14px 24px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  border-radius: 6px;
+  border-bottom: none;
+}
+.cta:hover { background: #33FFA2; border-bottom: none; }
+</style>
+</head>
+<body>
+<article class="wrap">
+
+<h1>Deploying an AI SRE Agent in a Regulated Enterprise — A PIPA Case Study</h1>
+<p class="subtitle">How the amended Korean Personal Information Protection Act of April 2026 turns "LLM agents that read production data" from a nice demo into a legal minefield, and the open-source deployment pattern that keeps you on the right side of it.</p>
+
+<hr/>
+
+<p>On April 15, 2026, the amended <strong>Personal Information Protection Act (PIPA)</strong> came into force in the Republic of Korea. If you work at a Korean company, or you run services that process Korean users' data, or you are thinking about where to deploy an AI agent that touches production telemetry — this article is for you.</p>
+
+<p>The headline provisions everyone has been quoting:</p>
+
+<ul>
+<li><strong>Cross-border data transfers</strong> of personal information now require an explicit consent architecture, regulator notification, and documented controller→controller agreements.</li>
+<li><strong>CEO personal liability</strong> attaches to violations, with fines up to <strong>3% of domestic revenue</strong> for category-A infractions (amended, was 10% in the early draft — final bill is lower but still eye-watering).</li>
+<li><strong>Enforcement is real.</strong> The PIPC (Personal Information Protection Commission) has already issued cessation orders against cross-border AI products in the last twelve months.</li>
+</ul>
+
+<p>The part that nobody is writing about, which happens to be my day job, is how this intersects with <strong>autonomous AI agents that read production telemetry</strong>. An SRE agent that fetches a SigNoz log line — containing a real user's email or a real customer ID — and shoves it into a prompt bound for <code>api.anthropic.com</code> has just <em>transferred personal data to a third country without consent architecture</em>.</p>
+
+<p>That is a compliance incident. You didn't push anything to GitHub. You didn't export a database. You just let your agent do what agents do. PIPA does not care about your intent.</p>
+
+<p>This article is the deployment pattern I use for <a href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">Aegis</a>, my open-source AI DevSecOps platform, to keep it deployable under PIPA and comparable cross-border regimes (GDPR, Japan's APPI, India's DPDP). It is an honest engineering writeup, not legal advice — but it's the technical foundation that lets a lawyer tell you "yes, this deployment is defensible."</p>
+
+<blockquote>
+<strong>Repo:</strong> <a href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">github.com/JIUNG9/aegis</a><br/>
+<strong>Deployment guide:</strong> <code>docs/DEPLOYMENT.md</code> (Tier C)
+</blockquote>
+
+<hr/>
+
+<h2>The PIPA problem, in one diagram</h2>
+
+<div class="mermaid">
+flowchart LR
+    S[SigNoz<br/>on-prem · Korea] --&gt; A[Aegis agent<br/>runs wherever you deployed]
+    A --&gt; AN[api.anthropic.com<br/>US or EU]
+    S -. log line contains<br/>real customer email<br/>real internal hostname<br/>real source IP .-&gt; X((THIS IS A<br/>CROSS-BORDER<br/>TRANSFER))
+</div>
+
+<p>The pattern that used to be "data in, prompt out, answer back" is now, legally, a <strong>cross-border transfer of personal data</strong> at each arrow that crosses a jurisdictional boundary.</p>
+
+<p>Under the amended PIPA, four things are required before that transfer is lawful:</p>
+
+<ol>
+<li><strong>A lawful basis</strong> (consent, contract, or a specific exemption).</li>
+<li><strong>Controller→controller agreement</strong> with the receiving party.</li>
+<li><strong>Notification</strong> to PIPC in many cases.</li>
+<li><strong>Technical safeguards</strong> that minimize what actually crosses the border.</li>
+</ol>
+
+<p>Points 1–3 are contractual and organizational. The lawyers handle them. <strong>Point 4 is the engineer's job.</strong> That is where Aegis's Layer 0 lives.</p>
+
+<hr/>
+
+<h2>The Tier C deployment pattern</h2>
+
+<p>Aegis ships three deployment tiers:</p>
+
+<table>
+<thead><tr><th>Tier</th><th>Use case</th><th>PIPA applicability</th></tr></thead>
+<tbody>
+<tr><td>A. Local / Homelab</td><td>Learning, demo</td><td>N/A (no real PII)</td></tr>
+<tr><td>B. Personal Cloud</td><td>Consultant, side project</td><td>Low (depends on data)</td></tr>
+<tr><td><strong>C. Enterprise Sandbox</strong></td><td><strong>Regulated org, compliance required</strong></td><td><strong>Full</strong></td></tr>
+</tbody>
+</table>
+
+<p>For Tier C — the "my employer expects me to deploy this without getting them sued" tier — Aegis uses five Layer 0 features together. Each one is a feature of the OSS repo, enabled via config, not a personal discipline you have to remember.</p>
+
+<h3>Feature 1 — Local LLM router (the PIPA lynchpin)</h3>
+
+<p>Layer 0.4 is <code>apps/ai-engine/llm_router.py</code>. It classifies every prompt as <em>sensitive</em> or <em>sanitized</em> and routes accordingly:</p>
+
+<ul>
+<li><strong>Sensitive</strong> (contains real hostnames, real PII, large log dumps, known customer names) → local Ollama running on a machine inside the same jurisdiction as the data. No HTTPS call leaves Korea.</li>
+<li><strong>Sanitized</strong> (already-redacted placeholder text, public knowledge, demo fixtures) → Claude API in the US.</li>
+</ul>
+
+<p>The classifier is conservative. "Borderline" counts as sensitive. A false positive costs Ollama tokens. A false negative costs a PIPA fine. The math is one-sided.</p>
+
+<pre><code class="language-yaml"># aegis.config.yaml (Tier C)
+llm_router:
+  sensitive_backend: ollama
+  sanitized_backend: claude
+  ollama_url: http://ollama.internal:11434   # inside VPC, inside Korea
+  ollama_model: llama3.1:70b                  # serious model for serious prod
+  auto_detect_sensitive: true
+  always_local: false                         # flip to true for maximum conservatism
+  fallback_to_cloud_on_local_failure: false   # ALWAYS false in Tier C</code></pre>
+
+<p>The <code>fallback_to_cloud_on_local_failure: false</code> line is the important one. If Ollama goes down, the router returns an error to the agent. It does <em>not</em> silently retry against Claude — which would be a cross-border transfer the user never authorized. Loud failure is the correct behavior when the alternative is an unlogged compliance violation.</p>
+
+<p><strong>For the always-local paranoid mode:</strong> set <code>always_local: true</code>. Every prompt routes to Ollama. The Claude API key remains configured (for sanitized fixtures or dev work), but at runtime, no real prompt ever reaches it.</p>
+
+<h3>Feature 2 — PII redaction proxy (for the prompts that do go to Claude)</h3>
+
+<p>Layer 0.1 — <code>apps/ai-engine/proxy/</code> — handles the edge case where a prompt <em>does</em> go to Claude (sanitized fixture tests, demo mode, CI runs). Even in "sanitized" flows, the proxy stays on as belt-and-suspenders. If a developer accidentally tests against a real log line, the proxy catches it.</p>
+
+<pre><code class="language-yaml">pii_proxy:
+  enabled: true               # default ON, leave it ON
+  provider: hybrid            # regex + Presidio
+  mapping_ttl_seconds: 3600
+  custom_patterns:
+    - '\bprod-[a-z0-9-]+\.acme-corp\.internal\b'
+    - '\bnaver_[a-z]+_prod\b'</code></pre>
+
+<p>Article #9 in this series has the full walkthrough of what the proxy does and doesn't catch. For a Tier C deployment, it is treated as a <em>secondary</em> defense — the primary defense is that sensitive data should never reach the cloud backend at all. The proxy catches the times that assumption fails.</p>
+
+<h3>Feature 3 — OTel GenAI audit trail (for the regulator)</h3>
+
+<p>Layer 0.5 emits OpenTelemetry spans following the GenAI semantic conventions for every LLM call and every MCP tool invocation. The attributes are the ones PIPC cares about:</p>
+
+<ul>
+<li><code>gen_ai.system</code> = <code>anthropic</code> or <code>ollama</code> (which backend served)</li>
+<li><code>gen_ai.request.model</code> (which model)</li>
+<li><code>aegis.mcp.tool.scope</code> = <code>read</code> or <code>write</code></li>
+<li><code>aegis.mcp.tool.outcome</code></li>
+<li>Span count by backend, over time</li>
+</ul>
+
+<p>That means if PIPC asks "prove this agent never sent personal data to a US server," you can export a trace query like:</p>
+
+<pre><code class="language-traceql">{ resource.service.name = "aegis"
+  &amp;&amp; span.gen_ai.system = "anthropic" }
+| count_over_time(1d)</code></pre>
+
+<p>If the answer is "zero" for the period in question, you have documentary evidence. If the answer is non-zero, you can drill into exactly which prompts went where, and (because the PII proxy was in the path) verify they were sanitized. This is the evidence a lawyer's associate builds a file around. The alternative — "trust me, it didn't happen" — is not a defense.</p>
+
+<h3>Feature 4 — Honey token tripwires</h3>
+
+<p>Layer 0.6 plants <code>AEGIS-HONEY-*</code> strings in your agent's vault. They look like real secrets but are fake. If any of those strings ever appear in an OTel span, a Claude API request body, or a webhook payload, you have <em>immediate</em> evidence that a leak path exists — without waiting for an external breach report.</p>
+
+<p>For a regulated deployment, the value is the ability to <strong>prove a leak did not happen</strong> (because no honey token fired in the audit window) or <strong>prove exactly when a leak started</strong> (first honey token hit → investigation begins → patch). Compare the usual lifecycle of a data leak (discovered months later by a third party) and the value is obvious.</p>
+
+<h3>Feature 5 — Kill switch + panic CLI</h3>
+
+<p>Layer 0.3 — <code>aegis panic</code> — is the "stop the world" for when something goes wrong that you did not anticipate. Typing two lines:</p>
+
+<pre><code class="language-bash">$ aegis panic
+Operator name: june
+Reason: unusual egress to Anthropic during a scheduled outage window</code></pre>
+
+<p>…freezes every MCP tool the agent can invoke. If the deployer opts in, <code>aegis panic --revoke-aws</code> also attaches a <code>Deny *</code> policy to the agent's IAM role, freezing any in-flight AWS credential use.</p>
+
+<p>For PIPA purposes the value is: if you ever get a PIPC inquiry, you can respond "we halted the system at TIMESTAMP while we investigate" and point at the audit log. Demonstrating operational control is part of what makes a controller-data-subject relationship defensible.</p>
+
+<hr/>
+
+<h2>What Tier C looks like in practice</h2>
+
+<p>Here is the deployment shape for a Korean regulated organization (I'm not going to name the employer, but the shape is real):</p>
+
+<div class="mermaid">
+flowchart TB
+    subgraph VPC["Company VPC · Korea · ap-northeast-2"]
+        S[SigNoz<br/>internal]
+        A[Aegis agent<br/>+ Layer 0]
+        O[Ollama<br/>llama3.1:70b<br/>on g5.12xlarge]
+        P[PII Proxy<br/>scrubs]
+        S --&gt; A
+        A &lt;--&gt; O
+        A --&gt; P
+    end
+    P --&gt; AN[api.anthropic.com · US<br/>ONLY sees placeholders]
+</div>
+
+<p>The AWS footprint:</p>
+<ul>
+<li><strong>Aegis agent</strong>: runs on a small instance inside the VPC (t3.large is sufficient for the agent itself).</li>
+<li><strong>Ollama</strong>: runs on a g5.12xlarge or similar for the 70B model — if cost matters, gemma3:27b on a smaller GPU also works.</li>
+<li><strong>IAM</strong>: the agent role uses the Tier C read-only policy from <code>deploy/iam/aws/readonly-policy.json</code> (Layer 0.2). No write perms. Explicit <code>Deny</code> on IAM, Secrets Manager, KMS decrypt, and every mutating verb.</li>
+<li><strong>Kill switch</strong>: Redis inside the VPC, exposed only to Aegis.</li>
+<li><strong>OTel traces</strong>: ship to an internal collector that forwards to the company's SigNoz (no external SaaS for trace data in Tier C).</li>
+</ul>
+
+<p>The cost math is significant. Ollama on g5.12xlarge at on-demand pricing is ~$5/hr. A spot instance drops that to $1.50/hr. Compare to fully Claude-API-backed usage, where 100 incident investigations per day at realistic prompt sizes can run $30–50/day — so Ollama pays for itself in a few months for any non-trivial deployment, and the savings fund the compliance posture.</p>
+
+<hr/>
+
+<h2>What this buys the lawyer</h2>
+
+<p>Here is the conversation a legal associate can now have with PIPC:</p>
+
+<blockquote>
+<strong>PIPC:</strong> Describe the technical safeguards in place for cross-border transfers of personal data by your AI analysis system.<br/><br/>
+<strong>Legal (with engineer's help):</strong> Our AI analysis system is deployed such that real production telemetry — including any personal data — is processed exclusively by locally-hosted LLMs inside the Republic of Korea. Prompts containing real production data do not cross the border. Our deployment architecture enforces this at two layers: (1) an automated classifier routes all sensitive-detected prompts to local Ollama, and (2) an egress proxy redacts personal identifiers from any prompt that does leave the jurisdiction, replacing them with non-reversible placeholders. We maintain OpenTelemetry audit traces showing, per day, the number of prompts that went to each backend, along with the sensitivity classification. We can produce this audit trail for any requested time range.
+</blockquote>
+
+<p>Every sentence in that response maps to a shipped feature in the Aegis repo. That is the point. The lawyer is not asking you to <em>build</em> the defense at the time of inquiry — it already exists, it's already running, it's already logging.</p>
+
+<hr/>
+
+<h2>The three things that do NOT make the system PIPA-compliant</h2>
+
+<p>Let me be explicit about what this architecture does <em>not</em> solve:</p>
+
+<ol>
+<li><strong>Consent and contractual basis.</strong> The technical architecture lets you <em>minimize</em> the transfer. It does not give you a lawful basis for <em>any</em> transfer. That is a separate legal workstream — consent flows, privacy policy updates, controller agreements. Aegis does not generate those.</li>
+<li><strong>Data subject rights.</strong> Right to access, right to deletion, right to object — these apply to the vault contents themselves, which include logs and notes. Aegis does not implement a data-subject-request workflow; your surrounding systems have to.</li>
+<li><strong>Cross-system breach response.</strong> If Aegis catches a leak (honey token fires), you still have to report the incident under PIPA's 72-hour rule. The tool gives you evidence and timing; the legal response is still manual.</li>
+</ol>
+
+<p>A lawyer looking at this architecture will be happy with it. They will still have work to do. But the work is the kind they are used to doing, rather than "we have no idea what our system is sending where."</p>
+
+<hr/>
+
+<h2>Who else this applies to</h2>
+
+<p>PIPA is the sharpest example, but the same pattern holds for:</p>
+
+<ul>
+<li><strong>GDPR</strong> (EU) — Article 44–49 on international transfers. The <code>always_local</code> mode plus audit trail is functionally a "supplementary measure" in Schrems-II terms.</li>
+<li><strong>Japan's APPI</strong> (amended 2022) — cross-border consent + safeguards similar to PIPA.</li>
+<li><strong>India's DPDP Act</strong> (2023) — localization requirements for sensitive categories.</li>
+<li><strong>HIPAA</strong> (US healthcare) — BAA requirements with LLM vendors, which Ollama side-steps entirely for the hot path.</li>
+</ul>
+
+<p>For any of these, the Tier C architecture is a reasonable starting point. The config flags are the same; the auditable evidence is the same; the engineering time to deploy is the same.</p>
+
+<hr/>
+
+<h2>What's next</h2>
+
+<p>This is Article #11 and the close of the Layer 0 safety arc. The final piece in the series — <strong>Article #8: Open-Sourcing Aegis: From Side Project to Platform</strong> — is already drafted and covers the bigger story: how and why an employed SRE builds an OSS platform, what it takes to make it production-ready for strangers, and how the OSS work and the day job intersect.</p>
+
+<p>Meanwhile, the engineering roadmap continues with Layers 2–5: the SigNoz connector, the Claude Control Tower, the production guardrails, and the MCP document reconciliation. Each will have its own article, each will map to a shipped feature in the repo.</p>
+
+<hr/>
+
+<blockquote>If your AI agent reads production data and you operate in a regulated jurisdiction, the question is not "should I deploy defensively" — it's "have I shipped the defense, or am I hoping my users will remember to be careful." Only the first answer survives a regulator's email.</blockquote>
+
+<hr/>
+
+<p style="text-align:center;margin:48px 0;"><a class="cta" href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">Try it yourself → github.com/JIUNG9/aegis</a></p>
+
+<hr/>
+
+<p class="byline"><em>Written by June Gu. Site Reliability Engineer at my employer. Previously a large e-commerce company, acme-it IT&amp;E, acme-retail Shopping. Targeting a Canadian relocation February 2027. Find me on <a href="https://www.linkedin.com/in/jiung-gu" target="_blank" rel="noopener">LinkedIn</a>.</em></p>
+
+<p><strong>Try it:</strong></p>
+<ul>
+<li>Repo: <a href="https://github.com/JIUNG9/aegis" target="_blank" rel="noopener">github.com/JIUNG9/aegis</a></li>
+<li>Tier C deployment guide: <code>docs/DEPLOYMENT.md</code></li>
+<li>Layer 0 config reference: <code>docs/CONFIG.md</code></li>
+<li>Full Layer 0 arc: Articles #9, #10, #11</li>
+</ul>
+
+<p style="text-align:center;margin:48px 0;"><em>More articles: <a href="../09-pii-proxy-for-claude/article.html">#9 — PII Proxy for Claude</a> &middot; <a href="../10-honey-tokens-killswitches/article.html">#10 — Honey Tokens and Kill Switches</a></em></p>
+
+<p class="tags"><strong>Tags:</strong> AI &middot; Compliance &middot; SRE &middot; Privacy &middot; Open Source</p>
+
+</article>
+
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+  hljs.highlightAll();
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#1E1E2A',
+      primaryTextColor: '#E6E6EC',
+      primaryBorderColor: '#00FF88',
+      lineColor: '#00FF88',
+      secondaryColor: '#25253A',
+      tertiaryColor: '#0A0A0F',
+      background: '#0A0A0F',
+      mainBkg: '#1E1E2A',
+      textColor: '#E6E6EC',
+      nodeBorder: '#00FF88',
+      clusterBkg: '#13131B',
+      clusterBorder: '#2A2A38'
+    }
+  });
+</script>
+</body>
+</html>

@@ -6,7 +6,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/JIUNG9/aegis/ci.yml?label=ci&logo=github)](https://github.com/JIUNG9/aegis/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v4.0%20Layer%201%20built-brightgreen)](docs/ARCHITECTURE.md)
+[![Status](https://img.shields.io/badge/status-v4.0%20Layers%200%20%2B%201%20built-brightgreen)](docs/ARCHITECTURE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000?logo=next.js)](https://nextjs.org/)
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
@@ -35,12 +35,13 @@ The whole platform targets a specific constraint: **under fifteen dollars a mont
 
 ```mermaid
 graph TB
-  subgraph AEGIS["Aegis v4.0 — 5 Layers"]
+  subgraph AEGIS["Aegis v4.0 — 6 Layers"]
+    L0[Layer 0: Safety Foundation<br/>PII proxy / IAM / kill switch / OTel / honey tokens<br/><b>BUILT</b>]
     L1[Layer 1: LLM Wiki<br/>Karpathy Pattern<br/><b>BUILT</b>]
-    L2[Layer 2: SigNoz Connector<br/>HTTP API<br/>planned]
+    L2[Layer 2: SigNoz Connector<br/>HTTP API + pattern analyzer<br/>in progress]
     L3[Layer 3: Claude Control Tower<br/>Eco / Standard / Deep<br/>planned]
-    L4[Layer 4: Production Guardrails<br/>4-Stage Automation Ladder<br/>planned]
-    L5[Layer 5: MCP Doc Reconciliation<br/>Confluence + GitHub + Incidents<br/>planned]
+    L4[Layer 4: Production Guardrails<br/>4-Stage Automation Ladder<br/>in progress]
+    L5[Layer 5: MCP Doc Reconciliation<br/>Confluence + GitHub + Incidents<br/>in progress]
   end
   User[SRE on-call] --> L3
   Alert[SigNoz alert] --> L3
@@ -50,6 +51,7 @@ graph TB
   L5 --> L1
   L2 --> L5
   L1 --> Vault[Obsidian vault<br/>aegis-wiki repo]
+  L0 -.wraps every layer.-> L3
 ```
 
 Full design document, component boundaries, trust model, and cost envelope: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
@@ -60,23 +62,29 @@ Full design document, component boundaries, trust model, and cost envelope: [doc
 
 | Layer | Component | Status | Code path |
 |-------|-----------|--------|-----------|
+| 0 | PII redaction proxy (Claude API) | Built | `apps/ai-engine/proxy/` |
+| 0 | Cloud IAM policy templates (AWS/GCP/Azure) | Built | `deploy/iam/` |
+| 0 | Kill switch + `aegis panic` CLI | Built | `apps/ai-engine/killswitch/` |
+| 0 | Local LLM router (Ollama fallback) | Built | `apps/ai-engine/llm_router/` |
+| 0 | OTel GenAI tracing | Built | `apps/ai-engine/telemetry/` |
+| 0 | Honey token beacon | Built | `apps/ai-engine/honeytokens/` |
+| 0 | MCP tool scoping (read/write/blocked) | Built | `apps/ai-engine/mcp/manifest.py` |
+| 0 | Demo mode (docker-compose + LocalStack + OTel) | Built | `deploy/demo/` |
 | 1 | LLM Wiki (Karpathy pattern) | Built | `apps/ai-engine/wiki/` |
 | 1 | Contradiction detector | Built | `apps/ai-engine/wiki/contradiction.py` |
 | 1 | Staleness linter | Built | `apps/ai-engine/wiki/staleness.py` |
 | 1 | Confluence sync | Built | `apps/ai-engine/wiki/confluence_sync.py` |
 | 1 | SigNoz wiki sync | Built | `apps/ai-engine/wiki/signoz_sync.py` |
 | 1 | Git publisher | Built | `apps/ai-engine/wiki/publisher.py` |
-| 2 | SigNoz HTTP connector | Planned | `apps/ai-engine/connectors/` |
-| 2 | Time-based pattern analyzer | Planned | `apps/ai-engine/connectors/pattern_analyzer.py` |
+| 2 | SigNoz HTTP connector | In progress | `apps/ai-engine/connectors/` |
+| 2 | Time-based pattern analyzer | In progress | `apps/ai-engine/connectors/pattern_analyzer/` |
 | 3 | Claude Control Tower | Planned | `apps/ai-engine/agents/orchestrator.py` |
 | 3 | Three-mode routing (Eco / Standard / Deep) | Built (UI), planned (backend) | `apps/web/src/app/(dashboard)/settings/` |
-| 4 | Risk classifier | Planned | `apps/ai-engine/guardrails/risk_assessor.py` |
-| 4 | Four-stage automation ladder | Planned | `apps/ai-engine/guardrails/observation_mode.py` |
-| 4 | Slack approval gate | Planned | `apps/ai-engine/guardrails/approval_gate.py` |
-| 4 | Pre-validator (dry-run) | Planned | `apps/ai-engine/guardrails/pre_validator.py` |
-| 4 | Post-validator (metric verify) | Planned | `apps/ai-engine/guardrails/post_validator.py` |
-| 4 | Audit logger (SOC2 trail) | Planned | `apps/ai-engine/guardrails/audit_logger.py` |
-| 5 | MCP docs reconciliation tools | Planned | `apps/ai-engine/mcp/tools/docs_reconciliation.py` |
+| 4 | 4-stage automation ladder + policy engine | In progress | `apps/ai-engine/guardrails/` |
+| 4 | Risk classifier | In progress | `apps/ai-engine/guardrails/risk.py` |
+| 4 | Slack approval gate | In progress | `apps/ai-engine/guardrails/approval.py` |
+| 4 | Audit logger (SOC2 trail) | In progress | `apps/ai-engine/guardrails/audit.py` |
+| 5 | MCP docs reconciliation tools (4 read tools) | In progress | `apps/ai-engine/mcp/tools/read/docs_*.py` |
 
 Frontend modules already shipped: Log Explorer, SLO Dashboard, FinOps, Incidents, Security, Deployments, On-Call, Services, IAM, Cloud Accounts, Settings (general, integrations, AI & tokens, team, safety). See `apps/web/src/app/(dashboard)/`.
 
@@ -167,6 +175,9 @@ The design decisions, trade-offs, and implementation details behind Aegis are do
 | 6 | [80% of Incidents on Monday 9 AM](articles/06-monday-patterns/article.md) | Time-based pattern analysis that pre-positions recommendations. |
 | 7 | [Production Guardrails Across 4 AWS Accounts](articles/07-multi-account-guardrails/article.md) | Risk tiers, dry-run, rollback-first, SOC2-ready audit trail. |
 | 8 | [Open-Sourcing Aegis](articles/08-open-sourcing-capstone/article.md) | The career capstone: SRE by day, platform author by night. |
+| 9 | [PII-Redacting Proxy for Claude](articles/09-pii-proxy-for-claude/article.md) | Layer 0.1 — stopping real prod data from crossing to Anthropic's servers. |
+| 10 | [Honey Tokens + Kill Switches](articles/10-honey-tokens-killswitches/article.md) | Layer 0.3 + 0.6 — tripwires that catch LLM leaks + an `aegis panic` CLI. |
+| 11 | [Deploying AI in a Regulated Enterprise (PIPA Case Study)](articles/11-pipa-case-study/article.md) | Layer 0.4 + Tier C — how Aegis stays on the right side of Korean PIPA. |
 
 Each article directory also contains a `linkedin-post.md` with three variants (technical, career, hot-take) ready to post.
 

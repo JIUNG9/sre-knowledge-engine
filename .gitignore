@@ -2,6 +2,9 @@
 node_modules/
 .pnpm-store/
 
+# Claude Code worktrees (ephemeral, per-session)
+.claude/worktrees/
+
 # Build outputs
 .next/
 dist/

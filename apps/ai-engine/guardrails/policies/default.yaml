@@ -1,0 +1,129 @@
+# Aegis default guardrails policy.
+#
+# This is the shipped, conservative default. Edit a copy — don't edit this
+# file in-place, since upgrades will overwrite it. Override with
+# AEGIS_GUARDRAILS_POLICY=/path/to/my-policy.yaml.
+#
+# Matching primitives (see guardrails/policy.py for the full list):
+#   environment   — dev | stage | prod | ...
+#   category      — iam | rbac | secret | database | deployment | ...
+#   verb          — delete | scale | restart | apply | ...
+#   destructive   — true | false
+#   target        — substring match against action.target
+#   after_hours   — true | false (based on local clock)
+#   blast_radius_gte — int
+#   any           — list of sub-blocks, OR semantics
+#
+# Effects:
+#   cap_tier          — SUGGEST | DRAFT | PROPOSE | EXECUTE
+#   require_approvals — int (lower bound; max across rules wins)
+#   approver_group    — str or list
+#   deny              — true (outright block)
+#   add_risk          — int (adds to risk score)
+#   reason            — human-readable explanation
+
+config:
+  after_hours_start: 18   # 18:00 local
+  after_hours_end: 8      # 08:00 local
+
+rules:
+  # ---------------- Environment-tier caps ----------------
+
+  - id: dev-can-execute
+    description: "Dev environments can reach EXECUTE without special approvals."
+    match:
+      environment: [dev, development, sandbox, test, qa]
+    effect:
+      # No cap — the ladder + other rules still apply.
+      require_approvals: 0
+
+  - id: stage-needs-one-approval
+    description: "Stage actions need one human approver at EXECUTE."
+    match:
+      environment: [stage, staging, preprod, pre-prod]
+    effect:
+      require_approvals: 1
+      approver_group: stage-oncall
+
+  - id: prod-requires-two-approvals
+    description: "Any action targeting prod requires 2 approvals."
+    match:
+      environment: [prod, production]
+    effect:
+      require_approvals: 2
+      approver_group: [prod-oncall, platform-leads]
+      reason: "prod requires 2 human approvals"
+
+  # ---------------- Category-based hard caps ----------------
+
+  - id: iam-never-execute
+    description: "IAM / RBAC changes never auto-execute."
+    match:
+      category: [iam, rbac]
+    effect:
+      cap_tier: PROPOSE
+      reason: "IAM/RBAC changes are never auto-executed"
+
+  - id: secrets-capped-at-draft
+    description: "Secret/KMS changes never get past DRAFT."
+    match:
+      category: [secret, secrets, kms]
+    effect:
+      cap_tier: DRAFT
+      reason: "secret / KMS mutations are DRAFT-only"
+
+  # ---------------- Destructive ops ----------------
+
+  - id: destructive-prod-propose-only
+    description: "Destructive actions never EXECUTE in prod."
+    match:
+      environment: [prod, production]
+      destructive: true
+    effect:
+      cap_tier: PROPOSE
+      add_risk: 10
+      reason: "destructive ops capped at PROPOSE in prod"
+
+  - id: scale-to-zero-prod-block
+    description: "Scale-to-zero in prod is blocked entirely — draft only."
+    match:
+      environment: [prod, production]
+      verb: [scale-to-zero]
+    effect:
+      cap_tier: DRAFT
+      reason: "scale-to-zero in prod is DRAFT-only"
+
+  # ---------------- Time-of-day guards ----------------
+
+  - id: after-hours-prod-needs-oncall
+    description: "Prod changes after 18:00 need on-call approval."
+    match:
+      environment: [prod, production]
+      after_hours: true
+    effect:
+      require_approvals: 1
+      approver_group: oncall
+      reason: "after-hours prod change requires on-call sign-off"
+
+  # ---------------- Blast radius ----------------
+
+  - id: wide-blast-radius-review
+    description: "Actions affecting > 50 resources need platform-lead approval."
+    match:
+      blast_radius_gte: 50
+    effect:
+      require_approvals: 1
+      approver_group: platform-leads
+      add_risk: 5
+
+  # ---------------- Hard denies ----------------
+
+  - id: deny-prod-database-destroy
+    description: "Never allow destructive DB actions in prod — even at SUGGEST."
+    match:
+      environment: [prod, production]
+      category: [database, db]
+      destructive: true
+    effect:
+      deny: true
+      reason: "destroying a prod database requires a manual runbook"

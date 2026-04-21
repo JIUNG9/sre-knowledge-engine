@@ -20,7 +20,7 @@ def test_read_scope_is_success(memory_exporter) -> None:
         "kubectl_get_pods",
         scope="read",
         target_resource="k8s://pods/default",
-    ) as tool:
+    ):
         pass
 
     spans = memory_exporter.get_finished_spans()
@@ -40,7 +40,7 @@ def test_blocked_scope_marks_span_error(memory_exporter) -> None:
         "aws_iam_create_user",
         scope="blocked",
         target_resource="aws://iam/users",
-    ) as tool:
+    ):
         pass
 
     span = memory_exporter.get_finished_spans()[0]

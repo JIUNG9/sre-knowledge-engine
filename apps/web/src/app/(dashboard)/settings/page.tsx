@@ -248,7 +248,7 @@ const CLOUD_ACCOUNTS: CloudAccount[] = [
     name: "prod-k8s",
     provider: "AWS",
     region: "ap-northeast-2",
-    role: "arn:aws:iam::234567890123:role/AegisReadOnly",
+    role: "arn:aws:iam::111122223333:role/AegisReadOnly",
     status: "active",
   },
   {
@@ -256,7 +256,7 @@ const CLOUD_ACCOUNTS: CloudAccount[] = [
     name: "staging",
     provider: "AWS",
     region: "ap-northeast-2",
-    role: "arn:aws:iam::345678901234:role/AegisReadOnly",
+    role: "arn:aws:iam::987654321098:role/AegisReadOnly",
     status: "active",
   },
   {
@@ -264,7 +264,7 @@ const CLOUD_ACCOUNTS: CloudAccount[] = [
     name: "shared",
     provider: "AWS",
     region: "ap-northeast-2",
-    role: "arn:aws:iam::456789012345:role/AegisReadOnly",
+    role: "arn:aws:iam::000000000000:role/AegisReadOnly",
     status: "error",
   },
   {

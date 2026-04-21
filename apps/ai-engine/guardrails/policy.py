@@ -47,7 +47,7 @@ The loader validates structure; unknown match/effect keys raise
 from __future__ import annotations
 
 import datetime as _dt
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
 

@@ -3,8 +3,8 @@
 `apps/ai-engine/proxy/` is a drop-in wrapper around the official
 `anthropic.Anthropic` client. Every outbound prompt is scanned for PII
 (emails, IPv4/IPv6, AWS account IDs and access keys, internal hostnames
-ending in `.internal`, `.local`, `.corp`, `.acme-corp.*`, `.acme.*`,
-`.acme-retail.*`, JWT and Bearer tokens, PEM blocks), each hit is replaced
+ending in `.internal`, `.local`, `.corp`, `.intranet`, `.lan`, JWT and
+Bearer tokens, PEM blocks), each hit is replaced
 with a deterministic per-request placeholder such as `<EMAIL_1>`, and
 the value is stashed in a thread-safe in-memory map with a TTL. When
 Claude replies, the proxy reverse-substitutes placeholders back to their
@@ -28,7 +28,7 @@ resp = client.messages.create(
     max_tokens=512,
     messages=[{
         "role": "user",
-        "content": "User june@example.com from 10.0.0.42 hit db01.prod.example.com",
+        "content": "User alice.dev@acme-corp.com from 10.0.0.42 hit db01.prod.internal",
     }],
 )
 print(resp.content[0].text)  # placeholders already un-redacted

@@ -57,8 +57,8 @@ class PublisherConfig(BaseModel):
     vault_root: Path = Field(default_factory=lambda: _DEFAULT_VAULT_ROOT)
     remote_url: str = _DEFAULT_REMOTE_URL
     branch: str = "main"
-    commit_author_name: str = "Jiung Gu"
-    commit_author_email: str = "june@example.com"
+    commit_author_name: str = "Aegis Bot"
+    commit_author_email: str = "aegis-bot@localhost"
     auto_push: bool = True
 
 

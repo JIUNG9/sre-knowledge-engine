@@ -29,7 +29,7 @@ prompt
 
 ## Sensitivity signals
 
-Hostnames (real FQDN) • k8s pod names • AWS account IDs / ARNs • emails (non-`example.com`) • IPv4 (non-RFC5737) • Korean resident numbers • credit-card-shaped digits • auth headers • deployment keywords (acme-corp, a large tech company, customer codenames) • large payloads.
+Hostnames (real FQDN) • k8s pod names • AWS account IDs / ARNs • emails (non-`example.com`) • IPv4 (non-RFC5737) • Korean resident numbers • credit-card-shaped digits • auth headers • deployment-specific keywords you supply (your company name, customer codenames) • large payloads.
 
 Sanitized markers (`<USER_1>`, `REDACTED`, `example.com`) push toward sanitized.
 

@@ -78,7 +78,7 @@ async def test_sensitive_prompt_goes_to_ollama() -> None:
     resp = await router.complete(
         [{
             "role": "user",
-            "content": "Pod user-service-7fbd4c9f-xk2ps on prod.api.example.com OOM-killed",
+            "content": "Pod user-service-7fbd4c9f-xk2ps on prod.api.acme-corp.com OOM-killed",
         }]
     )
     assert resp.backend == "ollama"

@@ -44,10 +44,12 @@ class Settings(BaseSettings):
     signoz_api_key: str = ""
     signoz_lookback_days: int = 30
 
-    # Wiki publisher
-    wiki_remote_url: str = "git@github.com:JIUNG9/aegis-wiki.git"
-    wiki_git_author_name: str = "Jiung Gu"
-    wiki_git_author_email: str = "june@example.com"
+    # Wiki publisher — per-deployment, supply via env vars or override.
+    # Defaults are intentionally generic so strangers cloning the repo do
+    # not accidentally publish under the upstream author's identity.
+    wiki_remote_url: str = ""
+    wiki_git_author_name: str = "Aegis Bot"
+    wiki_git_author_email: str = "aegis-bot@localhost"
     wiki_auto_push: bool = False
 
 

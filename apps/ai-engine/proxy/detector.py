@@ -15,8 +15,12 @@ Two backends are supported:
 * **Regex** — always available, zero dependencies. Covers the categories
   required by Aegis Layer 0.1: emails, IPv4/IPv6, AWS account IDs,
   AWS access keys (AKIA*/ASIA*), internal hostnames (``*.internal``,
-  ``*.local``, ``*.corp``, ``*.acme-corp.*``, ``*.acme.*``, ``*.acme-retail.*``),
-  JWT tokens, ``Bearer`` tokens, and PEM blocks.
+  ``*.local``, ``*.corp``, ``*.intranet``), JWT tokens, ``Bearer``
+  tokens, and PEM blocks. Company-specific hostname suffixes (e.g.
+  ``*.acme.internal``) are expected to be supplied via
+  :attr:`PIIProxyConfig.custom_patterns` — the built-in list is
+  intentionally generic so the proxy works the same way for every
+  deployment.
 
 * **Presidio** — optional. When
   `presidio-analyzer <https://microsoft.github.io/presidio/>`_ is installed
@@ -80,7 +84,7 @@ _AWS_ACCESS_KEY_PATTERN = re.compile(
 _INTERNAL_HOST_PATTERN = re.compile(
     r"\b[a-zA-Z0-9][a-zA-Z0-9_-]*"
     r"(?:\.[a-zA-Z0-9_-]+)*"
-    r"\.(?:internal|local|corp|acme-corp\.[a-z.]+|acme\.[a-z.]+|acme-retail\.[a-z.]+)\b",
+    r"\.(?:internal|local|corp|intranet|lan)\b",
     re.IGNORECASE,
 )
 

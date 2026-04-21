@@ -40,7 +40,7 @@ or Jira comments is a 30-line exercise.
   load.
 * LLM calls flow through the Layer 0.4 `LLMRouter` with
   `sensitivity_override=True`, routing doc bodies to Ollama by
-  default so acme-corp/a large tech company content never leaves the box.
+  default so your company's runbook content never leaves the box.
 * Link-check HEAD probes honour `robots.txt` and use a 3-second
   timeout to avoid becoming a DoS tool.
 

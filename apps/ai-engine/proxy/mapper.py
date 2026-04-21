@@ -6,7 +6,7 @@
 
 Every outbound Claude call gets its own :class:`RequestScope`. Inside a
 scope, the same raw value is always replaced with the same placeholder (so
-repeated mentions of ``db01.example.com`` collapse to a single
+repeated mentions of ``db01.acme.internal`` collapse to a single
 ``<HOST_1>``). Scopes do **not** share placeholders — a value that was
 ``<HOST_1>`` in one request will be ``<HOST_1>`` again in a different
 request only by coincidence. This prevents cross-request leakage if a

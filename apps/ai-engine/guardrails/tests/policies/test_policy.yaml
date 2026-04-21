@@ -1,0 +1,66 @@
+# Stricter test policy used by guardrails/tests/test_policy.py and
+# test_engine.py. Asserts specific behaviours in isolation — this is NOT a
+# fixture for how a real deployment would be configured.
+
+config:
+  after_hours_start: 18
+  after_hours_end: 8
+
+rules:
+  - id: test-prod-two-approvals
+    description: "prod needs two approvers in tests"
+    match:
+      environment: prod
+    effect:
+      require_approvals: 2
+      approver_group: [test-oncall, test-leads]
+
+  - id: test-iam-cap-propose
+    description: "IAM capped at PROPOSE"
+    match:
+      category: iam
+    effect:
+      cap_tier: PROPOSE
+
+  - id: test-destructive-prod-propose
+    description: "destructive prod capped at PROPOSE"
+    match:
+      environment: prod
+      destructive: true
+    effect:
+      cap_tier: PROPOSE
+
+  - id: test-after-hours-approval
+    description: "after hours in prod needs oncall"
+    match:
+      environment: prod
+      after_hours: true
+    effect:
+      require_approvals: 1
+      approver_group: oncall
+
+  - id: test-wide-radius-risk
+    description: "wide blast radius adds risk"
+    match:
+      blast_radius_gte: 100
+    effect:
+      add_risk: 15
+
+  - id: test-deny-prod-db-drop
+    description: "never drop prod databases"
+    match:
+      environment: prod
+      category: database
+      destructive: true
+    effect:
+      deny: true
+
+  - id: test-any-block
+    description: "any-block matches either branch"
+    match:
+      any:
+        - target: "secret-sauce"
+        - target: "crown-jewels"
+    effect:
+      cap_tier: DRAFT
+      reason: "sensitive targets locked at DRAFT"

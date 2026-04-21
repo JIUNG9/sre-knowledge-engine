@@ -47,8 +47,17 @@ requires = ["setuptools>=75.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["agents*", "mcp*", "models*", "proxy*", "routers*", "killswitch*", "cli*", "services*", "wiki*", "telemetry*", "guardrails*"]
+include = ["agents*", "mcp*", "models*", "proxy*", "routers*", "killswitch*", "cli*", "services*", "wiki*", "telemetry*", "guardrails*", "connectors*", "reconciliation*"]
 
 [tool.pytest.ini_options]
-testpaths = ["proxy/tests", "killswitch/tests", "honeytokens/tests", "telemetry/tests", "mcp/tests", "guardrails/tests"]
+testpaths = [
+    "proxy/tests",
+    "killswitch/tests",
+    "honeytokens/tests",
+    "telemetry/tests",
+    "mcp/tests",
+    "guardrails/tests",
+    "connectors/tests",
+    "reconciliation/tests",
+]
 pythonpath = ["."]

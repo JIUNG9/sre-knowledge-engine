@@ -335,14 +335,14 @@ class LogAnalyzer:
 
         # Detect frequency changes — repeated warnings that may escalate
         warning_messages = [
-            l.get("message", "") for l in logs
-            if l.get("level", "").lower() == "warning"
+            entry.get("message", "") for entry in logs
+            if entry.get("level", "").lower() == "warning"
         ]
         warn_counts = Counter(warning_messages)
         for msg, count in warn_counts.items():
             if count >= 5:
                 sample_entry = next(
-                    (l for l in logs if l.get("message") == msg),
+                    (entry for entry in logs if entry.get("message") == msg),
                     {},
                 )
                 anomalies.append({
@@ -354,7 +354,7 @@ class LogAnalyzer:
                     "affected_service": sample_entry.get("service", "unknown"),
                     "time_window": "analysis period",
                     "evidence": [
-                        l for l in logs if l.get("message") == msg
+                        entry for entry in logs if entry.get("message") == msg
                     ][:5],
                     "confidence_score": min(0.9, 0.5 + count * 0.02),
                 })

@@ -297,7 +297,7 @@ class RemediationAgent:
                 exc,
             )
             return self._template_based_remediation(rca, incident)
-        except Exception as exc:
+        except Exception:
             logger.exception(
                 "Unexpected error generating remediation for %s",
                 incident_id,

@@ -13,6 +13,24 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from routers import analyze, health, investigate, logs, mcp, wiki
 
+# Layer 0.1 — PII Redaction Proxy for Claude API.
+#
+# To enable PII redaction for every outbound Claude call, wrap the SDK client
+# at instantiation time. Because the proxy is a drop-in for
+# ``anthropic.Anthropic`` (same ``messages.create`` signature, same response
+# shape, streaming preserved), no downstream code needs to change:
+#
+#     import anthropic
+#     from proxy import AnthropicProxy, PIIProxyConfig
+#
+#     claude = AnthropicProxy(
+#         anthropic.Anthropic(api_key=settings.anthropic_api_key),
+#         PIIProxyConfig(),   # enabled=True by default
+#     )
+#     # ... hand ``claude`` to orchestrator / remediator / analyzer as usual.
+#
+# See ``apps/ai-engine/proxy/README.md`` for usage patterns.
+
 logger = logging.getLogger("aegis")
 
 

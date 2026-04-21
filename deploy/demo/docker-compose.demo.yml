@@ -1,0 +1,317 @@
+# ────────────────────────────────────────────────────────────────
+#  Aegis Layer 0.8 — Demo Mode
+#  Self-contained local demo stack. Zero real credentials required.
+#
+#  Total RAM budget: ~8GB
+#  Boot time: ~3-5 minutes (cold) / ~90s (warm cache)
+#
+#  Usage:  make -C deploy/demo demo
+# ────────────────────────────────────────────────────────────────
+version: "3.9"
+
+name: aegis-demo
+
+networks:
+  aegis-demo:
+    driver: bridge
+
+volumes:
+  signoz-clickhouse:
+  signoz-zookeeper:
+  signoz-queryservice:
+  localstack-data:
+  ollama-models:
+  redis-demo:
+  aegis-vault:
+
+x-demo-common: &demo-common
+  restart: unless-stopped
+  networks:
+    - aegis-demo
+
+services:
+  # ═══════════════════════════════════════════════════════════
+  #  SigNoz stack (observability backend)
+  # ═══════════════════════════════════════════════════════════
+  signoz-zookeeper:
+    <<: *demo-common
+    image: bitnami/zookeeper:3.7.1
+    container_name: aegis-demo-zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_AUTOPURGE_INTERVAL=1
+    volumes:
+      - signoz-zookeeper:/bitnami/zookeeper
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  signoz-clickhouse:
+    <<: *demo-common
+    image: clickhouse/clickhouse-server:24.1.2-alpine
+    container_name: aegis-demo-clickhouse
+    depends_on:
+      - signoz-zookeeper
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - signoz-clickhouse:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1500M
+
+  signoz-query-service:
+    <<: *demo-common
+    image: signoz/query-service:0.55.0
+    container_name: aegis-demo-signoz-query
+    command: ["-config=/root/config/prometheus.yml"]
+    environment:
+      - ClickHouseUrl=tcp://signoz-clickhouse:9000
+      - ALERTMANAGER_API_PREFIX=http://signoz-alertmanager:9093/api/
+      - SIGNOZ_LOCAL_DB_PATH=/var/lib/signoz/signoz.db
+      - DASHBOARDS_PATH=/root/config/dashboards
+      - STORAGE=clickhouse
+      - TELEMETRY_ENABLED=false
+      - DEPLOYMENT_TYPE=docker-standalone-amd
+    volumes:
+      - signoz-queryservice:/var/lib/signoz/
+    depends_on:
+      signoz-clickhouse:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  signoz-frontend:
+    <<: *demo-common
+    image: signoz/frontend:0.55.0
+    container_name: aegis-demo-signoz-ui
+    ports:
+      - "3301:3301"
+    environment:
+      - FRONTEND_API_ENDPOINT=http://signoz-query-service:8080
+    depends_on:
+      - signoz-query-service
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  signoz-otel-collector:
+    <<: *demo-common
+    image: signoz/signoz-otel-collector:0.88.24
+    container_name: aegis-demo-otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-config/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=host.name=aegis-demo
+      - CLICKHOUSE_URL=tcp://signoz-clickhouse:9000
+    depends_on:
+      signoz-clickhouse:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ═══════════════════════════════════════════════════════════
+  #  OpenTelemetry Demo (astronomy-shop — synthetic traces/logs/metrics)
+  # ═══════════════════════════════════════════════════════════
+  otel-demo:
+    <<: *demo-common
+    image: otel/opentelemetry-demo:1.11.1
+    container_name: aegis-demo-otel-app
+    ports:
+      - "8080:8080"   # Astronomy-shop frontend proxy
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://signoz-otel-collector:4317
+      - OTEL_SERVICE_NAME=astronomy-shop
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=demo,deployment.environment=demo
+    depends_on:
+      - signoz-otel-collector
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+  # ═══════════════════════════════════════════════════════════
+  #  LocalStack (AWS mocks: S3, EC2, CloudWatch Logs, IAM)
+  # ═══════════════════════════════════════════════════════════
+  localstack:
+    <<: *demo-common
+    image: localstack/localstack:3.8
+    container_name: aegis-demo-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,ec2,logs,iam,sts,cloudwatch
+      - DEBUG=0
+      - DEFAULT_REGION=us-east-1
+      - DATA_DIR=/var/lib/localstack/data
+      - PERSISTENCE=1
+    volumes:
+      - localstack-data:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  # ═══════════════════════════════════════════════════════════
+  #  Confluence-compatible mock API (20 fake runbooks)
+  # ═══════════════════════════════════════════════════════════
+  confluence-mock:
+    <<: *demo-common
+    build:
+      context: ./confluence-mock
+      dockerfile: Dockerfile
+    container_name: aegis-demo-confluence
+    ports:
+      - "8090:8090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # ═══════════════════════════════════════════════════════════
+  #  Redis (kill switch / rate limits / cache)
+  # ═══════════════════════════════════════════════════════════
+  redis:
+    <<: *demo-common
+    image: redis:7-alpine
+    container_name: aegis-demo-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-demo:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # ═══════════════════════════════════════════════════════════
+  #  Ollama (optional — local LLM for offline demos)
+  #  Enable with: docker compose --profile ollama up
+  # ═══════════════════════════════════════════════════════════
+  ollama:
+    <<: *demo-common
+    image: ollama/ollama:0.3.12
+    container_name: aegis-demo-ollama
+    profiles: ["ollama"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    entrypoint: >
+      /bin/sh -c "
+      ollama serve &
+      sleep 5 &&
+      ollama pull llama3.2:1b &&
+      wait
+      "
+    deploy:
+      resources:
+        limits:
+          memory: 2048M
+
+  # ═══════════════════════════════════════════════════════════
+  #  Aegis AI Engine (FastAPI)
+  # ═══════════════════════════════════════════════════════════
+  aegis-api:
+    <<: *demo-common
+    build:
+      context: ../../apps/ai-engine
+      dockerfile: Dockerfile
+    container_name: aegis-demo-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Demo mode flag — disables external writes
+      AEGIS_DEMO_MODE: "true"
+      API_PORT: "8000"
+      DEBUG: "true"
+      # LLM (no real key needed when Ollama profile used)
+      ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-demo-no-key}"
+      MODEL_NAME: "claude-sonnet-4-6"
+      OLLAMA_URL: "http://ollama:11434"
+      # Observability
+      SIGNOZ_API_URL: "http://signoz-query-service:8080"
+      SIGNOZ_API_KEY: "demo-key"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://signoz-otel-collector:4317"
+      # AWS (LocalStack)
+      AWS_ACCESS_KEY_ID: "test"
+      AWS_SECRET_ACCESS_KEY: "test"
+      AWS_REGION: "us-east-1"
+      AWS_ENDPOINT_URL: "http://localstack:4566"
+      # Confluence mock
+      CONFLUENCE_BASE_URL: "http://confluence-mock:8090"
+      CONFLUENCE_API_TOKEN: "demo-token"
+      # Kill switch
+      REDIS_URL: "redis://redis:6379"
+      # Vault
+      AEGIS_VAULT_PATH: "/var/lib/aegis/vault"
+    volumes:
+      - aegis-vault:/var/lib/aegis/vault
+    depends_on:
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      confluence-mock:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  # ═══════════════════════════════════════════════════════════
+  #  Aegis Web (Next.js)
+  # ═══════════════════════════════════════════════════════════
+  aegis-web:
+    <<: *demo-common
+    build:
+      context: ../../apps/web
+      dockerfile: Dockerfile
+    container_name: aegis-demo-web
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:8000"
+      NEXT_PUBLIC_DEMO_MODE: "true"
+      NEXT_PUBLIC_SIGNOZ_URL: "http://localhost:3301"
+      NEXT_PUBLIC_OTEL_DEMO_URL: "http://localhost:8080"
+    depends_on:
+      - aegis-api
+    deploy:
+      resources:
+        limits:
+          memory: 512M

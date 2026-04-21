@@ -1,7 +1,7 @@
 # Aegis Architecture
 
 **Version**: 4.0
-**Status**: Layer 1 built (2026-04-19). Layers 2–5 planned.
+**Status**: Layers 0 + 1 built (2026-04-21). Layers 2, 4, 5 in active development. Layer 3 blocked on Layer 2 interfaces.
 **Repository**: `github.com/JIUNG9/aegis`
 **Audience**: contributors, self-hosters, and reviewers evaluating the project for adoption.
 
@@ -14,11 +14,12 @@ Aegis is an AI-native DevSecOps command center built around a single idea: the o
 ```mermaid
 graph TB
   subgraph AEGIS["AEGIS v4.0"]
+    L0[Layer 0: Safety Foundation<br/>PII proxy / IAM / kill switch / OTel / honey tokens<br/>BUILT]
     L1[Layer 1: LLM Wiki<br/>Karpathy Pattern<br/>BUILT]
-    L2[Layer 2: SigNoz Connector<br/>HTTP API<br/>PLANNED]
+    L2[Layer 2: SigNoz Connector<br/>HTTP API + pattern analyzer<br/>IN PROGRESS]
     L3[Layer 3: Claude Control Tower<br/>Eco / Standard / Deep<br/>PLANNED]
-    L4[Layer 4: Production Guardrails<br/>4-Stage Ladder<br/>PLANNED]
-    L5[Layer 5: MCP Doc Reconciliation<br/>PLANNED]
+    L4[Layer 4: Production Guardrails<br/>4-Stage Ladder<br/>IN PROGRESS]
+    L5[Layer 5: MCP Doc Reconciliation<br/>IN PROGRESS]
   end
   User[SRE Team] --> L3
   L3 --> L1
@@ -26,15 +27,51 @@ graph TB
   L3 --> L4
   L1 --> L5
   L2 --> L1
+  L0 -.wraps.-> L1
+  L0 -.wraps.-> L2
+  L0 -.wraps.-> L3
+  L0 -.wraps.-> L4
+  L0 -.wraps.-> L5
 ```
 
 The differentiator is explicit: traditional RAG treats documents as a bag of chunks. Aegis treats them as a living knowledge base that catches contradictions at ingest time, tracks staleness per source, and publishes the result as a public Obsidian vault — which doubles as a portfolio artifact for the operator.
 
 ---
 
-## 2. The Five Layers
+## 2. The Six Layers
 
-Each layer lives in its own Python package under `apps/ai-engine/`. Layers compose top-to-bottom: the Control Tower (L3) calls into the Wiki (L1), the SigNoz Connector (L2), and the Guardrails (L4). The MCP Reconciliation (L5) writes back into L1.
+Each layer lives in its own Python package under `apps/ai-engine/`. Layer 0 is the safety foundation every other layer inherits automatically — the rule is **safety as shipped features, not operator discipline**. Layers 1–5 compose top-to-bottom: the Control Tower (L3) calls into the Wiki (L1), the SigNoz Connector (L2), and the Guardrails (L4). The MCP Reconciliation (L5) writes back into L1.
+
+### Layer 0 — Safety Foundation (ships inside every deployment)
+
+| Field | Value |
+| --- | --- |
+| **Status** | Built |
+| **Purpose** | Make Aegis deployable by any engineer in any regulated environment. Every safety primitive is enforced by code in the repo, not by documentation or checklists. |
+| **Mental model** | If a safety rule can only be upheld by an operator remembering to do something, it is not a safety rule — it is a bug waiting for a bad day. |
+
+The eight features in Layer 0, each enabled by default, each configurable via `aegis.config.yaml`:
+
+| # | Feature | Location | What it enforces |
+| --- | --- | --- | --- |
+| 0.1 | PII Redaction Proxy | `apps/ai-engine/proxy/` | Scrubs PII, secrets, hostnames from every outbound Claude API call. Reverse-substitutes placeholders on response. |
+| 0.2 | Cloud IAM Templates | `deploy/iam/{aws,gcp,azure}/` | Drop-in read-only policies with explicit `Deny` guards. Writes are technically impossible, not discouraged. |
+| 0.3 | Kill Switch + `aegis panic` CLI | `apps/ai-engine/killswitch/` | Redis-backed flag every MCP tool checks. Panic CLI optionally attaches `Deny *` to the agent's IAM role. |
+| 0.4 | Local LLM Router | `apps/ai-engine/llm_router/` | Sensitive prompts route to local Ollama; sanitized to Claude API. Cross-border transfers become an opt-in. |
+| 0.5 | OTel GenAI Tracing | `apps/ai-engine/telemetry/` | Every LLM call + MCP tool call emits a signed exportable trace. Provable audit trail for regulators. |
+| 0.6 | Honey Token Beacon | `apps/ai-engine/honeytokens/` | Tripwires planted in the vault. Every outbound payload + trace scanned for them. First hit fires an alert. |
+| 0.7 | MCP Tool Scoping | `apps/ai-engine/mcp/manifest.py` | READ loaded by default, WRITE opt-in, BLOCKED never compiled. Injection can't call a tool that isn't in the manifest. |
+| 0.8 | Demo Mode | `deploy/demo/` | `make demo` boots LocalStack + SigNoz + OTel astronomy-shop with seeded synthetic incidents. Zero real credentials required. |
+
+Deployment tiers supported by Layer 0:
+
+| Tier | Use case | Example user |
+| --- | --- | --- |
+| A. Local / Homelab | Side project, learning, demo | Curious SRE on GitHub |
+| B. Personal Cloud | Consultant, hobbyist | Freelance SRE |
+| C. Enterprise Sandbox | Team, compliance required (PIPA / GDPR / HIPAA) | Any regulated org |
+
+The Tier C deployment pattern (local Ollama + PII proxy + OTel audit + kill switch + honey tokens) is the reference architecture for running Aegis inside a jurisdictionally-constrained environment. See `docs/DEPLOYMENT.md` for full walkthrough.
 
 ### Layer 1 — LLM Wiki (Karpathy Pattern)
 

@@ -1,12 +1,12 @@
 # Aegis v4.0 — Publishing Checklist
 
-Master publishing plan for the eight-part Medium series and accompanying LinkedIn campaign. Audience: June. Goal: spread eight articles across four months, drive GitHub stars and interview conversations, build a durable content asset.
+Master publishing plan for the eleven-part Medium series and accompanying LinkedIn campaign. Audience: June. Goal: spread eleven articles across roughly five months, drive GitHub stars and interview conversations, build a durable content asset. Articles #9, #10, #11 are the Layer 0 safety arc added 2026-04-21 — they come late in the sequence because Layers 0.1–0.8 must ship as code before the articles are truthful.
 
 ---
 
 ## 1. Ordering and cadence
 
-Two articles per month. Start with the two articles that are strongest on their own (#1 and #3). End with #8 as the capstone.
+Two to three articles per month. Start with the two articles that are strongest on their own (#1 and #3). End with #8 as the capstone. The three Layer 0 articles (#9, #10, #11) cluster together as a "safety arc" late in the series so they reinforce each other.
 
 | Slot | Article | Why this slot |
 |------|---------|---------------|
@@ -17,7 +17,10 @@ Two articles per month. Start with the two articles that are strongest on their 
 | 5 | #2 AI Is Lying | The practical follow-up to #1. Ships the reconciliation tools. |
 | 6 | #6 Monday Patterns | Specific-number viral hook. Good standalone. |
 | 7 | #7 Multi-Account Guardrails | AWS-focused, deepest technical piece. Targets infra managers. |
-| 8 | #8 Open-Sourcing Aegis | Capstone. Career positioning. Links back to all prior articles. |
+| 8 | #9 PII Proxy for Claude | Opens the Layer 0 safety arc. Technical + unique (nobody's published this pattern). |
+| 9 | #10 Honey Tokens + Kill Switches | Middle of the safety arc. Builds on #9. |
+| 10 | #11 PIPA Case Study (Tier C Deployment) | Closes the safety arc. Career-defining piece for Canadian recruiters. Pin for 2 weeks. |
+| 11 | #8 Open-Sourcing Aegis | Capstone. Career positioning. Links back to all prior articles. |
 
 ---
 
@@ -34,7 +37,10 @@ Mondays are peak LinkedIn traffic. Thursdays catch weekly recap posts. Spread re
 | 2026-07-06 | Mon | #2 AI Is Lying |
 | 2026-07-23 | Thu | #6 Monday Patterns |
 | 2026-08-10 | Mon | #7 Multi-Account Guardrails |
-| 2026-08-27 | Thu | #8 Open-Sourcing Aegis |
+| 2026-08-27 | Thu | #9 PII Proxy for Claude (Layer 0 arc start) |
+| 2026-09-10 | Thu | #10 Honey Tokens + Kill Switches |
+| 2026-09-28 | Mon | #11 PIPA Case Study (Tier C, pinned for 2 weeks) |
+| 2026-10-19 | Mon | #8 Open-Sourcing Aegis (capstone) |
 
 Dates can slide by up to a week if there is a personal or infra conflict. Do not double up two articles inside the same week — momentum depends on each article having its own cycle.
 

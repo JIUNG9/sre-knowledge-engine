@@ -1,0 +1,108 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowReadOnlyObservability",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:Describe*",
+        "ec2:Get*",
+        "ec2:List*",
+        "ec2:Search*",
+        "logs:Describe*",
+        "logs:Get*",
+        "logs:List*",
+        "logs:FilterLogEvents",
+        "logs:StartQuery",
+        "logs:StopQuery",
+        "logs:TestMetricFilter",
+        "cloudwatch:Describe*",
+        "cloudwatch:Get*",
+        "cloudwatch:List*",
+        "rds:Describe*",
+        "rds:List*",
+        "rds:DownloadDBLogFilePortion",
+        "eks:Describe*",
+        "eks:List*",
+        "sts:GetCallerIdentity"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AllowS3ReadMetadataAndObjects",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:GetObjectTagging",
+        "s3:ListBucket",
+        "s3:ListAllMyBuckets",
+        "s3:GetBucketLocation",
+        "s3:GetBucketTagging",
+        "s3:GetBucketLogging"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyAllMutatingVerbsAnyService",
+      "Effect": "Deny",
+      "Action": [
+        "*:Create*",
+        "*:Delete*",
+        "*:Put*",
+        "*:Update*",
+        "*:Modify*",
+        "*:Attach*",
+        "*:Detach*",
+        "*:Replace*",
+        "*:Reboot*",
+        "*:Restore*",
+        "*:Terminate*",
+        "*:Disable*",
+        "*:Enable*",
+        "*:Start*",
+        "*:Stop*",
+        "*:Run*",
+        "*:Associate*",
+        "*:Disassociate*",
+        "*:Authorize*",
+        "*:Revoke*",
+        "*:Tag*",
+        "*:Untag*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyHighRiskServicesEntirely",
+      "Effect": "Deny",
+      "Action": [
+        "iam:*",
+        "secretsmanager:*",
+        "kms:Decrypt",
+        "kms:Encrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "organizations:*",
+        "ce:*",
+        "account:*",
+        "billing:*",
+        "sso:*",
+        "identitystore:*"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyWriteToS3Objects",
+      "Effect": "Deny",
+      "Action": [
+        "s3:PutObject*",
+        "s3:DeleteObject*",
+        "s3:PutBucket*",
+        "s3:DeleteBucket*",
+        "s3:RestoreObject",
+        "s3:BypassGovernanceRetention"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

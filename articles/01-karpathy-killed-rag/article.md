@@ -109,7 +109,13 @@ Here is the comparison, from actually having shipped both:
 
 And the cost table, which matters because "SRE AI tooling" is the kind of line item a CFO will cut first:
 
-For a small team, the realistic monthly bill looks like this. **Pinecone starter + Voyage embeddings**: about $70 fixed plus per-query, so $80–120 a month. **Chroma self-hosted + OpenAI embeddings**: $40–80 a month once you count the infra it runs on. **Aegis Wiki on Claude Haiku + a local vault**: **$0.50–2 a month**, synthesis included. Two orders of magnitude cheaper than Pinecone, and it's the version that actually tells the truth at 3 AM.
+For a small team, the realistic monthly bill looks like this:
+
+- **Pinecone starter + Voyage embeddings** — $70 fixed plus per-query usage, landing at $80–120 a month.
+- **Chroma self-hosted + OpenAI embeddings** — $40–80 a month once you count the infra it runs on.
+- **Aegis Wiki on Claude Haiku + a local vault** — $0.50–2 a month, synthesis included.
+
+Two orders of magnitude cheaper than Pinecone. And it's the version that actually tells the truth at 3 AM.
 
 Haiku is cheap enough that synthesizing every source every day is a rounding error on a personal AWS bill. Sonnet, used only for contradiction detection, runs a few cents per scan.
 

@@ -97,23 +97,13 @@ I tried Pinecone first. It cost us around $90/month for a small index, integrate
 
 Here is the comparison, from actually having shipped both:
 
-- **Storage.** Traditional RAG needs a managed vector DB — proprietary, opaque, another vendor. LLM Wiki needs a folder of markdown in git. You already have that.
-- **Cost.** Pinecone starts around $30-100 a month before you query anything. Aegis Wiki synthesis costs around $0.50-$2 a month on Haiku, and queries are effectively free because the wiki is just files.
-- **Staleness.** RAG has none built-in. You can bolt on metadata filters, but you have to remember to set them on every query. Aegis Wiki has a `freshness` field on every page, checked by a nightly linter.
-- **Contradictions.** RAG returns all matches and lets the LLM pick. Aegis Wiki detects contradictions at synthesis time and surfaces them before they reach the operator.
-- **Human editability.** To edit a RAG index you rebuild it. To edit an Aegis Wiki page you open the markdown file.
-- **Portability.** Vector DBs lock you in. Markdown + git runs anywhere.
-- **Portfolio.** A vector blob is opaque. A public GitHub repo of synthesized runbooks is a hiring signal.
-- **Review.** Vector DBs have no review workflow. Markdown gets PRs, diff, blame, comments.
-- **On-call feel.** With RAG, when something's wrong, you ask "why did it say that?" With Aegis Wiki, you read the page.
+[IMAGE: assets/02-rag-vs-llm-wiki-comparison.png — side-by-side comparison table of Traditional RAG (Pinecone + Voyage) vs LLM Wiki (Obsidian + Claude Haiku) across nine dimensions: storage, cost, staleness handling, contradictions, human editability, portability, portfolio value, review workflow, and on-call experience]
 
 And the cost table, which matters because "SRE AI tooling" is the kind of line item a CFO will cut first:
 
-For a small team, the realistic monthly bill looks like this:
+For a small team, the realistic monthly bill across three options:
 
-- **Pinecone starter + Voyage embeddings** — $70 fixed plus per-query usage, landing at $80–120 a month.
-- **Chroma self-hosted + OpenAI embeddings** — $40–80 a month once you count the infra it runs on.
-- **Aegis Wiki on Claude Haiku + a local vault** — $0.50–2 a month, synthesis included.
+[IMAGE: assets/03-cost-comparison.png — table comparing Pinecone starter, Chroma self-hosted, and Aegis Wiki across fixed cost, variable cost, and realistic monthly bill]
 
 Two orders of magnitude cheaper than Pinecone. And it's the version that actually tells the truth at 3 AM.
 
@@ -173,10 +163,7 @@ This is the part I'm proudest of, because it's the part that solves the real fai
 
 Each source type decays at a different rate. The defaults that ship with the engine:
 
-- **Confluence** — stale at 90 days, archived at 180, checked daily
-- **GitHub docs** — stale at 60 days, archived at 180, checked daily
-- **Runbooks** — stale at 120 days, archived at 365, checked weekly
-- **Incidents** — stale at 365 days, archived at 730, checked weekly
+[IMAGE: assets/04-staleness-defaults.png — four-row table of source type vs stale-after / archive-after / check-frequency: Confluence 90/180/daily, GitHub docs 60/180/daily, runbooks 120/365/weekly, incidents 365/730/weekly]
 
 Confluence rots fastest because product teams abandon docs. Runbooks decay slower because procedures are mostly stable. Incidents are archived but almost never deleted, because post-mortems are the most valuable learning asset a team has.
 

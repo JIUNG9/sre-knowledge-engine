@@ -9,33 +9,17 @@ Medium's editor does NOT render Markdown cleanly. Pasting a `.md` written for Gi
 
 ## The hard rules (must follow)
 
-### 1. No Markdown tables
+### 1. Markdown tables must become PNG images
 
-Medium strips Markdown table syntax. The result is a run-on paragraph of pipe characters.
+Medium strips Markdown table syntax. The result is a run-on paragraph of pipe characters. Bullet-list conversions work technically but lose the at-a-glance scan value a table provides. **Rule: every Markdown table in the body becomes a rendered PNG image.**
 
-**Instead of a table, use:**
-- **Bullet list with bolded keys** — best for most comparisons
-- **Inline prose** — best for 2–3 row comparisons
-- **Screenshot / PNG image** — best when the table is visually dense and you want to preserve alignment (treat it like a diagram; render to PNG, upload as image)
+**The workflow:**
+1. Keep the original Markdown table in `assets/NN-descriptor.md` alongside the article so future edits regenerate cleanly.
+2. Render the table to PNG via a dark-theme HTML template + headless Chromium at 1600×900 or wider.
+3. Replace the table in `article.md` with `[IMAGE: assets/NN-descriptor.png — brief description for alt text]`.
+4. On Medium publish, upload the PNG inline where the placeholder sits.
 
-Example — staleness defaults table. DO NOT write:
-
-```
-| Source type | Stale after | Archive after | Frequency |
-|---|---|---|---|
-| Confluence | 90 days | 180 days | daily |
-```
-
-Instead, write:
-
-> Confluence pages age out after **90 days** and archive at **180**, checked daily. GitHub docs are similar (60 / 180, daily). Runbooks decay slower (120 / 365, weekly). Incidents stay readable for a year before going stale, two before archive.
-
-Or as a bullet list:
-
-- **Confluence** — stale at 90 days, archived at 180, checked daily
-- **GitHub docs** — stale at 60 days, archived at 180, checked daily
-- **Runbooks** — stale at 120 days, archived at 365, checked weekly
-- **Incidents** — stale at 365 days, archived at 730, checked weekly
+**When a table should become prose instead:** essentially never. Even small tables earn their PNG. Consistency matters — readers learn to trust "this article's tables all render the same way." Only if a 2-row comparison reads more naturally as a sentence ("A cost $80, B cost $2, B wins") skip the PNG.
 
 ### 2. Keep paragraphs tight
 

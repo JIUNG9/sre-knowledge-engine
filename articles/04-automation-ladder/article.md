@@ -103,15 +103,7 @@ I won't be at Stage 4 for another six months minimum.
 
 Every proposed action gets classified by the `risk_assessor.py` module (planned — see [Layer 4 spec](https://github.com/JIUNG9/aegis/blob/main/ARCHITECTURE.md#layer-4-production-guardrails)). The classification drives everything downstream: dry-run, approval gates, rollback requirements, audit verbosity.
 
-**Read-only** actions (`query_logs`, `query_metrics`, `describe_pod`) auto-execute at every stage, including Stage 1. No approval ever required.
-
-**Low-risk** actions — updating staging env vars, `kubectl scale --replicas=N` (up), single-service cache flushes — get observed at Stage 1, recommended at Stage 2, and auto-execute from Stage 3 onward.
-
-**Medium-risk** actions — `kubectl rollout restart deployment/X`, `kubectl rollout undo`, scaling down a prod deployment, updating prod config (non-secret) — are observed at Stage 1, recommended at Stages 2 and 3, and only auto-execute at Stage 4.
-
-**High-risk** actions — `terraform apply` (any), multi-service rollbacks, `kubectl delete` anything — stay at recommend through Stage 3 and escalate to explicit approval at Stage 4. Never automated.
-
-**Blocked** actions — IAM role and policy changes, data mutation or deletion — are never automated at any stage. Full stop, forever.
+[IMAGE: assets/02-risk-tier-matrix.png — 13-row risk matrix mapping specific actions (read-only queries, staging updates, kubectl scale/rollout/delete, terraform apply, IAM changes, data mutation) to 5 risk tiers and the behavior at each of the 4 automation stages (observe / recommend / auto / approval / never)]
 
 The classifier isn't a free-form LLM call. It's a rule engine with LLM fallback. The rules cover 90% of actions (regex on commands, service tags, namespace). The LLM only adjudicates ambiguous ones, and it has to justify its classification in the audit log.
 

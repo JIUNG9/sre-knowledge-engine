@@ -289,11 +289,7 @@ The [`staleness.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wi
 
 Every page gets a freshness label computed from `last_updated` minus per-source-type thresholds:
 
-- **`confluence`** — stale at 90 days, archived at 180
-- **`github_docs`** — stale at 60 days, archived at 180
-- **`runbook`** — stale at 120 days, archived at 365
-- **`incident`** — stale at 365 days, archived at 730
-- **`manual`** — stale at 30 days, archived at 180
+[IMAGE: assets/02-staleness-thresholds.png — five-row table of source types (confluence, github_docs, runbook, incident, manual) mapped to days-until-stale and days-until-archive thresholds]
 
 The labels get written back into the page's frontmatter. Obsidian's Dataview plugin then lets me render dashboards like "all stale runbooks" with a three-line query:
 
@@ -408,11 +404,7 @@ This is the OSS → Medium → LinkedIn → hire pipeline I'm committing to. Eve
 
 ## A brief comparison
 
-- **Confluence as-is** — doesn't update itself, not AI-agent safe (stale pages rank high), no public portfolio (behind SSO).
-- **GitHub wiki in team repo** — partial self-update, partial AI-agent safety, not a public portfolio (private repo).
-- **Notion internal KB** — doesn't update itself, not AI-agent safe, not a public portfolio (paywalled).
-- **Hand-written personal README** — doesn't update itself, AI-agent safety is N/A, public but shallow.
-- **Aegis LLM Wiki Engine (this)** — updates itself, AI-agent safe via reconciled context, public via auto-published mirror.
+[IMAGE: assets/03-approach-comparison.png — five-row comparison table of knowledge-base approaches (Confluence, GitHub wiki, Notion, hand-written README, Aegis LLM Wiki Engine) across three dimensions: updates itself, AI-agent safe, public portfolio]
 
 The engine is under 3,000 lines of Python. It runs on a laptop. The heavy lifting is a few Claude Sonnet calls per sync. Total cost in my testing is under $5/month.
 

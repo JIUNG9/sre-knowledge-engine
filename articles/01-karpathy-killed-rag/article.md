@@ -97,25 +97,19 @@ I tried Pinecone first. It cost us around $90/month for a small index, integrate
 
 Here is the comparison, from actually having shipped both:
 
-| Dimension | Traditional RAG (Pinecone + Voyage) | LLM Wiki (Obsidian + Claude Haiku) |
-|---|---|---|
-| **Storage** | Managed vector DB, proprietary | Local markdown + git |
-| **Cost** | $30-100/mo baseline + per-query | $0.50-2/mo synthesis + ~free queries |
-| **Staleness handling** | None built-in; bolt-on metadata | First-class `freshness` field |
-| **Contradictions** | Ignored — returns all matches | Detected, flagged, escalated |
-| **Human editability** | Rebuild index after edit | Edit the markdown file |
-| **Portability** | Locked to vendor | Markdown + git, anywhere |
-| **Portfolio value** | Opaque vector blob | Public GitHub repo |
-| **Review workflow** | None | PRs, diff, blame, comments |
-| **On-call experience** | "Why did it say that?" | Read the page |
+- **Storage.** Traditional RAG needs a managed vector DB — proprietary, opaque, another vendor. LLM Wiki needs a folder of markdown in git. You already have that.
+- **Cost.** Pinecone starts around $30-100 a month before you query anything. Aegis Wiki synthesis costs around $0.50-$2 a month on Haiku, and queries are effectively free because the wiki is just files.
+- **Staleness.** RAG has none built-in. You can bolt on metadata filters, but you have to remember to set them on every query. Aegis Wiki has a `freshness` field on every page, checked by a nightly linter.
+- **Contradictions.** RAG returns all matches and lets the LLM pick. Aegis Wiki detects contradictions at synthesis time and surfaces them before they reach the operator.
+- **Human editability.** To edit a RAG index you rebuild it. To edit an Aegis Wiki page you open the markdown file.
+- **Portability.** Vector DBs lock you in. Markdown + git runs anywhere.
+- **Portfolio.** A vector blob is opaque. A public GitHub repo of synthesized runbooks is a hiring signal.
+- **Review.** Vector DBs have no review workflow. Markdown gets PRs, diff, blame, comments.
+- **On-call feel.** With RAG, when something's wrong, you ask "why did it say that?" With Aegis Wiki, you read the page.
 
 And the cost table, which matters because "SRE AI tooling" is the kind of line item a CFO will cut first:
 
-| System | Fixed cost/mo | Variable cost | Realistic monthly bill (small team) |
-|---|---|---|---|
-| Pinecone (starter) + Voyage embeddings | $70 + $0.10/1M tokens | Per-query | **$80-120** |
-| Chroma self-hosted + OpenAI embeddings | Self-host | $0.02/1M + infra | **$40-80** |
-| Aegis Wiki (Claude Haiku + local vault) | $0 | $0.80 in / $4 out per 1M tokens, ~0.5-2M/mo | **$0.50-2** |
+For a small team, the realistic monthly bill looks like this. **Pinecone starter + Voyage embeddings**: about $70 fixed plus per-query, so $80–120 a month. **Chroma self-hosted + OpenAI embeddings**: $40–80 a month once you count the infra it runs on. **Aegis Wiki on Claude Haiku + a local vault**: **$0.50–2 a month**, synthesis included. Two orders of magnitude cheaper than Pinecone, and it's the version that actually tells the truth at 3 AM.
 
 Haiku is cheap enough that synthesizing every source every day is a rounding error on a personal AWS bill. Sonnet, used only for contradiction detection, runs a few cents per scan.
 
@@ -171,14 +165,12 @@ This is the part I'm proudest of, because it's the part that solves the real fai
 
 ### Staleness as a first-class concept
 
-Each source type decays at a different rate. The defaults:
+Each source type decays at a different rate. The defaults that ship with the engine:
 
-| Source type | Stale after | Archive after | Check frequency |
-|---|---|---|---|
-| Confluence | 90 days | 180 days | daily |
-| GitHub docs | 60 days | 180 days | daily |
-| Runbook | 120 days | 365 days | weekly |
-| Incident | 365 days | 730 days | weekly |
+- **Confluence** — stale at 90 days, archived at 180, checked daily
+- **GitHub docs** — stale at 60 days, archived at 180, checked daily
+- **Runbooks** — stale at 120 days, archived at 365, checked weekly
+- **Incidents** — stale at 365 days, archived at 730, checked weekly
 
 Confluence rots fastest because product teams abandon docs. Runbooks decay slower because procedures are mostly stable. Incidents are archived but almost never deleted, because post-mortems are the most valuable learning asset a team has.
 

@@ -119,40 +119,6 @@ pre code {
   color: inherit;
   font-size: inherit;
 }
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 24px 0;
-  font-size: 15px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-th, td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-th {
-  background: #25253A;
-  color: var(--accent);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-}
-tr:last-child td { border-bottom: none; }
-td strong { color: var(--accent); }
-.mermaid {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 24px;
-  margin: 32px 0;
-  text-align: center;
-}
 figure {
   margin: 32px 0;
   padding: 0;
@@ -305,31 +271,21 @@ figcaption {
 
 <p>Here is the comparison, from actually having shipped both:</p>
 
-<table>
-<thead><tr><th>Dimension</th><th>Traditional RAG (Pinecone + Voyage)</th><th>LLM Wiki (Obsidian + Claude Haiku)</th></tr></thead>
-<tbody>
-<tr><td><strong>Storage</strong></td><td>Managed vector DB, proprietary</td><td>Local markdown + git</td></tr>
-<tr><td><strong>Cost</strong></td><td>$30-100/mo baseline + per-query</td><td>$0.50-2/mo synthesis + ~free queries</td></tr>
-<tr><td><strong>Staleness handling</strong></td><td>None built-in; bolt-on metadata</td><td>First-class <code>freshness</code> field</td></tr>
-<tr><td><strong>Contradictions</strong></td><td>Ignored — returns all matches</td><td>Detected, flagged, escalated</td></tr>
-<tr><td><strong>Human editability</strong></td><td>Rebuild index after edit</td><td>Edit the markdown file</td></tr>
-<tr><td><strong>Portability</strong></td><td>Locked to vendor</td><td>Markdown + git, anywhere</td></tr>
-<tr><td><strong>Portfolio value</strong></td><td>Opaque vector blob</td><td>Public GitHub repo</td></tr>
-<tr><td><strong>Review workflow</strong></td><td>None</td><td>PRs, diff, blame, comments</td></tr>
-<tr><td><strong>On-call experience</strong></td><td>"Why did it say that?"</td><td>Read the page</td></tr>
-</tbody>
-</table>
+<ul>
+<li><strong>Storage.</strong> Traditional RAG needs a managed vector DB — proprietary, opaque, another vendor. LLM Wiki needs a folder of markdown in git. You already have that.</li>
+<li><strong>Cost.</strong> Pinecone starts around $30-100 a month before you query anything. Aegis Wiki synthesis costs around $0.50-$2 a month on Haiku, and queries are effectively free because the wiki is just files.</li>
+<li><strong>Staleness.</strong> RAG has none built-in. You can bolt on metadata filters, but you have to remember to set them on every query. Aegis Wiki has a <code>freshness</code> field on every page, checked by a nightly linter.</li>
+<li><strong>Contradictions.</strong> RAG returns all matches and lets the LLM pick. Aegis Wiki detects contradictions at synthesis time and surfaces them before they reach the operator.</li>
+<li><strong>Human editability.</strong> To edit a RAG index you rebuild it. To edit an Aegis Wiki page you open the markdown file.</li>
+<li><strong>Portability.</strong> Vector DBs lock you in. Markdown + git runs anywhere.</li>
+<li><strong>Portfolio.</strong> A vector blob is opaque. A public GitHub repo of synthesized runbooks is a hiring signal.</li>
+<li><strong>Review.</strong> Vector DBs have no review workflow. Markdown gets PRs, diff, blame, comments.</li>
+<li><strong>On-call feel.</strong> With RAG, when something's wrong, you ask "why did it say that?" With Aegis Wiki, you read the page.</li>
+</ul>
 
 <p>And the cost table, which matters because "SRE AI tooling" is the kind of line item a CFO will cut first:</p>
 
-<table>
-<thead><tr><th>System</th><th>Fixed cost/mo</th><th>Variable cost</th><th>Realistic monthly bill (small team)</th></tr></thead>
-<tbody>
-<tr><td>Pinecone (starter) + Voyage embeddings</td><td>$70 + $0.10/1M tokens</td><td>Per-query</td><td><strong>$80-120</strong></td></tr>
-<tr><td>Chroma self-hosted + OpenAI embeddings</td><td>Self-host</td><td>$0.02/1M + infra</td><td><strong>$40-80</strong></td></tr>
-<tr><td>Aegis Wiki (Claude Haiku + local vault)</td><td>$0</td><td>$0.80 in / $4 out per 1M tokens, ~0.5-2M/mo</td><td><strong>$0.50-2</strong></td></tr>
-</tbody>
-</table>
+<p>For a small team, the realistic monthly bill looks like this. <strong>Pinecone starter + Voyage embeddings</strong>: about $70 fixed plus per-query, so $80–120 a month. <strong>Chroma self-hosted + OpenAI embeddings</strong>: $40–80 a month once you count the infra it runs on. <strong>Aegis Wiki on Claude Haiku + a local vault</strong>: <strong>$0.50–2 a month</strong>, synthesis included. Two orders of magnitude cheaper than Pinecone, and it's the version that actually tells the truth at 3 AM.</p>
 
 <p>Haiku is cheap enough that synthesizing every source every day is a rounding error on a personal AWS bill. Sonnet, used only for contradiction detection, runs a few cents per scan.</p>
 
@@ -383,17 +339,14 @@ aliases: [auth, auth-svc]
 
 <h3>Staleness as a first-class concept</h3>
 
-<p>Each source type decays at a different rate. The defaults:</p>
+<p>Each source type decays at a different rate. The defaults that ship with the engine:</p>
 
-<table>
-<thead><tr><th>Source type</th><th>Stale after</th><th>Archive after</th><th>Check frequency</th></tr></thead>
-<tbody>
-<tr><td>Confluence</td><td>90 days</td><td>180 days</td><td>daily</td></tr>
-<tr><td>GitHub docs</td><td>60 days</td><td>180 days</td><td>daily</td></tr>
-<tr><td>Runbook</td><td>120 days</td><td>365 days</td><td>weekly</td></tr>
-<tr><td>Incident</td><td>365 days</td><td>730 days</td><td>weekly</td></tr>
-</tbody>
-</table>
+<ul>
+<li><strong>Confluence</strong> — stale at 90 days, archived at 180, checked daily</li>
+<li><strong>GitHub docs</strong> — stale at 60 days, archived at 180, checked daily</li>
+<li><strong>Runbooks</strong> — stale at 120 days, archived at 365, checked weekly</li>
+<li><strong>Incidents</strong> — stale at 365 days, archived at 730, checked weekly</li>
+</ul>
 
 <p>Confluence rots fastest because product teams abandon docs. Runbooks decay slower because procedures are mostly stable. Incidents are archived but almost never deleted, because post-mortems are the most valuable learning asset a team has.</p>
 
@@ -496,27 +449,8 @@ Public vault example: <a href="https://github.com/JIUNG9/aegis-wiki">aegis-wiki<
 </article>
 
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>
   hljs.highlightAll();
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: 'dark',
-    themeVariables: {
-      primaryColor: '#1E1E2A',
-      primaryTextColor: '#E6E6EC',
-      primaryBorderColor: '#00FF88',
-      lineColor: '#00FF88',
-      secondaryColor: '#25253A',
-      tertiaryColor: '#0A0A0F',
-      background: '#0A0A0F',
-      mainBkg: '#1E1E2A',
-      textColor: '#E6E6EC',
-      nodeBorder: '#00FF88',
-      clusterBkg: '#13131B',
-      clusterBorder: '#2A2A38'
-    }
-  });
 </script>
 </body>
 </html>

@@ -100,28 +100,42 @@ These three become inputs to the risk assessment.
 
 Here's the master table Aegis Layer 4 enforces. Each row: an action type, its default risk tier, an AWS-specific example, and the automation behavior.
 
-| # | Action Type | Risk Tier | AWS-Specific Example | Automation Behavior |
-|---|---|---|---|---|
-| 1 | CloudWatch log query | NONE | `filter-log-events` on `/aws/eks/cluster-name` | Auto, no approval, no dry-run |
-| 2 | CloudWatch metric read | NONE | `get-metric-statistics` on EKS pod metrics | Auto, no approval |
-| 3 | Describe resources | NONE | `describe-db-instances`, `describe-clusters` | Auto, no approval |
-| 4 | kubectl get / logs / describe | NONE | `kubectl get pods -n auth` | Auto, no approval |
-| 5 | kubectl rollout restart (spoke) | LOW | `kubectl rollout restart deploy/auth-service` in spoke | Auto-approve with dry-run; post-verify |
-| 6 | kubectl scale up (spoke) | LOW | `kubectl scale --replicas=7` (from 3) in spoke | Auto-approve with dry-run; post-verify |
-| 7 | kubectl scale down (spoke) | MEDIUM | `kubectl scale --replicas=1` (from 5) in spoke | Slack approval required |
-| 8 | kubectl delete pod (spoke) | MEDIUM | `kubectl delete pod auth-xxxx` | Slack approval required |
-| 9 | kubectl rollout undo (spoke) | MEDIUM | Roll back to previous ReplicaSet | Slack approval required |
-| 10 | Terraform apply (any account) | HIGH | `terraform apply` on any state file | Manual only, no AI execution ever |
-| 11 | kubectl delete (non-pod) | HIGH | `kubectl delete deployment auth-service` | Manual only |
-| 12 | RDS stop / modify | HIGH | `aws rds modify-db-instance` | Manual only |
-| 13 | Any action in hub account | HIGH | Anything touching `111111111111` | Manual only, regardless of category |
-| 14 | Any action in security account | BLOCKED | Anything touching `555555555555` | Never automated, ever |
-| 15 | IAM policy modify | BLOCKED | `iam put-role-policy`, `iam attach-role-policy` | Hard-coded block — AI literally cannot attempt this |
-| 16 | S3 public-access config change | BLOCKED | `s3api put-public-access-block` | Hard-coded block |
-| 17 | S3 bucket policy modify | BLOCKED | `s3api put-bucket-policy` | Hard-coded block |
-| 18 | Cross-account IAM role change | BLOCKED | `iam update-assume-role-policy` | Hard-coded block |
-| 19 | Security Group rule modify | HIGH | `ec2 authorize-security-group-ingress` | Manual only |
-| 20 | KMS key policy modify | BLOCKED | `kms put-key-policy` | Hard-coded block |
+[IMAGE: risk-tier-matrix.png — 20-row color-coded matrix showing Action Type, Risk Tier (NONE/LOW/MEDIUM/HIGH/BLOCKED), AWS example, and automation behavior. Render as 1600×900 PNG for Medium. Until rendered, the grouped bullets below carry the same information.]
+
+**NONE tier — auto, no approval, no dry-run:**
+
+- **CloudWatch log query** — `filter-log-events` on `/aws/eks/cluster-name`
+- **CloudWatch metric read** — `get-metric-statistics` on EKS pod metrics
+- **Describe resources** — `describe-db-instances`, `describe-clusters`
+- **kubectl get / logs / describe** — e.g. `kubectl get pods -n auth`
+
+**LOW tier — auto-approve with dry-run; post-verify:**
+
+- **kubectl rollout restart (spoke)** — `kubectl rollout restart deploy/auth-service` in a spoke
+- **kubectl scale up (spoke)** — `kubectl scale --replicas=7` (from 3) in a spoke
+
+**MEDIUM tier — Slack approval required:**
+
+- **kubectl scale down (spoke)** — `kubectl scale --replicas=1` (from 5) in a spoke
+- **kubectl delete pod (spoke)** — `kubectl delete pod auth-xxxx`
+- **kubectl rollout undo (spoke)** — roll back to previous ReplicaSet
+
+**HIGH tier — manual only, no AI execution ever:**
+
+- **Terraform apply (any account)** — `terraform apply` on any state file
+- **kubectl delete (non-pod)** — `kubectl delete deployment auth-service`
+- **RDS stop / modify** — `aws rds modify-db-instance`
+- **Any action in hub account** — anything touching `111111111111`, regardless of category
+- **Security Group rule modify** — `ec2 authorize-security-group-ingress`
+
+**BLOCKED tier — hard-coded, never automated:**
+
+- **Any action in security account** — anything touching `555555555555`
+- **IAM policy modify** — `iam put-role-policy`, `iam attach-role-policy`. AI literally cannot attempt this.
+- **S3 public-access config change** — `s3api put-public-access-block`
+- **S3 bucket policy modify** — `s3api put-bucket-policy`
+- **Cross-account IAM role change** — `iam update-assume-role-policy`
+- **KMS key policy modify** — `kms put-key-policy`
 
 A few things to notice:
 
@@ -408,26 +422,20 @@ Here's the kind of story that happens at 09:15 KST on a Monday — the same Mond
 
 ### Timeline
 
-| Time (KST) | Event |
-|---|---|
-| 09:12:04 | SigNoz fires alert: `auth-service` P99 > 1000ms (threshold 500ms) |
-| 09:12:08 | Aegis orchestrator picks up alert, opens investigation `INV-2026-0419-00017` |
-| 09:12:10 | Wiki context fetched: 3 pages on auth-service scaling |
-| 09:12:12 | Pattern analyzer returns: "Pattern A match — Mon 9AM cold-start, 26 prior occurrences" |
-| 09:12:15 | Claude (Sonnet) proposes: scale 3 -> 5 replicas, pre-warm connection pool |
-| 09:12:16 | Guardrails engine evaluates: |
-| 09:12:16 |   - Target account: `333333333333` (spoke-prod) — spoke, permitted |
-| 09:12:16 |   - Action type: `kubectl_scale` up — LOW |
-| 09:12:16 |   - Account adjustment: LOW (no upgrade) |
-| 09:12:16 |   - Rollback plan: provided |
-| 09:12:17 | Pre-validation: dry-run SAFE, IAM simulator ALLOWED, OPA ALLOWED |
-| 09:12:17 | Approval: auto-approved (LOW tier, all checks passed) |
-| 09:12:18 | Execution: `kubectl scale deployment auth-service --replicas=5` |
-| 09:12:19 | Execution succeeded; rollback window armed until 09:27:18 |
-| 09:12:20 | Post-validation watch started, 10-minute window |
-| 09:15:00 | P99 down to 640ms (improving) |
-| 09:17:00 | P99 down to 280ms (target reached) |
-| 09:22:30 | Post-validation: SUCCESS. Audit record finalized. |
+- **09:12:04** — SigNoz fires alert: `auth-service` P99 > 1000ms (threshold 500ms)
+- **09:12:08** — Aegis orchestrator picks up alert, opens investigation `INV-2026-0419-00017`
+- **09:12:10** — Wiki context fetched: 3 pages on auth-service scaling
+- **09:12:12** — Pattern analyzer returns: "Pattern A match — Mon 9AM cold-start, 26 prior occurrences"
+- **09:12:15** — Claude (Sonnet) proposes: scale 3 -> 5 replicas, pre-warm connection pool
+- **09:12:16** — Guardrails engine evaluates: target account `333333333333` (spoke-prod, permitted); action `kubectl_scale` up classifies LOW; account adjustment keeps it LOW (no upgrade); rollback plan provided.
+- **09:12:17** — Pre-validation: dry-run SAFE, IAM simulator ALLOWED, OPA ALLOWED
+- **09:12:17** — Approval: auto-approved (LOW tier, all checks passed)
+- **09:12:18** — Execution: `kubectl scale deployment auth-service --replicas=5`
+- **09:12:19** — Execution succeeded; rollback window armed until 09:27:18
+- **09:12:20** — Post-validation watch started, 10-minute window
+- **09:15:00** — P99 down to 640ms (improving)
+- **09:17:00** — P99 down to 280ms (target reached)
+- **09:22:30** — Post-validation: SUCCESS. Audit record finalized.
 
 Total AI-operator time from alert to mitigation: **13 seconds.**
 Human involvement: zero (because the action was LOW tier in a spoke account, with a valid rollback).
@@ -494,17 +502,15 @@ Four layers. All four have to fail. In practice, the failure mode is "the AI pic
 
 All paths relative to the [JIUNG9/aegis](https://github.com/JIUNG9/aegis) repo. Layer 4 files are planned — coming in Layer 4 per the roadmap.
 
-| File | Role |
-|---|---|
-| [`apps/ai-engine/guardrails/engine.py`](https://github.com/JIUNG9/aegis) | Main guardrails orchestrator |
-| [`apps/ai-engine/guardrails/risk_assessor.py`](https://github.com/JIUNG9/aegis) | Classifies actions into NONE/LOW/MEDIUM/HIGH/BLOCKED |
-| [`apps/ai-engine/guardrails/observation_mode.py`](https://github.com/JIUNG9/aegis) | Trust-building ladder (Observe / Recommend / Low-Auto / Full-Auto) |
-| [`apps/ai-engine/guardrails/approval_gate.py`](https://github.com/JIUNG9/aegis) | Slack approval integration for MEDIUM tier |
-| [`apps/ai-engine/guardrails/pre_validator.py`](https://github.com/JIUNG9/aegis) | Dry-run, IAM simulator, OPA checks |
-| [`apps/ai-engine/guardrails/post_validator.py`](https://github.com/JIUNG9/aegis) | Metric watch + auto-rollback trigger |
-| [`apps/ai-engine/guardrails/rollback_manager.py`](https://github.com/JIUNG9/aegis) | Enforces rollback plan; arms rollback window |
-| [`apps/ai-engine/guardrails/audit_logger.py`](https://github.com/JIUNG9/aegis) | SOC2-compliant decision record writer |
-| [`apps/ai-engine/guardrails/policies/`](https://github.com/JIUNG9/aegis) | OPA/Rego policies (versioned) |
+- **[`apps/ai-engine/guardrails/engine.py`](https://github.com/JIUNG9/aegis)** — Main guardrails orchestrator
+- **[`apps/ai-engine/guardrails/risk_assessor.py`](https://github.com/JIUNG9/aegis)** — Classifies actions into NONE/LOW/MEDIUM/HIGH/BLOCKED
+- **[`apps/ai-engine/guardrails/observation_mode.py`](https://github.com/JIUNG9/aegis)** — Trust-building ladder (Observe / Recommend / Low-Auto / Full-Auto)
+- **[`apps/ai-engine/guardrails/approval_gate.py`](https://github.com/JIUNG9/aegis)** — Slack approval integration for MEDIUM tier
+- **[`apps/ai-engine/guardrails/pre_validator.py`](https://github.com/JIUNG9/aegis)** — Dry-run, IAM simulator, OPA checks
+- **[`apps/ai-engine/guardrails/post_validator.py`](https://github.com/JIUNG9/aegis)** — Metric watch + auto-rollback trigger
+- **[`apps/ai-engine/guardrails/rollback_manager.py`](https://github.com/JIUNG9/aegis)** — Enforces rollback plan; arms rollback window
+- **[`apps/ai-engine/guardrails/audit_logger.py`](https://github.com/JIUNG9/aegis)** — SOC2-compliant decision record writer
+- **[`apps/ai-engine/guardrails/policies/`](https://github.com/JIUNG9/aegis)** — OPA/Rego policies (versioned)
 
 Environment variables the guardrails engine expects:
 

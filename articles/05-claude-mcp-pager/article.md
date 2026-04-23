@@ -158,11 +158,9 @@ The whole loop runs in 60–120 seconds from alert-fire to Slack-card. The slowe
 
 Claude has three model tiers that map naturally to investigation complexity. The AI settings page in Aegis exposes them as **Eco**, **Standard**, and **Deep**.
 
-| Tier | Model | Used For | Typical Cost per Investigation |
-|---|---|---|---|
-| **Eco** | Haiku | Wiki synthesis, simple log summaries, routing decisions | ~$0.001 |
-| **Standard** | Sonnet 4.6 | Incident investigation, pattern analysis, remediation proposal | ~$0.08 |
-| **Deep** | Opus | Multi-service correlation, complex RCAs, novel failure modes | ~$0.25 |
+- **Eco** — Haiku. Wiki synthesis, simple log summaries, routing decisions. ~$0.001 per investigation.
+- **Standard** — Sonnet 4.6. Incident investigation, pattern analysis, remediation proposal. ~$0.08 per investigation.
+- **Deep** — Opus. Multi-service correlation, complex RCAs, novel failure modes. ~$0.25 per investigation.
 
 The routing logic lives in the token tracker (`services/token_tracker.py` in the existing codebase). It's not a black-box heuristic — it's a decision table:
 
@@ -258,18 +256,16 @@ One pattern I'm watching carefully: the AI has a tendency to over-fetch when a R
 
 Here's the real change from the before-Aegis to the after-Aegis workflow.
 
-| Step | Before (manual) | After (with Control Tower) |
-|---|---|---|
-| Alert fires → on-call acknowledges | 30 sec | 30 sec |
-| Find the right runbook | 3–8 min | 0 sec (wiki context in Slack) |
-| Pull SigNoz logs + metrics | 4–10 min | 0 sec (pre-fetched in context) |
-| Correlate with recent incidents | 5–15 min | 0 sec (pattern analyzer did it) |
-| Form a hypothesis | 2–5 min | 0 sec (in Slack card) |
-| Decide on an action | 1–3 min | 15–45 sec (read card, click) |
-| Execute | 1–2 min | 30–90 sec (auto or Slack-approved) |
-| Verify fix worked | 3–5 min | Auto (post-validator, 60 sec) |
-| **Total p50** | **~20 min** | **~2 min** |
-| **Total p95 (harder incidents)** | **~45 min** | **~5 min** |
+- **Alert fires → on-call acknowledges** — 30 sec before, 30 sec after.
+- **Find the right runbook** — 3–8 min before. 0 sec after (wiki context in Slack).
+- **Pull SigNoz logs + metrics** — 4–10 min before. 0 sec after (pre-fetched in context).
+- **Correlate with recent incidents** — 5–15 min before. 0 sec after (pattern analyzer did it).
+- **Form a hypothesis** — 2–5 min before. 0 sec after (in Slack card).
+- **Decide on an action** — 1–3 min before. 15–45 sec after (read card, click).
+- **Execute** — 1–2 min before. 30–90 sec after (auto or Slack-approved).
+- **Verify fix worked** — 3–5 min before. Auto after (post-validator, 60 sec).
+- **Total p50** — **~20 min** before. **~2 min** after.
+- **Total p95 (harder incidents)** — **~45 min** before. **~5 min** after.
 
 The Control Tower doesn't *solve* the incident faster than a senior SRE can. What it does is eliminate the 18 minutes of ambient toil per alert that come from context-gathering and tab-switching. Compounded over a week, that's hours back.
 

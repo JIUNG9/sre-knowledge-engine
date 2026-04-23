@@ -36,13 +36,11 @@ We called it the document reconciliation engine. It ships inside [Aegis](https:/
 
 Let me describe, without exaggeration, where our operational knowledge actually lives.
 
-| Source | What lives there | Last-updated reality |
-|---|---|---|
-| Confluence (two spaces) | Architecture diagrams, onboarding guides, legacy runbooks | Roughly 40% of pages older than 12 months, no freshness markers |
-| GitHub wikis (3 repos) | Platform, data, and frontend team runbooks | Updated during incidents; no one reviews them between incidents |
-| Google Docs | Migration plans, postmortems, design docs in progress | Abandoned as projects finish; never deleted |
-| Slack pinned threads | Real, current operational knowledge — "here's how we actually did it" | Searchable but not indexable; vanishes under the next pin |
-| Nobody | The thing that's actually running in prod | Only discoverable by reading Terraform + checking SigNoz |
+- **Confluence (two spaces)** — architecture diagrams, onboarding guides, legacy runbooks. Roughly 40% of pages older than 12 months, no freshness markers.
+- **GitHub wikis (3 repos)** — platform, data, and frontend team runbooks. Updated during incidents; no one reviews them between incidents.
+- **Google Docs** — migration plans, postmortems, design docs in progress. Abandoned as projects finish; never deleted.
+- **Slack pinned threads** — real, current operational knowledge ("here's how we actually did it"). Searchable but not indexable; vanishes under the next pin.
+- **Nobody** — the thing that's actually running in prod. Only discoverable by reading Terraform and checking SigNoz.
 
 Any human SRE looking for a runbook will start with the pinned Slack thread, then check the GitHub wiki, then ignore Confluence entirely because they know it's stale. An LLM has no such instinct. It sees four documents with overlapping topics, scores them on embedding similarity, and picks the one that sounds the most authoritative. Stale prose can sound extremely authoritative.
 
@@ -94,12 +92,10 @@ flowchart LR
 
 The four MCP tools — **the reconciliation engine coming in Aegis Layer 5, see the [roadmap](https://github.com/JIUNG9/aegis)**:
 
-| Tool | Input | Output | Cadence |
-|---|---|---|---|
-| `confluence_sync` | Space key, API token | Ingested pages with source-typed metadata | Daily |
-| `github_docs_scan` | Repo list, glob patterns | Runbooks, ARCHITECTURE.md, ADRs | On-push webhook |
-| `incident_history_sync` | SigNoz/PagerDuty API keys | Postmortem-grade incident pages | Hourly |
-| `docs_lint` | Vault path | Contradictions + staleness + coverage gaps | On-demand |
+- **`confluence_sync`** — takes a space key and API token, ingests pages with source-typed metadata, runs daily.
+- **`github_docs_scan`** — takes a repo list and glob patterns, pulls runbooks, ARCHITECTURE.md, and ADRs, runs on push via webhook.
+- **`incident_history_sync`** — takes SigNoz and PagerDuty API keys, emits postmortem-grade incident pages, runs hourly.
+- **`docs_lint`** — takes a vault path, returns contradictions, staleness, and coverage gaps, runs on demand.
 
 The important piece is `docs_lint`, because that's where the reconciliation actually happens. The first three tools are ingestion pipes — I'll cover those in depth in the next article ("I Built a Self-Maintaining SRE Knowledge Base"). The linter is the one that catches the lies.
 
@@ -313,11 +309,9 @@ Here's a truncated, sanitized real report from one of my dogfood runs:
 
 ## Stale (14)
 
-| Slug                       | Type        | Days | Action            |
-|----------------------------|-------------|------|-------------------|
-| legacy-vpc-peering         | confluence  | 203  | archive tonight   |
-| rds-backup-playbook-v2     | runbook     | 141  | needs_review      |
-| oncall-onboarding          | confluence  | 112  | stale, reviewable |
+- [[legacy-vpc-peering]] — confluence, 203 days — archive tonight
+- [[rds-backup-playbook-v2]] — runbook, 141 days — needs_review
+- [[oncall-onboarding]] — confluence, 112 days — stale, reviewable
 ...
 
 ## Archivable (3)
@@ -350,17 +344,20 @@ This is what replaces the "just grep Confluence and hope" retrieval flow.
 
 I want to be honest about the build state.
 
-| Component | File | Status |
-|---|---|---|
-| Contradiction detector | [`apps/ai-engine/wiki/contradiction.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/contradiction.py) | Built (Layer 1) |
-| Staleness linter | [`apps/ai-engine/wiki/staleness.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/staleness.py) | Built (Layer 1) |
-| Confluence sync | [`apps/ai-engine/wiki/confluence_sync.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/confluence_sync.py) | Built (Layer 1) |
-| SigNoz sync | [`apps/ai-engine/wiki/signoz_sync.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/signoz_sync.py) | Built (Layer 1) |
-| Engine orchestrator | [`apps/ai-engine/wiki/engine.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/engine.py) | Built (Layer 1) |
-| MCP `confluence_sync` tool | `mcp/tools/docs_reconciliation.py` | Planned (Layer 5) |
-| MCP `github_docs_scan` tool | `mcp/tools/docs_reconciliation.py` | Planned (Layer 5) |
-| MCP `incident_history_sync` tool | `mcp/tools/docs_reconciliation.py` | Planned (Layer 5) |
-| MCP `docs_lint` tool | `mcp/tools/docs_reconciliation.py` | Planned (Layer 5) |
+Built today (Layer 1):
+
+- **Contradiction detector** — [`apps/ai-engine/wiki/contradiction.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/contradiction.py)
+- **Staleness linter** — [`apps/ai-engine/wiki/staleness.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/staleness.py)
+- **Confluence sync** — [`apps/ai-engine/wiki/confluence_sync.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/confluence_sync.py)
+- **SigNoz sync** — [`apps/ai-engine/wiki/signoz_sync.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/signoz_sync.py)
+- **Engine orchestrator** — [`apps/ai-engine/wiki/engine.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/engine.py)
+
+Planned (Layer 5), all living in `mcp/tools/docs_reconciliation.py`:
+
+- **MCP `confluence_sync` tool**
+- **MCP `github_docs_scan` tool**
+- **MCP `incident_history_sync` tool**
+- **MCP `docs_lint` tool**
 
 Layer 1 is what you can clone and run today. It does the hard work: contradiction detection, staleness linting, orphan detection, reconciliation reports, Confluence + SigNoz ingestion into an Obsidian vault. You run it as a CLI, it writes to `~/Documents/obsidian-sre/`, and you open the vault in Obsidian.
 

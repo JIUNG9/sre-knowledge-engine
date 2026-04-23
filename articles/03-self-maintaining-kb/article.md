@@ -253,8 +253,8 @@ tags: [overview, living-document, auto-generated]
 <!-- AUTO-GENERATED BELOW -->
 
 ## Services
-| Service | Type | Owner | Runbook | Last Incident |
-|---------|------|-------|---------|---------------|
+- **auth-service** — entity, owned by platform, linked to [[runbook-auth-service]], last incident [[INC-EXAMPLE-001]]
+- **rds-aurora-postgres** — entity, owned by platform, linked to [[runbook-rds-failover]], last incident 43d ago
 ...
 
 ## Recent Incidents (last 30 days)
@@ -267,11 +267,9 @@ tags: [overview, living-document, auto-generated]
 ...
 
 ## Document Health
-| Metric | Count |
-|--------|-------|
-| Total pages | 13 |
-| Current (updated <30d) | 13 |
-| Stale (30-90d) | 0 |
+- **Total pages**: 13
+- **Current (updated <30d)**: 13
+- **Stale (30-90d)**: 0
 ...
 ```
 
@@ -291,13 +289,11 @@ The [`staleness.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wi
 
 Every page gets a freshness label computed from `last_updated` minus per-source-type thresholds:
 
-| Source type | Stale at | Archive at |
-|---|---|---|
-| `confluence` | 90 days | 180 days |
-| `github_docs` | 60 days | 180 days |
-| `runbook` | 120 days | 365 days |
-| `incident` | 365 days | 730 days |
-| `manual` | 30 days | 180 days |
+- **`confluence`** — stale at 90 days, archived at 180
+- **`github_docs`** — stale at 60 days, archived at 180
+- **`runbook`** — stale at 120 days, archived at 365
+- **`incident`** — stale at 365 days, archived at 730
+- **`manual`** — stale at 30 days, archived at 180
 
 The labels get written back into the page's frontmatter. Obsidian's Dataview plugin then lets me render dashboards like "all stale runbooks" with a three-line query:
 
@@ -412,13 +408,11 @@ This is the OSS → Medium → LinkedIn → hire pipeline I'm committing to. Eve
 
 ## A brief comparison
 
-| Approach | Updates itself? | AI-agent safe? | Public portfolio? |
-|---|---|---|---|
-| Confluence as-is | No | No (stale pages rank high) | No (behind SSO) |
-| GitHub wiki in team repo | Partial | Partial | No (private repo) |
-| Notion internal KB | No | No | No (paywalled) |
-| Hand-written personal README | No | N/A | Yes, but shallow |
-| Aegis LLM Wiki Engine (this) | Yes | Yes (reconciled context) | Yes, auto-published mirror |
+- **Confluence as-is** — doesn't update itself, not AI-agent safe (stale pages rank high), no public portfolio (behind SSO).
+- **GitHub wiki in team repo** — partial self-update, partial AI-agent safety, not a public portfolio (private repo).
+- **Notion internal KB** — doesn't update itself, not AI-agent safe, not a public portfolio (paywalled).
+- **Hand-written personal README** — doesn't update itself, AI-agent safety is N/A, public but shallow.
+- **Aegis LLM Wiki Engine (this)** — updates itself, AI-agent safe via reconciled context, public via auto-published mirror.
 
 The engine is under 3,000 lines of Python. It runs on a laptop. The heavy lifting is a few Claude Sonnet calls per sync. Total cost in my testing is under $5/month.
 

@@ -103,21 +103,15 @@ I won't be at Stage 4 for another six months minimum.
 
 Every proposed action gets classified by the `risk_assessor.py` module (planned — see [Layer 4 spec](https://github.com/JIUNG9/aegis/blob/main/ARCHITECTURE.md#layer-4-production-guardrails)). The classification drives everything downstream: dry-run, approval gates, rollback requirements, audit verbosity.
 
-| Action | Risk | Stage 1 | Stage 2 | Stage 3 | Stage 4 |
-|---|---|---|---|---|---|
-| `query_logs`, `query_metrics`, `describe_pod` | Read-only | auto | auto | auto | auto |
-| Update staging env var | Low | observe | recommend | auto | auto |
-| `kubectl scale --replicas=N` (up) | Low | observe | recommend | auto | auto |
-| Cache flush (single service) | Low | observe | recommend | auto | auto |
-| `kubectl rollout restart deployment/X` | Medium | observe | recommend | recommend | auto |
-| `kubectl rollout undo` | Medium | observe | recommend | recommend | auto |
-| Scale-down prod deployment | Medium | observe | recommend | recommend | auto |
-| Update prod config (non-secret) | Medium | observe | recommend | recommend | auto |
-| `terraform apply` (any) | High | observe | recommend | recommend | approval |
-| Multi-service rollback | High | observe | recommend | recommend | approval |
-| `kubectl delete` anything | High | observe | recommend | recommend | approval |
-| IAM role / policy change | Blocked | never | never | never | never |
-| Data mutation / deletion | Blocked | never | never | never | never |
+**Read-only** actions (`query_logs`, `query_metrics`, `describe_pod`) auto-execute at every stage, including Stage 1. No approval ever required.
+
+**Low-risk** actions — updating staging env vars, `kubectl scale --replicas=N` (up), single-service cache flushes — get observed at Stage 1, recommended at Stage 2, and auto-execute from Stage 3 onward.
+
+**Medium-risk** actions — `kubectl rollout restart deployment/X`, `kubectl rollout undo`, scaling down a prod deployment, updating prod config (non-secret) — are observed at Stage 1, recommended at Stages 2 and 3, and only auto-execute at Stage 4.
+
+**High-risk** actions — `terraform apply` (any), multi-service rollbacks, `kubectl delete` anything — stay at recommend through Stage 3 and escalate to explicit approval at Stage 4. Never automated.
+
+**Blocked** actions — IAM role and policy changes, data mutation or deletion — are never automated at any stage. Full stop, forever.
 
 The classifier isn't a free-form LLM call. It's a rule engine with LLM fallback. The rules cover 90% of actions (regex on commands, service tags, namespace). The LLM only adjudicates ambiguous ones, and it has to justify its classification in the audit log.
 

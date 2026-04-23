@@ -196,33 +196,15 @@ Here are three that came out of the analyzer — genericized, but the numbers ar
 
 ### Pattern A — "Auth service latency spikes Monday 9-11 AM"
 
-- **Service** — `auth-service`
-- **Window** — Mon 09:00-11:00 KST
-- **Baseline P99** — 180 ms
-- **Hotspot P99** — 1,240 ms
-- **Event count over 180d** — 45 (across ~26 Mondays)
-- **Root cause (suspected)** — Connection pool cold-start + 4x login throughput
-- **Suggested action** — Pre-warm pool at 08:45; pre-scale 3 -> 5 replicas at 08:30
+[IMAGE: assets/02-pattern-a-auth-latency.png — seven-row table describing Pattern A on auth-service: Mon 09:00-11:00 KST window, baseline P99 180ms vs hotspot P99 1,240ms, 45 events across ~26 Mondays in 180d, connection pool cold-start root cause, pre-warm and pre-scale 3→5 action]
 
 ### Pattern B — "Batch job at 02:00 correlates with DB write amplification"
 
-- **Service** — `analytics-worker` -> `postgres-primary`
-- **Window** — Mon 02:00-04:00 KST
-- **Baseline write IOPS** — 2,100
-- **Hotspot write IOPS** — 14,800
-- **Event count over 180d** — 22 (all Mondays; no misses)
-- **Root cause** — Weekly reconcile job rewrites 3 materialized views
-- **Suggested action** — Stagger view rebuilds; move 1 of 3 to Sunday 23:00
+[IMAGE: assets/03-pattern-b-batch-iops.png — seven-row table describing Pattern B on analytics-worker → postgres-primary: Mon 02:00-04:00 KST window, baseline 2,100 write IOPS vs hotspot 14,800, 22 events (all Mondays), weekly reconcile job rebuilding 3 materialized views, stagger rebuilds action]
 
 ### Pattern C — "Traffic drops 70% between 22:00-06:00 KST"
 
-- **Service** — all user-facing
-- **Window** — Daily 22:00-06:00 KST
-- **Peak RPS** — 3,400
-- **Trough RPS** — 1,020
-- **Pattern type** — `idle_window`
-- **Suggested action** — Scheduled rightsizing — drop replica count 40% overnight
-- **Estimated savings** — ~$3,000/month across all spoke accounts
+[IMAGE: assets/04-pattern-c-idle-window.png — seven-row table describing Pattern C idle window on all user-facing services: daily 22:00-06:00 KST window, peak 3,400 RPS vs trough 1,020 RPS, scheduled rightsizing by dropping replicas 40% overnight, ~$3,000/month savings]
 
 Pattern C is the one that makes finance teams smile. The other two are the ones that make on-call engineers smile.
 
@@ -276,10 +258,7 @@ At a large e-commerce company, handling 1M+ daily commerce transactions, we lear
 
 Six months after shipping the analyzer (well, after I started running it by hand — the full v4.0 Layer 2 is still rolling out), the team's FinOps summary looked like:
 
-- **Monday morning incidents** — from ~27/month to ~6/month. Delta: -78%.
-- **Mean time to mitigation (MTTM) on Mon 9 AM** — from 18 min to 4 min (pre-positioned). Delta: -78%.
-- **Overnight compute cost (22:00-06:00)** — from $4,200/mo to $1,200/mo. Delta: -$3,000/mo.
-- **Auto-scaling "surprise" events** — from frequent to near zero.
+[IMAGE: assets/05-finops-results.png — four-row before/after FinOps results table showing Monday morning incidents (27→6/mo, -78%), MTTM on Mon 9AM (18→4 min, -78%), overnight compute cost ($4,200→$1,200/mo, -$3,000/mo), and auto-scaling surprise events (frequent → near zero)]
 
 The ~$3K/month saving is across our non-production spoke account plus two smaller production services we felt confident scheduling. We haven't done it everywhere — some workloads genuinely don't want to be rightsized on a cron, and the AI's recommendations respect that.
 
@@ -328,11 +307,7 @@ For the AI-cost nerds: this is also the difference between burning Sonnet tokens
 
 The files involved (paths are relative to the [JIUNG9/aegis](https://github.com/JIUNG9/aegis) repo; Layer 2 files are planned — coming in Layer 2 per the roadmap):
 
-- **[`apps/ai-engine/connectors/signoz_client.py`](https://github.com/JIUNG9/aegis)** — HTTP API client for logs, metrics, traces, alerts
-- **[`apps/ai-engine/connectors/alert_fetcher.py`](https://github.com/JIUNG9/aegis)** — Firing alert pull with filters
-- **[`apps/ai-engine/connectors/metric_fetcher.py`](https://github.com/JIUNG9/aegis)** — PromQL range queries
-- **[`apps/ai-engine/connectors/pattern_analyzer.py`](https://github.com/JIUNG9/aegis)** — Time-of-week bucketing + correlation
-- **[`apps/ai-engine/agents/orchestrator.py`](https://github.com/JIUNG9/aegis)** — Wires patterns into Claude's investigation context
+[IMAGE: assets/06-connector-files.png — five-row file/role table listing the Layer 2 SigNoz connector components: signoz_client.py (HTTP API client), alert_fetcher.py (firing alerts), metric_fetcher.py (PromQL range queries), pattern_analyzer.py (time-of-week bucketing), orchestrator.py (wires patterns into Claude)]
 
 Environment variables the connector expects:
 

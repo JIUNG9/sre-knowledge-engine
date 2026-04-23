@@ -2,9 +2,11 @@
 
 *Your RAG system is serving 2-year-old Confluence pages as truth. I know, because mine did.*
 
+[IMAGE: assets/00-feature-image.png — feature image, upload as Medium hero]
+
 ---
 
-I'm an SRE at my employer. Our team runs 4 AWS accounts in a hub-spoke topology, 49 PostgreSQL instances mid-migration from PG 13 to 16, and an EKS 1.33 fleet that ArgoCD ApplicationSets deploy into from a single GitOps repo. Before acme-corp I ran 1M+ daily transactions on AWS ECS Fargate at a large e-commerce company. This is my on-call rotation. My 3 AM pager. So when I say our AI agent started lying to us, I mean it lied to *me* at 3 AM, and I wrote this because I don't want it to happen to you.
+I'm an SRE. Our team runs a multi-account AWS estate in a hub-spoke topology, dozens of PostgreSQL instances mid-migration from PG 13 to 16, and an EKS 1.33 fleet that ArgoCD ApplicationSets deploy into from a single GitOps repo. Before this role I ran a million daily transactions on AWS ECS Fargate at a NYSE-listed commerce platform. This is my on-call rotation. My 3 AM pager. So when I say our AI agent started lying to us, I mean it lied to *me* at 3 AM, and I wrote this because I don't want it to happen to you.
 
 This is the story of how I built a knowledge layer that doesn't rot — based on a pattern Andrej Karpathy sketched in a tweet — and the open-source implementation you can clone tonight.
 
@@ -75,39 +77,7 @@ It also changes the failure mode. When the wiki is wrong, you can *read the page
 
 Here is the thing I built. It's Layer 1 of a larger open-source DevSecOps platform called Aegis, but this layer stands on its own — you can run it against your own docs today.
 
-```mermaid
-flowchart LR
-    subgraph Sources
-        A[Confluence]
-        B[GitHub runbooks]
-        C[SigNoz incidents]
-        D[Slack threads]
-    end
-
-    subgraph Engine[Aegis Wiki Engine]
-        I[Ingester]
-        S[Synthesizer<br/>Claude Haiku]
-        CD[Contradiction<br/>Detector<br/>Claude Sonnet]
-        SL[Staleness<br/>Linter]
-    end
-
-    V[(Obsidian Vault<br/>local markdown)]
-    P[Publisher]
-    G[GitHub<br/>aegis-wiki repo]
-
-    A --> I
-    B --> I
-    C --> I
-    D --> I
-    I --> S
-    S --> V
-    V --> CD
-    V --> SL
-    CD --> V
-    SL --> V
-    V --> P
-    P --> G
-```
+[IMAGE: assets/01-wiki-engine-architecture.png — architecture flowchart, four sources feeding Ingester → Synthesizer → Obsidian Vault with Contradiction Detector + Staleness Linter, then Publisher → public GitHub]
 
 The flow, if you prefer words:
 
@@ -117,15 +87,7 @@ The flow, if you prefer words:
 4. **Staleness Linter** flags pages whose sources haven't refreshed in N days, per source-type thresholds (Confluence decays in 90, runbooks in 120, incidents are forever).
 5. **Publisher** pushes the vault to GitHub as a sanitized public repo. That repo is also a portfolio piece — recruiters can read it.
 
-Code lives here, module by module:
-
-- Engine coordinator: [`apps/ai-engine/wiki/engine.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/engine.py)
-- Synthesizer: [`apps/ai-engine/wiki/synthesizer.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/synthesizer.py)
-- Contradiction detector: [`apps/ai-engine/wiki/contradiction.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/contradiction.py)
-- Staleness linter: [`apps/ai-engine/wiki/staleness.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/staleness.py)
-- Ingester: [`apps/ai-engine/wiki/ingester.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/ingester.py)
-
-The class surface is small on purpose. Five nouns: `WikiEngine`, `Ingester`, `Synthesizer`, `ContradictionDetector`, `StalenessLinter`. If you understand those, you understand the system.
+The class surface is small on purpose. Five nouns — `WikiEngine`, `Ingester`, `Synthesizer`, `ContradictionDetector`, `StalenessLinter`. If you understand those, you understand the system. The source is linked at the end of the article for anyone who wants the line-by-line.
 
 ---
 
@@ -167,33 +129,9 @@ The full code is in the repo; I'll show the three pieces that matter most.
 
 ### The synthesizer: two calls, not one
 
-I deliberately split the router and the writer into separate LLM calls. The router (should this create, update, or skip?) needs the *index* of all pages but not their bodies. The writer (produce the merged page) needs the *body* of one target page but not the index. Splitting roughly halves the token bill.
+I deliberately split the router and the writer into separate LLM calls. The router — "should this create, update, or skip?" — needs an *index* of all pages: slug, title, type, and a one-line summary of each. It does not need the full bodies, which would blow the context window on a large vault. The writer — "produce the merged page" — needs the *body* of exactly one target page and the new source, nothing else.
 
-```python
-# from apps/ai-engine/wiki/synthesizer.py
-
-class Synthesizer:
-    """Wraps Claude calls for wiki synthesis.
-
-    Three async methods: decide_action, synthesize_new_page,
-    merge_into_page. Every call returns token usage + cost via
-    last_usage — this is what the FinOps panel reads to show $/month.
-    """
-
-    async def decide_action(
-        self, source: Source, existing_pages: list[WikiPage]
-    ) -> SynthesisDecision:
-        # We pass only (slug, title, type, 1-line summary) for each page.
-        # Full bodies would blow the context window on a large vault.
-        index_entries = [
-            {"slug": p.slug, "title": p.title,
-             "type": p.type, "summary": _first_sentence(p.body)[:200]}
-            for p in existing_pages
-        ]
-        # ... builds prompt, calls Claude, returns a SynthesisDecision
-```
-
-See: [`synthesizer.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/synthesizer.py).
+Two calls, two focused contexts, roughly half the token bill of a naive single call. On a vault of two hundred pages, the router is dirt cheap (it sees a few kilobytes of index) and the writer is bounded (it sees one page plus one source). Neither is ever looking at the whole vault.
 
 ### The page schema: structured, not soup
 
@@ -223,44 +161,7 @@ Four page types — `entity`, `concept`, `incident`, `runbook` — and four fres
 
 ### The engine: lazy, degradable, honest
 
-Layer 1 is built to degrade gracefully. If the contradiction engine isn't available, the engine reports "feature unavailable" instead of crashing. If the staleness linter is missing, same. This mattered during development because multiple agents were landing modules in parallel — but it also matters in production, where you want your knowledge layer to keep serving reads even if one subsystem is down.
-
-```python
-# from apps/ai-engine/wiki/engine.py
-
-class WikiEngine:
-    def __init__(self, config: WikiEngineConfig, anthropic_client: Any):
-        self.config = config
-        self.client = anthropic_client
-        self.ingester = Ingester()
-        self.synthesizer = Synthesizer(
-            anthropic_client=anthropic_client,
-            model=config.synthesis_model,
-        )
-
-        # Optional engines — degrade gracefully if not importable
-        self.contradiction_detector = None
-        self.staleness_linter = None
-        try:
-            from .contradiction import ContradictionDetector
-            self.contradiction_detector = ContradictionDetector(
-                anthropic_client=anthropic_client,
-                model=config.contradiction_model,
-            )
-        except Exception as exc:
-            logger.debug("contradiction engine unavailable: %s", exc)
-
-        try:
-            from .staleness import StalenessLinter
-            self.staleness_linter = StalenessLinter(
-                stale_after_days=config.stale_threshold_days,
-                archive_after_days=config.archive_threshold_days,
-            )
-        except Exception as exc:
-            logger.debug("staleness engine unavailable: %s", exc)
-```
-
-See: [`engine.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/engine.py).
+Layer 1 is built to degrade gracefully. The contradiction detector and the staleness linter are optional; if either fails to import or runs into an error, the engine reports the feature as unavailable and keeps serving reads from the vault. This mattered during development, when several modules were landing in parallel — but it matters more in production, where a single broken subsystem should never take the whole knowledge layer down at 3 AM. You keep the wiki searchable even when half the machinery is offline.
 
 ---
 
@@ -270,44 +171,18 @@ This is the part I'm proudest of, because it's the part that solves the real fai
 
 ### Staleness as a first-class concept
 
-Each source type decays at a different rate:
+Each source type decays at a different rate. The defaults:
 
-```python
-# from apps/ai-engine/wiki/staleness.py
-
-DEFAULT_RULES: dict[str, StalenessRule] = {
-    "confluence": StalenessRule(
-        source_type="confluence",
-        stale_threshold_days=90,
-        archive_threshold_days=180,
-        check_frequency="daily",
-    ),
-    "github_docs": StalenessRule(
-        source_type="github_docs",
-        stale_threshold_days=60,
-        archive_threshold_days=180,
-        check_frequency="daily",
-    ),
-    "runbook": StalenessRule(
-        source_type="runbook",
-        stale_threshold_days=120,
-        archive_threshold_days=365,
-        check_frequency="weekly",
-    ),
-    "incident": StalenessRule(
-        source_type="incident",
-        stale_threshold_days=365,
-        archive_threshold_days=730,
-        check_frequency="weekly",
-    ),
-}
-```
+| Source type | Stale after | Archive after | Check frequency |
+|---|---|---|---|
+| Confluence | 90 days | 180 days | daily |
+| GitHub docs | 60 days | 180 days | daily |
+| Runbook | 120 days | 365 days | weekly |
+| Incident | 365 days | 730 days | weekly |
 
 Confluence rots fastest because product teams abandon docs. Runbooks decay slower because procedures are mostly stable. Incidents are archived but almost never deleted, because post-mortems are the most valuable learning asset a team has.
 
 The linter runs daily as a cron, marks every stale page with `freshness: stale`, and emits a JSON report. That report is how Obsidian knows to render stale pages in amber and archived ones in grey.
-
-See: [`staleness.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/staleness.py).
 
 ### Contradiction detection as an auditor
 
@@ -329,13 +204,11 @@ Four categories (`version_mismatch`, `procedure_conflict`, `coverage_gap`, `fact
 
 The detector persists to `_meta/contradictions.json`. Obsidian renders it as a dashboard. You, the SRE, click through and resolve them. The vault is now an auditable trail of "we used to disagree on X, here's what we decided."
 
-See: [`contradiction.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/contradiction.py).
-
 ---
 
 ## Results
 
-Three months into running this against real acme-corp SRE docs:
+Three months into running this against real production SRE docs:
 
 - **Cost:** ~$1.20/month average. Peak day (full Confluence re-sync) was $4.70. For a vault of ~200 pages and daily ingests.
 - **Accuracy on "which runbook is current":** our internal agent went from correct-about-60%-of-the-time (Pinecone era) to correct-about-95%-of-the-time (Wiki era). The 5% is usually a page the team hasn't resolved a contradiction on yet — which is *visible* and actionable, not silent.
@@ -386,10 +259,11 @@ Public vault example: [aegis-wiki](https://github.com/JIUNG9/aegis-wiki).
 
 ## What's next
 
-This is Layer 1 of five. The next two pieces of this series:
+This is Layer 1 of six. The next pieces of this series:
 
-- **Article #2 — "Your Docs Are Lying to You: Stale Docs Detection with MCP Reconciliation"** — a deeper dive on the contradiction engine, the MCP server that exposes it to Claude Desktop, and how I used it to find 14 disagreements across my own acme-corp runbooks in the first week.
-- **Layer 2: SigNoz Connector** — auto-ingest incidents and alerts into the wiki. The next article covers the event contract, the replay semantics, and why I stopped trusting Prometheus for post-incident context.
+- **Article #2 — "Your Docs Are Lying to You: Stale Docs Detection with MCP Reconciliation"** — a deeper dive on the contradiction engine, the MCP server that exposes it to Claude Desktop, and how I used it to find 14 disagreements across my own runbooks in the first week.
+- **Layer 2: SigNoz Connector** — auto-ingest incidents and alerts into the wiki. Covers the event contract, the replay semantics, and why I stopped trusting Prometheus for post-incident context.
+- **Layer 0: Safety Foundation** — the part I wrote last, after realising I was one HTTPS call away from sending real production log lines to a server in a different jurisdiction. PII proxy, local-LLM router, kill switch, honey tokens. How to run an AI agent over production data without becoming the incident.
 
 If you run this and it helps, tell me. If it doesn't, tell me louder — I will fix it, because this is my on-call, too.
 

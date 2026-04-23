@@ -60,11 +60,9 @@ Points 1–3 are contractual and organizational. The lawyers handle them. **Poin
 
 Aegis ships three deployment tiers:
 
-| Tier | Use case | PIPA applicability |
-|---|---|---|
-| A. Local / Homelab | Learning, demo | N/A (no real PII) |
-| B. Personal Cloud | Consultant, side project | Low (depends on data) |
-| **C. Enterprise Sandbox** | **Regulated org, compliance required** | **Full** |
+- **Tier A — Local / Homelab** — for learning and demos. PIPA applicability: N/A (no real PII).
+- **Tier B — Personal Cloud** — for consultants and side projects. PIPA applicability: low (depends on data).
+- **Tier C — Enterprise Sandbox** — for regulated orgs where compliance is required. PIPA applicability: full.
 
 For Tier C — the "my employer expects me to deploy this without getting them sued" tier — Aegis uses five Layer 0 features together. Each one is a feature of the OSS repo, enabled via config, not a personal discipline you have to remember.
 
@@ -123,8 +121,7 @@ That means if PIPC asks "prove this agent never sent personal data to a US serve
 
 ```traceql
 { resource.service.name = "aegis"
-  && span.gen_ai.system = "anthropic" }
-| count_over_time(1d)
+  && span.gen_ai.system = "anthropic" } | count_over_time(1d)
 ```
 
 If the answer is "zero" for the period in question, you have documentary evidence. If the answer is non-zero, you can drill into exactly which prompts went where, and (because the PII proxy was in the path) verify they were sanitized. This is the evidence a lawyer's associate builds a file around. The alternative — "trust me, it didn't happen" — is not a defense.

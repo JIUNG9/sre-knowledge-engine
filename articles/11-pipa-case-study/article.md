@@ -60,9 +60,7 @@ Points 1–3 are contractual and organizational. The lawyers handle them. **Poin
 
 Aegis ships three deployment tiers:
 
-- **Tier A — Local / Homelab** — for learning and demos. PIPA applicability: N/A (no real PII).
-- **Tier B — Personal Cloud** — for consultants and side projects. PIPA applicability: low (depends on data).
-- **Tier C — Enterprise Sandbox** — for regulated orgs where compliance is required. PIPA applicability: full.
+[IMAGE: assets/02-deployment-tiers.png — three-row deployment tier table (A Local/Homelab, B Personal Cloud, C Enterprise Sandbox) with use case and PIPA applicability per tier — Tier C row bolded to signal "this is where compliance actually matters"]
 
 For Tier C — the "my employer expects me to deploy this without getting them sued" tier — Aegis uses five Layer 0 features together. Each one is a feature of the OSS repo, enabled via config, not a personal discipline you have to remember.
 

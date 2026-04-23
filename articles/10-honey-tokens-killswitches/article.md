@@ -201,9 +201,7 @@ Tests use `fakeredis` so CI does not need a real Redis. The `aegis panic` CLI is
 
 Here is the mental model for why you want all three:
 
-- **PII proxy** (Article #9) — catches pattern-matchable PII, secrets, and hostnames. Misses paraphrased summaries and novel formats. Response time is 0ms (it's prevention, not detection).
-- **Honey tokens** (this article) — catch anything that leaks verbatim, including unseen patterns. Miss paraphrased or re-keyed content. Scan costs ~1ms per outbound payload (detection).
-- **Kill switch** (this article) — catches active misbehavior and runaway tool calls. Misses past leaks (you cannot un-send). ~5ms check overhead, ~2s to fully halt the agent.
+[IMAGE: assets/02-defense-layers.png — three-row defense-in-depth table showing the PII proxy, honey tokens, and kill switch side-by-side: what each catches, what each misses, and response time per layer (0ms prevention, ~1ms detection, ~5ms check + ~2s halt)]
 
 You want the proxy because it prevents the common case cheaply. You want honey tokens because the proxy is not perfect and you need *some* way to know when it misses. You want the kill switch because sometimes you see something weird in your telemetry and you need to stop the world *now* while you figure out what it was.
 

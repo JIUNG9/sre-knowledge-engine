@@ -113,11 +113,7 @@ Aegis is an open-source AI-Native DevSecOps Command Center. It is five layers, e
 
 ### The five layers
 
-- **Layer 1 — LLM Wiki Engine** (built, shipped) — Karpathy-pattern knowledge base. Reads Confluence, GitHub, SigNoz, Slack. Synthesizes one canonical markdown page per entity. Renders to `aegis-wiki` repo. Never goes stale because it never stops updating.
-- **Layer 2 — SigNoz Connector** (planned) — Pulls ClickHouse-backed traces, metrics, and logs from SigNoz. Normalizes incident timelines. Feeds Layer 1 with observability data.
-- **Layer 3 — Claude Control Tower** (planned) — MCP-based agent control plane. Tiered risk model (read-safe / write-requires-approval / blocked). Slack-in-the-loop approval flow. Full audit trail.
-- **Layer 4 — Production Guardrails** (planned) — Pre-flight checks on Terraform plans, Kubernetes manifests, AWS IAM policies. Triangulates between Claude, a local Ollama model, and Codex as an adversarial reviewer. Blocks destructive changes without explicit approval.
-- **Layer 5 — MCP Document Reconciliation** (planned) — Detects contradictions between Confluence, GitHub runbooks, and Slack incident post-mortems. Opens PRs to fix. Keeps the knowledge graph from drifting.
+[IMAGE: assets/02-five-layers.png — five-row layer-by-layer table of Aegis (Layer 1 LLM Wiki Engine built/shipped, Layers 2-5 planned: SigNoz Connector, Claude Control Tower, Production Guardrails, MCP Document Reconciliation) with a one-line "what it does" per row]
 
 Layer 1 is live today. I'll ship Layers 2 through 5 over the rest of 2026.
 
@@ -202,11 +198,7 @@ Here is an example. When I explain "why Karpathy's LLM Wiki pattern beats vanill
 
 One thing that matters for the portfolio framing: Aegis is not a $10,000-a-month enterprise project dressed up as open source. It runs on a single cheap VPS, a small Postgres instance, and pay-per-use Claude API calls. Back of envelope:
 
-- **VPS** (2 vCPU, 4 GB RAM) — $6/month
-- **Managed Postgres** (tiny) — $4/month
-- **Object storage** for vault backups — $1/month
-- **Claude API** (synthesis runs, ~3 per day, Haiku + Sonnet mix) — $4/month
-- **Total** — **~$15/month**
+[IMAGE: assets/03-monthly-cost.png — five-row monthly cost table (VPS $6, managed Postgres $4, object storage $1, Claude API $4) totalling ~$15/month to run Aegis]
 
 That's the point. Enterprise-grade SRE tooling does not have to be enterprise-priced. The patterns that make production observability, knowledge management, and AI-agent governance work at scale also work on a hobbyist budget, because the hard part is design, not cost.
 
@@ -280,14 +272,7 @@ This is a deliberate bet, not a shortcut. If a specific job posting in the final
 
 The rest of 2026 and the first months of 2027 look like this:
 
-- **Q2 2026** — Finish Article 8 (this one), update LinkedIn, publish full series on Medium
-- **Q2 2026** — Ship Layer 2 (SigNoz Connector) + Article 9
-- **Q3 2026** — Ship Layer 3 (Claude Control Tower) + Articles 10-11
-- **Q3 2026** — Open-source three reusable Terraform modules (VPC hub-spoke, EKS baseline, Aurora Postgres with IAM auth)
-- **Q4 2026** — Ship Layer 4 (Production Guardrails) + Articles 12-13
-- **Q4 2026** — IELTS General Training (when ready — targeting 7.0+ all bands)
-- **Q1 2027** — Ship Layer 5 (MCP Reconciliation) + Articles 14-15
-- **Feb 2027** — Move to Canada
+[IMAGE: assets/04-roadmap.png — eight-row roadmap table from Q2 2026 through Feb 2027: publish Medium series, ship Layers 2-5 with paired articles, open-source three Terraform modules, IELTS, and final Canada move in Feb 2027]
 
 Certifications are on the "only if a job posting requires one" list. I have looked at dozens of Canadian SRE and Platform Engineering postings, and the ones I am targeting consistently ask for demonstrable hands-on experience with the stack I already run. If a specific posting demands AWS Solutions Architect Associate, Certified Kubernetes Administrator, or Terraform Associate, I will take the exam. Otherwise that time is better spent shipping Layer 4 or writing Article 12.
 

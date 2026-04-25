@@ -192,7 +192,7 @@ graph LR
 
   subgraph Production["Production / work lane"]
     Sources2[Real runbooks<br/>Confluence<br/>Internal SigNoz]
-    Vault2[/var/lib/aegis/wiki<br/>PVC]
+    Vault2["/var/lib/aegis/wiki<br/>PVC"]
     Remote2[git.internal.example.com<br/>PRIVATE VPC]
   end
 
@@ -220,7 +220,7 @@ sequenceDiagram
   participant Sig as SigNoz Connector<br/>connectors/signoz_client.py
   participant Claude as Anthropic API
   participant GR as Guardrails<br/>guardrails/engine.py
-  participant Actor as SRE on-call
+  participant OnCall as SRE on-call
 
   Alert->>CT: incident payload
   par Wiki context
@@ -237,12 +237,12 @@ sequenceDiagram
   GR->>GR: risk_assessor.classify()
   GR->>GR: pre_validator.dry_run()
   alt risk == low AND stage >= low-auto
-    GR-->>Actor: Auto-execute + audit log
+    GR-->>OnCall: Auto-execute + audit log
   else risk == medium
-    GR-->>Actor: Slack approval request
-    Actor-->>GR: approve / deny
+    GR-->>OnCall: Slack approval request
+    OnCall-->>GR: approve / deny
   else risk == high OR observe-only
-    GR-->>Actor: Recommendation only
+    GR-->>OnCall: Recommendation only
   end
 ```
 

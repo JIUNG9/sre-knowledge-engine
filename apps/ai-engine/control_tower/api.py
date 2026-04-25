@@ -1,15 +1,16 @@
 """FastAPI router for the Aegis Control Tower (Layer 3).
 
-Exposes three endpoints:
+Exposes three endpoints under ``/api/v2`` (the legacy ``/api/v1/investigate``
+in ``routers/investigate.py`` is the v3 mock-data implementation; v2 is
+the real Control Tower so both can coexist during migration):
 
-* ``POST /api/v1/investigate`` — run a new investigation.
-* ``GET /api/v1/investigations/{id}`` — retrieve a cached investigation.
-* ``GET /api/v1/modes`` — describe available modes.
+* ``POST /api/v2/investigate`` — run a new investigation.
+* ``GET /api/v2/investigations/{id}`` — retrieve a cached investigation.
+* ``GET /api/v2/modes`` — describe available modes.
 
-The router is created as a module-level ``control_tower_router``. The
-FastAPI app's ``main.py`` is expected to mount it via
-``app.include_router(control_tower_router)`` — that wiring is left for
-a follow-up so this module can land independently.
+The router is mounted by ``main.py``. Its ``get_control_tower``
+dependency returns 503 until ``main.py``'s lifespan hook attaches a
+real ``ControlTower`` instance (gated on ``AEGIS_CONTROL_TOWER`` env).
 
 The router reads a :class:`ControlTower` instance from a dependency
 function. By default the dependency raises 503 — callers in the app
@@ -56,7 +57,7 @@ class ModeInfo(BaseModel):
     tools: list[str]
 
 
-control_tower_router = APIRouter(prefix="/api/v1", tags=["control-tower"])
+control_tower_router = APIRouter(prefix="/api/v2", tags=["control-tower"])
 
 
 # --------------------------------------------------------------------------- #

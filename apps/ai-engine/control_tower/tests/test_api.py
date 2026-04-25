@@ -71,7 +71,7 @@ def _client(tower: _FakeTower) -> TestClient:
 
 def test_modes_endpoint_returns_three():
     client = _client(_FakeTower())
-    resp = client.get("/api/v1/modes")
+    resp = client.get("/api/v2/modes")
     assert resp.status_code == 200
     body = resp.json()
     assert [m["name"] for m in body] == ["eco", "standard", "deep"]
@@ -82,7 +82,7 @@ def test_investigate_endpoint_happy_path():
     tower = _FakeTower()
     client = _client(tower)
     resp = client.post(
-        "/api/v1/investigate",
+        "/api/v2/investigate",
         json={
             "alert": {
                 "service": "acme-api",
@@ -105,7 +105,7 @@ def test_investigate_endpoint_default_mode():
     tower = _FakeTower()
     client = _client(tower)
     resp = client.post(
-        "/api/v1/investigate",
+        "/api/v2/investigate",
         json={"alert": {"service": "billing", "severity": "warning"}},
     )
     assert resp.status_code == 200
@@ -116,11 +116,11 @@ def test_lookup_endpoint_existing():
     tower = _FakeTower()
     client = _client(tower)
     created = client.post(
-        "/api/v1/investigate",
+        "/api/v2/investigate",
         json={"alert": {"service": "a"}, "mode": "eco"},
     ).json()
     inv_id = created["id"]
-    resp = client.get(f"/api/v1/investigations/{inv_id}")
+    resp = client.get(f"/api/v2/investigations/{inv_id}")
     assert resp.status_code == 200
     assert resp.json()["id"] == inv_id
 
@@ -128,7 +128,7 @@ def test_lookup_endpoint_existing():
 def test_lookup_endpoint_missing():
     tower = _FakeTower()
     client = _client(tower)
-    resp = client.get("/api/v1/investigations/nope")
+    resp = client.get("/api/v2/investigations/nope")
     assert resp.status_code == 404
 
 
@@ -136,7 +136,7 @@ def test_get_control_tower_default_raises_503():
     app = FastAPI()
     app.include_router(control_tower_router)
     client = TestClient(app)
-    resp = client.get("/api/v1/investigations/anything")
+    resp = client.get("/api/v2/investigations/anything")
     assert resp.status_code == 503
 
 
@@ -144,7 +144,7 @@ def test_investigate_endpoint_accepts_dict_alert_shape():
     tower = _FakeTower()
     client = _client(tower)
     resp = client.post(
-        "/api/v1/investigate",
+        "/api/v2/investigate",
         json={
             "alert": {
                 "question": "why did the deploy fail?",
@@ -158,7 +158,7 @@ def test_investigate_endpoint_accepts_dict_alert_shape():
 
 def test_modes_endpoint_is_json_serializable():
     client = _client(_FakeTower())
-    resp = client.get("/api/v1/modes")
+    resp = client.get("/api/v2/modes")
     # Round-trip through JSON to prove schema stability.
     body = json.loads(resp.content)
     assert isinstance(body, list)

@@ -36,6 +36,7 @@ import {
   Wallet,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { DownloadButton } from "@/components/finops/download-button"
 
 // --- Types ---
 
@@ -570,7 +571,10 @@ export function BudgetManagement() {
             )}
           </CardTitle>
           <CardAction>
-            <AddBudgetDialog />
+            <div className="flex items-center gap-2">
+              <DownloadButton view="budgets" />
+              <AddBudgetDialog />
+            </div>
           </CardAction>
         </CardHeader>
         <CardContent className="space-y-4 p-6">

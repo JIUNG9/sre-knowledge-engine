@@ -151,6 +151,11 @@ func Setup(app *fiber.App, logger *zap.Logger) {
 	finops.Get("/anomalies", handlers.GetFinOpsAnomalies)
 	finops.Get("/budgets", handlers.GetFinOpsBudgets)
 	finops.Get("/kubernetes", handlers.GetFinOpsKubernetes)
+	// CSV / XLSX export endpoints (P2.3).
+	finops.Get("/export/costs", handlers.ExportFinOpsCosts)
+	finops.Get("/export/budgets", handlers.ExportFinOpsBudgets)
+	finops.Get("/export/anomalies", handlers.ExportFinOpsAnomalies)
+	finops.Get("/export/k8s", handlers.ExportFinOpsKubernetes)
 
 	// Targets (team SLO/MTTR/SLA/ErrorBudget/CostBudget targets).
 	targets := authenticated.Group("/targets")

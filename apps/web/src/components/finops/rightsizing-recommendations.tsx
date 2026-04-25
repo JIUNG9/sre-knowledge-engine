@@ -30,6 +30,7 @@ import {
   Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { DownloadButton } from "@/components/finops/download-button"
 
 // --- Types ---
 
@@ -634,6 +635,11 @@ export function RightsizingRecommendations() {
               >
                 {RECOMMENDATIONS.length} recommendations
               </Badge>
+              <DownloadButton
+                view="k8s"
+                params={{ aggregate: "namespace", window: "7d" }}
+                label="Export"
+              />
               <Button
                 variant="outline"
                 size="sm"

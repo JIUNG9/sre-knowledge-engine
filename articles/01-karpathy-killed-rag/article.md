@@ -29,6 +29,8 @@ The second week, it told an on-call engineer to **restart the auth-service pods*
 
 That's the moment I realized: **RAG isn't a knowledge system. It's a similarity search with a language model glued on top.** And similarity is not the same as truth.
 
+[IMAGE: assets/05-doc-rot.png — six scattered doc sources (Confluence 2023 runbooks, GitHub infra-as-code, Google Drive ops-docs-v2-FINAL-actual, expiring Slack threads, a service-catalog spreadsheet, Google Doc post-mortems) all feeding into one confused AI agent that emits a wrong answer at 3 AM]
+
 ---
 
 ## Why traditional RAG breaks for SRE
@@ -70,6 +72,8 @@ Think about what changes. The synthesis step — the expensive, slow, read-every
 It also changes the failure mode. When the wiki is wrong, you can *read the page* and see that it's wrong. It's a markdown file. A human can edit it. Git tracks every change. Compare that to debugging "why did the vector DB return this chunk" — which I have done, and it is miserable.
 
 > **RAG retrieves slices of truth. LLM Wiki retrieves synthesized truth. The difference is that second one can be version-controlled and peer-reviewed.**
+
+[IMAGE: assets/06-rag-vs-wiki-flow.png — side-by-side flow comparison. Left, Traditional RAG: query → vector DB → three retrieved chunks (2023, 2024, 2026 docs) → LLM picks highest similarity → wrong answer from 2023. Right, LLM Wiki: query → one synthesized canonical wiki page → one peer-reviewed answer.]
 
 ---
 
@@ -195,19 +199,13 @@ The detector persists to `_meta/contradictions.json`. Obsidian renders it as a d
 
 Three months into running this against real production SRE docs:
 
-- **Cost:** ~$1.20/month average. Peak day (full Confluence re-sync) was $4.70. For a vault of ~200 pages and daily ingests.
-- **Accuracy on "which runbook is current":** our internal agent went from correct-about-60%-of-the-time (Pinecone era) to correct-about-95%-of-the-time (Wiki era). The 5% is usually a page the team hasn't resolved a contradiction on yet — which is *visible* and actionable, not silent.
-- **Onboarding:** new engineer was productive in week one. The vault answers "how does service X work" in one page, not eight.
-- **Portfolio value:** the sanitized public vault at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki) became a live demonstration of SRE practice across AWS hub-spoke, EKS 1.33, Terraform, ArgoCD, SigNoz, and Aurora PostgreSQL. Recruiters read it. One of them told me it was the most concrete portfolio they'd seen that year.
+[IMAGE: assets/07-results-callout.png — four-card stat panel. Monthly cost: $1.20 average, $4.70 peak day (vs Pinecone $80–120). Accuracy on "which runbook is current": 60% to 95% (Pinecone era to Wiki era). Vault size: 200 pages across entities, concepts, incidents, runbooks. New engineer onboarding: productive in week one.]
 
-The vault looks like this in Obsidian:
+The remaining 5% is usually a page the team hasn't resolved a contradiction on yet — which is *visible* and actionable, not silent. The sanitized public vault at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki) became a live demonstration of SRE practice across AWS hub-spoke, EKS 1.33, Terraform, ArgoCD, SigNoz, and Aurora PostgreSQL. Recruiters read it.
 
-- `entities/` — services, accounts, clusters. The nouns of the infrastructure.
-- `concepts/` — SRE practices: error budgets, hub-spoke AWS, blue-green deploys.
-- `incidents/` — every post-mortem, linked to affected entities.
-- `runbooks/` — operational procedures with real kubectl and aws CLI commands.
-- `_meta/` — engine state, sync timestamps, contradiction reports.
-- `overview.md` — auto-regenerated service index, recent incidents, known patterns.
+The vault is a flat folder of markdown files in Obsidian:
+
+[IMAGE: assets/08-vault-tree.png — directory tree of ~/Documents/obsidian-sre/ showing entities/ (42 services), concepts/ (17 pages), incidents/ (88 post-mortems), runbooks/ (53 procedures), _meta/ (8 files including contradictions.json + freshness.json), and overview.md auto-regenerated service index]
 
 Graph view shows every page linked to every page that references it via `[[WikiLinks]]`. That graph *is* the service topology. It's also the closest thing to a living architecture diagram we've ever had.
 

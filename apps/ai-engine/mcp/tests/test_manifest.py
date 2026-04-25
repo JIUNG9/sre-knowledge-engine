@@ -110,9 +110,11 @@ def test_loaded_tool_count_matches_expected():
     write_write = shared_manifest.load_scope("write", write_cfg)
 
     # Read tools: log_search, metric_query, runbook_lookup +
-    # Layer 5 docs_*: find_docs, reconcile_docs, detect_stale_docs, check_doc_links.
-    assert len(default_read) == 7
-    assert len(write_read) == 7
+    # Layer 5 docs_*: find_docs, reconcile_docs, detect_stale_docs, check_doc_links +
+    # Layer P2.2 finops: query_aws_costs, query_opencost_allocation,
+    # query_kubecost_allocation, top_spenders, find_cost_anomalies.
+    assert len(default_read) == 12
+    assert len(write_read) == 12
     # Two write tools: slack_post, jira_create_ticket.
     assert len(write_write) == 2
 
@@ -131,6 +133,11 @@ def test_load_all_allowed_respects_config():
         "reconcile_docs",
         "detect_stale_docs",
         "check_doc_links",
+        "query_aws_costs",
+        "query_opencost_allocation",
+        "query_kubecost_allocation",
+        "top_spenders",
+        "find_cost_anomalies",
     }
     assert {
         t.name for t in shared_manifest.load_all_allowed(MCPScopeConfig())

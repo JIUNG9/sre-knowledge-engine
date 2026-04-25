@@ -109,13 +109,13 @@ That is Aegis.
 
 ## What Aegis actually is
 
-Aegis is an open-source AI-Native DevSecOps Command Center. It is five layers, each of which solves a real operational problem I have lived through on-call.
+Aegis is an open-source AI-Native DevSecOps Command Center. It is six layers, each of which solves a real operational problem I have lived through on-call.
 
-### The five layers
+### The six layers
 
-[IMAGE: assets/02-five-layers.png — five-row layer-by-layer table of Aegis (Layer 1 LLM Wiki Engine built/shipped, Layers 2-5 planned: SigNoz Connector, Claude Control Tower, Production Guardrails, MCP Document Reconciliation) with a one-line "what it does" per row]
+[IMAGE: assets/02-five-layers.png — six-row layer table for Aegis: Layer 0 Safety Foundation, Layer 1 LLM Wiki Engine, Layer 2 SigNoz Connector, Layer 3 Claude Control Tower, Layer 4 Production Guardrails, Layer 5 MCP Document Reconciliation. All six built and shipped.]
 
-Layer 1 is live today. I'll ship Layers 2 through 5 over the rest of 2026.
+All six layers are built and pushed today. The next horizon is Phase 2 — turning Aegis from an *advisory* AI SRE into a *self-healing* one. That's covered in Article #12.
 
 ### Architecture at a glance
 
@@ -260,7 +260,7 @@ I looked at it carefully and I decided against it, for three reasons that I thin
 
 **Second**, a certification is a lagging indicator. It proves you studied for an exam. A public repo proves you built something. When recruiters screen for senior roles, they are looking for signal of judgment — what you chose to build, how you reasoned about trade-offs, how you wrote about the result. An AWS SAA sticker on a LinkedIn profile is a nice-to-have but it is not what wins a shortlist spot.
 
-**Third**, my time budget is finite. I have evenings and weekends for the next nine months. Every hour I spend grinding flashcards for a CKA exam is an hour I am not spending on Layer 3 of Aegis, or on the next Medium article, or on the Terraform modules I'm planning to open-source. The opportunity cost is real.
+**Third**, my time budget is finite. I have evenings and weekends for the next nine months. Every hour I spend grinding flashcards for a CKA exam is an hour I am not spending on Phase 2 of Aegis (the self-healing executor), or on the next Medium article, or on the Terraform modules I'm planning to open-source. The opportunity cost is real.
 
 This is a deliberate bet, not a shortcut. If a specific job posting in the final stretch tells me "offer conditional on CKA," I will book the exam that week and pass it. Until then, I would rather ship the thing that proves the skill than study for the thing that certifies it.
 
@@ -272,7 +272,7 @@ This is a deliberate bet, not a shortcut. If a specific job posting in the final
 
 The rest of 2026 and the first months of 2027 look like this:
 
-[IMAGE: assets/04-roadmap.png — eight-row roadmap table from Q2 2026 through Feb 2027: publish Medium series, ship Layers 2-5 with paired articles, open-source three Terraform modules, IELTS, and final Canada move in Feb 2027]
+[IMAGE: assets/04-roadmap.png — roadmap from April 2026 through February 2027. Done: Layers 0-5 shipped, Articles #1-#11 drafted, OSS hygiene CI live. Planned: P2.1-P2.5 Phase 2 features (Control Tower wiring, MCP FinOps, Excel export, periodic scheduler, Layer 4 executor), Article #12 on the executor, three Terraform modules, a large tech company Tier C deployment, IELTS, Canada move Feb 2027.]
 
 Certifications are on the "only if a job posting requires one" list. I have looked at dozens of Canadian SRE and Platform Engineering postings, and the ones I am targeting consistently ask for demonstrable hands-on experience with the stack I already run. If a specific posting demands AWS Solutions Architect Associate, Certified Kubernetes Administrator, or Terraform Associate, I will take the exam. Otherwise that time is better spent shipping Layer 4 or writing Article 12.
 

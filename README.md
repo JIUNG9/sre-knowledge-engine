@@ -6,7 +6,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/JIUNG9/aegis/ci.yml?label=ci&logo=github)](https://github.com/JIUNG9/aegis/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v4.0%20Layers%200%20%2B%201%20built-brightgreen)](docs/ARCHITECTURE.md)
+[![Status](https://img.shields.io/badge/status-v4.0%20Layers%200--5%20built%20%C2%B7%20Phase%202%20starting-brightgreen)](docs/ARCHITECTURE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000?logo=next.js)](https://nextjs.org/)
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
@@ -38,10 +38,10 @@ graph TB
   subgraph AEGIS["Aegis v4.0 — 6 Layers"]
     L0[Layer 0: Safety Foundation<br/>PII proxy / IAM / kill switch / OTel / honey tokens<br/><b>BUILT</b>]
     L1[Layer 1: LLM Wiki<br/>Karpathy Pattern<br/><b>BUILT</b>]
-    L2[Layer 2: SigNoz Connector<br/>HTTP API + pattern analyzer<br/>in progress]
-    L3[Layer 3: Claude Control Tower<br/>Eco / Standard / Deep<br/>planned]
-    L4[Layer 4: Production Guardrails<br/>4-Stage Automation Ladder<br/>in progress]
-    L5[Layer 5: MCP Doc Reconciliation<br/>Confluence + GitHub + Incidents<br/>in progress]
+    L2[Layer 2: SigNoz Connector<br/>HTTP API + pattern analyzer<br/><b>BUILT</b>]
+    L3[Layer 3: Claude Control Tower<br/>Eco / Standard / Deep<br/><b>BUILT</b>]
+    L4[Layer 4: Production Guardrails<br/>4-Stage Automation Ladder<br/><b>BUILT</b>]
+    L5[Layer 5: MCP Doc Reconciliation<br/>Confluence + GitHub + Incidents<br/><b>BUILT</b>]
   end
   User[SRE on-call] --> L3
   Alert[SigNoz alert] --> L3
@@ -76,15 +76,27 @@ Full design document, component boundaries, trust model, and cost envelope: [doc
 | 1 | Confluence sync | Built | `apps/ai-engine/wiki/confluence_sync.py` |
 | 1 | SigNoz wiki sync | Built | `apps/ai-engine/wiki/signoz_sync.py` |
 | 1 | Git publisher | Built | `apps/ai-engine/wiki/publisher.py` |
-| 2 | SigNoz HTTP connector | In progress | `apps/ai-engine/connectors/` |
-| 2 | Time-based pattern analyzer | In progress | `apps/ai-engine/connectors/pattern_analyzer/` |
-| 3 | Claude Control Tower | Planned | `apps/ai-engine/agents/orchestrator.py` |
-| 3 | Three-mode routing (Eco / Standard / Deep) | Built (UI), planned (backend) | `apps/web/src/app/(dashboard)/settings/` |
-| 4 | 4-stage automation ladder + policy engine | In progress | `apps/ai-engine/guardrails/` |
-| 4 | Risk classifier | In progress | `apps/ai-engine/guardrails/risk.py` |
-| 4 | Slack approval gate | In progress | `apps/ai-engine/guardrails/approval.py` |
-| 4 | Audit logger (SOC2 trail) | In progress | `apps/ai-engine/guardrails/audit.py` |
-| 5 | MCP docs reconciliation tools (4 read tools) | In progress | `apps/ai-engine/mcp/tools/read/docs_*.py` |
+| 2 | SigNoz HTTP connector | Built | `apps/ai-engine/connectors/` |
+| 2 | Time-based pattern analyzer | Built | `apps/ai-engine/connectors/pattern_analyzer/` |
+| 3 | Claude Control Tower | Built | `apps/ai-engine/control_tower/` |
+| 3 | Three-mode routing (Eco / Standard / Deep) | Built | `apps/ai-engine/control_tower/modes.py` |
+| 4 | 4-stage automation ladder + policy engine | Built | `apps/ai-engine/guardrails/` |
+| 4 | Risk classifier | Built | `apps/ai-engine/guardrails/risk.py` |
+| 4 | Slack approval gate | Built | `apps/ai-engine/guardrails/approval.py` |
+| 4 | Audit logger (SOC2 trail) | Built | `apps/ai-engine/guardrails/audit.py` |
+| 5 | MCP docs reconciliation tools (4 read tools) | Built | `apps/ai-engine/mcp/tools/read/docs_*.py` |
+
+### Phase 2 — Roadmap (next 4–6 weeks)
+
+The 6-layer architecture is shipped and tested. Phase 2 turns Aegis from an *advisory* AI SRE into a *self-healing* one, plus closes the FinOps and operational gaps users have asked for.
+
+| # | Component | Status | Effort | What it unlocks |
+|---|---|---|---|---|
+| P2.1 | Wire Control Tower into `main.py` (`/api/v1/investigate`) | Planned | ~2 hours | Live investigation endpoint; unblocks every Phase 2 feature below |
+| P2.2 | MCP FinOps tool — Cost Explorer / OpenCost / Kubecost queries via MCP | Planned | ~1 day | Claude can answer cost questions; cost anomalies become first-class context |
+| P2.3 | FinOps Excel/CSV export — `openpyxl` serializer + Download buttons | Planned | ~1 day | Costs leave the dashboard as spreadsheets your CFO can open |
+| P2.4 | Periodic sync scheduler — APScheduler + tunable interval per connector | Planned | ~3 days | 24/7 background pulls; replaces "POST to sync" with autonomous polling |
+| P2.5 | Layer 4 executor — turns `ProposedAction` into actually-run kubectl/terraform/aws commands under the 4-stage ladder | Planned | ~1 week | The thing that makes Aegis *self-healing* instead of advisory. Article #12 documents this. |
 
 Frontend modules already shipped: Log Explorer, SLO Dashboard, FinOps, Incidents, Security, Deployments, On-Call, Services, IAM, Cloud Accounts, Settings (general, integrations, AI & tokens, team, safety). See `apps/web/src/app/(dashboard)/`.
 

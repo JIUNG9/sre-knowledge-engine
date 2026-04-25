@@ -20,7 +20,8 @@ Two to three articles per month. Start with the two articles that are strongest 
 | 8 | #9 PII Proxy for Claude | Opens the Layer 0 safety arc. Technical + unique (nobody's published this pattern). |
 | 9 | #10 Honey Tokens + Kill Switches | Middle of the safety arc. Builds on #9. |
 | 10 | #11 PIPA Case Study (Tier C Deployment) | Closes the safety arc. Career-defining piece for Canadian recruiters. Pin for 2 weeks. |
-| 11 | #8 Open-Sourcing Aegis | Capstone. Career positioning. Links back to all prior articles. |
+| 11 | #8 Open-Sourcing Aegis | Capstone of the architecture story. |
+| 12 | #12 From Investigator to Operator — Wiring the Self-Healing Executor | Phase 2 capstone. The leap from "agent describes the fix" to "agent runs the fix under the 4-stage ladder." Documents Layer 4 executor (P2.5). |
 
 ---
 

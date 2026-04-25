@@ -1,10 +1,15 @@
-| Timeframe | Item |
-|-----------|------|
-| Q2 2026 | Finish Article 8 (this one), update LinkedIn, publish full series on Medium |
-| Q2 2026 | Ship Layer 2 (SigNoz Connector) + Article 9 |
-| Q3 2026 | Ship Layer 3 (Claude Control Tower) + Articles 10-11 |
-| Q3 2026 | Open-source three reusable Terraform modules (VPC hub-spoke, EKS baseline, Aurora Postgres with IAM auth) |
-| Q4 2026 | Ship Layer 4 (Production Guardrails) + Articles 12-13 |
-| Q4 2026 | IELTS General Training (when ready — targeting 7.0+ all bands) |
-| Q1 2027 | Ship Layer 5 (MCP Reconciliation) + Articles 14-15 |
-| Feb 2027 | Move to Canada |
+| Timeframe | Item | Status |
+|-----------|------|--------|
+| Apr 2026 | Ship Layers 0-5 (full 6-layer architecture) | Done |
+| Apr 2026 | Articles #1-#11 drafted, OSS hygiene CI shipped | Done |
+| May 2026 | P2.1 Wire Control Tower into `main.py` (~2 hours) | Planned |
+| May 2026 | P2.2 MCP FinOps tool (Cost Explorer / OpenCost / Kubecost) | Planned |
+| May 2026 | P2.3 FinOps Excel/CSV export | Planned |
+| May 2026 | Begin publishing Medium series — Article #1 first | In progress |
+| Jun 2026 | P2.4 Periodic sync scheduler (APScheduler) | Planned |
+| Jun-Jul 2026 | P2.5 Layer 4 executor — Aegis becomes self-healing | Planned |
+| Jul 2026 | Article #12 — *From Investigator to Operator* (the executor) | Planned |
+| Aug 2026 | Open-source three reusable Terraform modules (VPC hub-spoke, EKS baseline, Aurora Postgres with IAM auth) | Planned |
+| Aug-Sep 2026 | Aegis Tier C deployment at a large tech company (PIPA case study, Article #11 publish) | Planned |
+| Q4 2026 | IELTS General Training (when ready, targeting 7.0+ all bands) | Planned |
+| Feb 2027 | Move to Canada | Target |

@@ -302,6 +302,10 @@ The next piece in this series is about the specific patterns that SigNoz reveals
 
 Read it here: [We Found That 80% of Our Incidents Happen on Monday 9 AM](https://github.com/JIUNG9/aegis/tree/main/articles/06-monday-9am-patterns).
 
+The Layer 5 MCP docs reconciliation tool referenced above (`mcp/tools/docs_reconciliation.py`) is now shipped — the four read tools are live in the repo today. The Control Tower itself still needs one final wire-up into `main.py` before it runs continuously on incoming alerts; that's the first item on the Phase 2 punchlist.
+
+Once you've read all six layer pieces, the next horizon is making the agent self-heal — turning proposed actions into actually-run commands. That's the topic of the upcoming **Article #12: "From Investigator to Operator."**
+
 ---
 
 ## Cost summary (for the skeptics)

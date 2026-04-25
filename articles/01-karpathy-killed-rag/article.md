@@ -244,11 +244,13 @@ Public vault example: [aegis-wiki](https://github.com/JIUNG9/aegis-wiki).
 
 ## What's next
 
-This is Layer 1 of six. The next pieces of this series:
+This is Layer 1 of six. All six layers are now shipped in the Aegis repo, and each has its own article in this series:
 
 - **Article #2 — "Your Docs Are Lying to You: Stale Docs Detection with MCP Reconciliation"** — a deeper dive on the contradiction engine, the MCP server that exposes it to Claude Desktop, and how I used it to find 14 disagreements across my own runbooks in the first week.
-- **Layer 2: SigNoz Connector** — auto-ingest incidents and alerts into the wiki. Covers the event contract, the replay semantics, and why I stopped trusting Prometheus for post-incident context.
-- **Layer 0: Safety Foundation** — the part I wrote last, after realising I was one HTTPS call away from sending real production log lines to a server in a different jurisdiction. PII proxy, local-LLM router, kill switch, honey tokens. How to run an AI agent over production data without becoming the incident.
+- **Layer 2: SigNoz Connector** — auto-ingests incidents and alerts into the wiki. Covers the event contract, the replay semantics, and why I stopped trusting Prometheus for post-incident context. Now shipped — see the Monday-9AM patterns article.
+- **Layer 0: Safety Foundation** — the part I wrote last, after realising I was one HTTPS call away from sending real production log lines to a server in a different jurisdiction. PII proxy, local-LLM router, kill switch, honey tokens. How to run an AI agent over production data without becoming the incident. Now shipped.
+
+Once you've read all six layer pieces, the next horizon is making the agent self-heal — turning proposed actions into actually-run commands. That's the topic of the upcoming **Article #12: "From Investigator to Operator."**
 
 If you run this and it helps, tell me. If it doesn't, tell me louder — I will fix it, because this is my on-call, too.
 

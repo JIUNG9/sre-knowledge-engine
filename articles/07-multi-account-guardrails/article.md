@@ -524,13 +524,18 @@ aegis guardrails classify --action kubectl_scale --account 999999999999 ...
 
 ## Part 14: What's next — the career capstone
 
-Six articles in, we've covered:
+Seven articles in, we've covered all six architectural layers:
+- Layer 0: Safety Foundation (PII proxy, IAM templates, kill switch, local LLM router, OTel tracing, honey tokens, MCP scoping, demo mode)
 - Layer 1: LLM Wiki (replacing RAG)
 - Layer 2: SigNoz Connector + pattern detection
 - Layer 3: Claude Control Tower
 - Layer 4: Production Guardrails (this article)
 - Layer 5: MCP Document Reconciliation
 
+Every layer is now shipped and pushed to `origin/main`. The Layer 4 guardrails package — `engine.py`, `risk_assessor.py`, `observation_mode.py`, `approval_gate.py`, `pre_validator.py`, `post_validator.py`, `rollback_manager.py`, `audit_logger.py`, plus the OPA policies — is live in the repo today.
+
+
+Once you've read all six layer pieces, the next horizon is making the agent self-heal — turning proposed actions into actually-run commands. That's the topic of the upcoming **Article #12: "From Investigator to Operator"** — the executor that bridges guardrails-approved proposals and real kubectl/aws execution. Guardrails decide *whether* the AI can act; the executor is what makes it actually act.
 
 If you're a hiring manager reading this — hi. If you're an SRE reading this and thinking "I should build something like this" — do it. It's the highest-leverage portfolio piece I've ever worked on.
 

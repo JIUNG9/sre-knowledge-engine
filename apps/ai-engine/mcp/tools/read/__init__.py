@@ -14,12 +14,14 @@ from mcp.tools.read import (  # noqa: F401
     metric_query,
     runbook_lookup,
 )
+from mcp.tools.read import finops  # noqa: F401
 
 __all__ = [
     "docs_find",
     "docs_link_check",
     "docs_reconcile",
     "docs_staleness",
+    "finops",
     "log_search",
     "metric_query",
     "runbook_lookup",

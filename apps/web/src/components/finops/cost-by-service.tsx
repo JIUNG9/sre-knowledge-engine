@@ -6,7 +6,13 @@ import {
   AreaChart,
   ResponsiveContainer,
 } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -22,6 +28,7 @@ import {
   SERVICE_COSTS,
   type ServiceCostRow,
 } from "@/lib/mock-data/finops"
+import { DownloadButton } from "@/components/finops/download-button"
 
 // --- Helpers ---
 
@@ -204,6 +211,9 @@ export function CostByService() {
         <CardTitle className="text-muted-foreground">
           Cost by Service
         </CardTitle>
+        <CardAction>
+          <DownloadButton view="costs" params={{ group_by: "service" }} />
+        </CardAction>
       </CardHeader>
       <CardContent className="p-0">
         <Table>

@@ -11,7 +11,14 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { DownloadButton } from "@/components/finops/download-button"
 import {
   Table,
   TableBody,
@@ -188,6 +195,12 @@ export function KubernetesCost() {
           <Server className="size-4 text-primary" />
           Kubernetes Cost Allocation
         </CardTitle>
+        <CardAction>
+          <DownloadButton
+            view="k8s"
+            params={{ aggregate: "namespace", window: "7d" }}
+          />
+        </CardAction>
       </CardHeader>
       <CardContent className="p-6">
         <Tabs defaultValue="namespaces">

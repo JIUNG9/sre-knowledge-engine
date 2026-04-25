@@ -13,6 +13,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from control_tower.api import control_tower_router, get_control_tower
+from executor import Executor, ExecutorConfig
+from executor.api import executor_router, get_executor
+from executor.audit import AuditLogger
 from routers import analyze, health, investigate, logs, mcp, wiki
 from scheduler import Scheduler, SchedulerConfig, default_jobs
 from scheduler.api import get_scheduler, scheduler_router
@@ -36,6 +39,33 @@ from scheduler.api import get_scheduler, scheduler_router
 # See ``apps/ai-engine/proxy/README.md`` for usage patterns.
 
 logger = logging.getLogger("aegis")
+
+
+def _build_executor() -> Executor | None:
+    """Construct an Executor when AEGIS_EXECUTOR_ENABLED is truthy.
+
+    Returns None otherwise. The audit log path defaults to
+    ./aegis-executor-audit.jsonl in the current working directory; set
+    AEGIS_EXECUTOR_AUDIT_PATH to override. Init failures degrade to None
+    so the API mounts the default 503 dependency rather than crashing.
+
+    Production wiring should also set AEGIS_EXECUTOR_DRY_RUN=0 once an
+    operator has opted into real execution. The default is dry-run on,
+    which means kubectl/terraform/aws commands report what they WOULD
+    have done without invoking the binaries.
+    """
+    if os.environ.get("AEGIS_EXECUTOR_ENABLED", "").lower() not in ("1", "true", "yes"):
+        return None
+    try:
+        config = ExecutorConfig.from_env()
+        from pathlib import Path
+        return Executor(
+            config=config,
+            audit=AuditLogger(Path(config.audit_log_path)),
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("executor unavailable (init): %s", exc)
+        return None
 
 
 def _build_scheduler() -> Scheduler | None:
@@ -118,6 +148,19 @@ async def lifespan(app: FastAPI):
         except Exception as exc:  # noqa: BLE001
             logger.warning("scheduler failed to start: %s", exc)
 
+    # Phase 2.5 — Layer 4 executor. Disabled by default; opt-in via
+    # ``AEGIS_EXECUTOR_ENABLED=1``. Even when enabled, dry-run is on by
+    # default — set ``AEGIS_EXECUTOR_DRY_RUN=0`` to run real commands.
+    # The executor only dispatches actions that have already cleared
+    # Layer 3 (Control Tower) + Layer 4 (Guardrails) gates AND have a
+    # decision tier of EXECUTE. Kill switch is checked one final time
+    # at the moment of execution, after every other gate has cleared.
+    executor = _build_executor()
+    if executor is not None:
+        app.state.executor = executor
+        app.dependency_overrides[get_executor] = lambda: executor
+        logger.info("executor attached to /api/v1/executor")
+
     try:
         yield
     finally:
@@ -163,3 +206,9 @@ app.include_router(control_tower_router)
 # OpenAPI schema is complete and CI smoke tests can introspect endpoints
 # without needing the scheduler running.
 app.include_router(scheduler_router)
+# Phase 2.5 — Layer 4 executor. Default ``get_executor`` returns 503 until
+# the lifespan hook above attaches a real ``Executor`` instance (gated on
+# ``AEGIS_EXECUTOR_ENABLED`` env, additionally gated on per-deployment
+# opt-in to leave dry-run mode). Mount unconditionally so OpenAPI surfaces
+# the executor endpoints in dev environments.
+app.include_router(executor_router)

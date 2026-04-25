@@ -55,7 +55,7 @@ requires = ["setuptools>=75.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["agents*", "mcp*", "mcp.tools.read.finops*", "models*", "proxy*", "routers*", "killswitch*", "cli*", "services*", "wiki*", "telemetry*", "guardrails*", "connectors*", "reconciliation*", "control_tower*", "llm_router*", "scheduler*"]
+include = ["agents*", "mcp*", "mcp.tools.read.finops*", "models*", "proxy*", "routers*", "killswitch*", "cli*", "services*", "wiki*", "telemetry*", "guardrails*", "connectors*", "reconciliation*", "control_tower*", "llm_router*", "scheduler*", "executor*"]
 
 [tool.pytest.ini_options]
 testpaths = [
@@ -70,5 +70,6 @@ testpaths = [
     "reconciliation/tests",
     "control_tower/tests",
     "scheduler/tests",
+    "executor/tests",
 ]
 pythonpath = ["."]

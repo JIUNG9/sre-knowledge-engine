@@ -447,6 +447,10 @@ Open the result in [Obsidian](https://obsidian.md/). Read `overview.md`. Run `sy
 
 Next article: **"The Automation Ladder — 5 Levels of SRE Automation, From Grep to MCP-Driven Agents."** That one walks through the pattern language I use to decide what to automate, how far to take it, and where humans belong in the loop. It's the mental model that made all of this coherent instead of a pile of scripts.
 
+All six layers referenced across this series are now shipped and pushed to `origin/main` — Safety Foundation, LLM Wiki, SigNoz Connector, Claude Control Tower, Production Guardrails, and MCP Document Reconciliation. Each has its own article in the series.
+
+Once you've read all six layer pieces, the next horizon is making the agent self-heal — turning proposed actions into actually-run commands. That's the topic of the upcoming **Article #12: "From Investigator to Operator."**
+
 The series as a whole is documenting how I'm building [Aegis](https://github.com/JIUNG9/aegis) in public — an open-source DevSecOps command center that treats docs, incidents, SLOs, and automation as one graph. Star the repo if this hits close to home.
 
 ---

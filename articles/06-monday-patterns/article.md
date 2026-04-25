@@ -375,6 +375,10 @@ The next article in this series covers **Layer 4 — Production Guardrails**. We
 
 If you're building anything autonomous in production, you'll want that one.
 
+The Layer 2 SigNoz Connector described in this article is now shipped — `signoz_client.py`, `alert_fetcher.py`, `metric_fetcher.py`, and `pattern_analyzer.py` are all live in the repo today. Same for Layer 4 (Guardrails) and Layer 5 (MCP Reconciliation) — every layer referenced across this series is now built and pushed to `origin/main`.
+
+Once you've read all six layer pieces, the next horizon is making the agent self-heal — turning proposed actions into actually-run commands. That's the topic of the upcoming **Article #12: "From Investigator to Operator"** — the executor that turns pattern-driven recommendations into pre-positioned scale-ups without a human in the loop.
+
 ---
 
 ## Try Aegis

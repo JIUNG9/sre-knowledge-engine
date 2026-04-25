@@ -389,6 +389,10 @@ If you're running a Confluence-plus-GitHub-wikis-plus-tribal-knowledge stack at 
 
 Next article: **"I Built a Self-Maintaining SRE Knowledge Base — It Finds Stale Docs Automatically"** — the Obsidian vault side of this story, showing how `signoz_sync.py` and `confluence_sync.py` turn resolved incidents into runbook pages, how the `overview.md` stays living, and why I'm auto-publishing a sanitized version of all this to [`github.com/JIUNG9/aegis-wiki`](https://github.com/JIUNG9/aegis-wiki) as a portable portfolio.
 
+The Layer 5 MCP reconciliation tools mentioned throughout this article are now shipped — the four read tools (`confluence_sync`, `github_docs_scan`, `incident_history_sync`, `docs_lint`) are live in the repo at [`apps/ai-engine/mcp/tools/`](https://github.com/JIUNG9/aegis/tree/main/apps/ai-engine/mcp). Every layer referenced across this series is now built.
+
+Once you've read all six layer pieces, the next horizon is making the agent self-heal — turning proposed actions into actually-run commands. That's the topic of the upcoming **Article #12: "From Investigator to Operator."**
+
 The series is building toward something bigger: a full AI-native DevSecOps command center that treats documentation, incidents, SLOs, and automation as one connected graph — not five disconnected SaaS tabs. [Aegis on GitHub](https://github.com/JIUNG9/aegis).
 
 ---

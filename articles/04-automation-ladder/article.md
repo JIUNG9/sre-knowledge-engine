@@ -323,6 +323,10 @@ I'm writing about how the Claude API + MCP stack replaced my 3 AM pager — for 
 
 Read it here: [How Claude API + MCP Replaced Our 3 AM Pager — For $15/month](https://github.com/JIUNG9/aegis/tree/main/articles/05-claude-mcp-pager).
 
+The Layer 4 guardrails engine referenced throughout this article — `risk_assessor.py`, `observation_mode.py`, `approval_gate.py`, `pre_validator.py`, `post_validator.py`, `rollback_manager.py`, `audit_logger.py` — is now shipped in the repo. Every file referenced above exists at [`apps/ai-engine/guardrails/`](https://github.com/JIUNG9/aegis/tree/main/apps/ai-engine/guardrails) today.
+
+Once you've read all six layer pieces (Safety, Wiki, SigNoz, Control Tower, Guardrails, MCP Reconciliation), the next horizon is making the agent self-heal — turning proposed actions into actually-run commands. That's the topic of the upcoming **Article #12: "From Investigator to Operator"** — the executor that closes the loop between "AI proposes" and "AI acts."
+
 ---
 
 *June Gu is an SRE at my employer in Seoul, ex-a large e-commerce company. He's building [Aegis](https://github.com/JIUNG9/aegis) — an open-source AI-native DevSecOps command center — on evenings and weekends. He's relocating to Canada in February 2027 and is open to SRE and DevOps roles in the Toronto area.*

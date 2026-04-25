@@ -117,48 +117,6 @@ Haiku is cheap enough that synthesizing every source every day is a rounding err
 
 ---
 
-## Implementation walkthrough
-
-The full code is in the repo; I'll show the three pieces that matter most.
-
-### The synthesizer: two calls, not one
-
-I deliberately split the router and the writer into separate LLM calls. The router — "should this create, update, or skip?" — needs an *index* of all pages: slug, title, type, and a one-line summary of each. It does not need the full bodies, which would blow the context window on a large vault. The writer — "produce the merged page" — needs the *body* of exactly one target page and the new source, nothing else.
-
-Two calls, two focused contexts, roughly half the token bill of a naive single call. On a vault of two hundred pages, the router is dirt cheap (it sees a few kilobytes of index) and the writer is bounded (it sees one page plus one source). Neither is ever looking at the whole vault.
-
-### The page schema: structured, not soup
-
-Every wiki page is a markdown file with YAML frontmatter. That frontmatter is the contract between the engine and the vault:
-
-```yaml
----
-title: auth-service
-type: entity
-slug: auth-service
-last_updated: 2026-04-19T10:00:00Z
-sources:
-  - confluence:12345
-  - signoz:INC-EXAMPLE-001
-  - github:acme-corp/auth-service
-freshness: current
-tags: [service, spring-boot, oauth2]
-aliases: [auth, auth-svc]
----
-
-# auth-service
-
-...
-```
-
-Four page types — `entity`, `concept`, `incident`, `runbook` — and four freshness states — `current`, `stale`, `archived`, `needs_review`. That's the entire type system. It fits in a tweet. It also turns out to be sufficient for every page I've needed to write.
-
-### The engine: lazy, degradable, honest
-
-Layer 1 is built to degrade gracefully. The contradiction detector and the staleness linter are optional; if either fails to import or runs into an error, the engine reports the feature as unavailable and keeps serving reads from the vault. This mattered during development, when several modules were landing in parallel — but it matters more in production, where a single broken subsystem should never take the whole knowledge layer down at 3 AM. You keep the wiki searchable even when half the machinery is offline.
-
----
-
 ## The staleness and contradiction engines — why these matter
 
 This is the part I'm proudest of, because it's the part that solves the real failure mode.

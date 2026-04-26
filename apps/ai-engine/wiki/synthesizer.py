@@ -39,7 +39,116 @@ _PRICING: dict[str, dict[str, float]] = {
 
 
 PageType = Literal["entity", "concept", "incident", "runbook"]
-Freshness = Literal["current", "stale", "archived", "needs_review"]
+Freshness = Literal[
+    "current",
+    "stale",
+    "archived",
+    "needs_review",
+    "pending_revalidation",  # set by Layer 1.6 InvalidationEngine
+]
+
+
+class ConfigDependency(BaseModel):
+    """A claim's dependency on an external config artifact.
+
+    When the artifact value changes (detected by Layer 1.5 consumers),
+    the InvalidationEngine marks dependent pages as `pending_revalidation`.
+
+    Pattern: Truth Maintenance System (Doyle 1979) - claims have justifications,
+    invalidation fans out when justifications change.
+    """
+
+    artifact_kind: Literal[
+        "terraform",
+        "k8s",
+        "argocd",
+        "cloud",
+        "source_file",
+    ] = Field(
+        description="Which subsystem owns this artifact"
+    )
+    artifact_id: str = Field(
+        description=(
+            "Stable identifier. Examples: "
+            "'terraform:rds.tf:aurora_postgres_version', "
+            "'k8s:Deployment:auth-service:spec.replicas', "
+            "'argocd:app:auth-service:targetRevision'"
+        )
+    )
+    expected_value: str | None = Field(
+        default=None,
+        description=(
+            "Optional value the claim assumes. If set, invalidation only "
+            "fires when current_value != expected_value. If None, any "
+            "change to the artifact invalidates."
+        ),
+    )
+    invalidate_on_change: bool = Field(
+        default=True,
+        description=(
+            "If True, change events trigger invalidation. Set False for "
+            "claims that just reference an artifact without depending on its value."
+        ),
+    )
+
+
+class ClaimScope(BaseModel):
+    """Scope of applicability for a page treated as a single coherent claim.
+
+    Resolved-incident pages are high-trust within their specific scope and
+    low-trust as generalizations (overfit-to-training-distribution problem).
+    Pattern: type-bounded dispatch in IR.
+    """
+
+    specific_to: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            "Context dimensions the claim is bounded by. Example: "
+            "{'service': 'auth-service', 'error_signature': 'OOMKilled'}"
+        ),
+    )
+    generalizes_to: Literal["yes", "no", "with_conditions"] = Field(
+        default="no",
+        description=(
+            "Does this claim hold outside its specific_to scope? "
+            "Resolved incidents default to 'no'; runbooks default to 'yes'."
+        ),
+    )
+    generalizes_conditions: str | None = Field(
+        default=None,
+        description="If generalizes_to == 'with_conditions', describe them.",
+    )
+    trust_in_scope: float = Field(
+        default=0.95,
+        ge=0.0,
+        le=1.0,
+        description="Confidence when the query context matches specific_to.",
+    )
+    trust_out_of_scope: float = Field(
+        default=0.10,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Confidence when the query context does NOT match specific_to. "
+            "Out-of-scope claims should usually be demoted, not silently dropped."
+        ),
+    )
+
+    def matches(self, context: dict[str, str]) -> bool:
+        """True if the query context satisfies all specific_to constraints."""
+        return all(
+            context.get(k) == v for k, v in self.specific_to.items()
+        )
+
+    def trust_for(self, context: dict[str, str]) -> float:
+        """Trust score appropriate for the given query context."""
+        if self.matches(context):
+            return self.trust_in_scope
+        if self.generalizes_to == "yes":
+            return min(self.trust_in_scope, 0.85)
+        if self.generalizes_to == "with_conditions":
+            return min(self.trust_in_scope, 0.50)
+        return self.trust_out_of_scope
 
 
 class WikiPage(BaseModel):
@@ -62,6 +171,23 @@ class WikiPage(BaseModel):
     )
     sources: list[str] = Field(default_factory=list)
     freshness: Freshness = "current"
+
+    # Layer 1.5 / 1.6 additions (both optional, backward-compatible).
+    config_dependencies: list[ConfigDependency] = Field(
+        default_factory=list,
+        description=(
+            "External artifacts this page's claims depend on. "
+            "Set by Synthesizer when it detects config references during synthesis. "
+            "Empty list means the page has no infra dependencies (e.g. concept pages)."
+        ),
+    )
+    scope: ClaimScope | None = Field(
+        default=None,
+        description=(
+            "Scope of applicability. None means the page has no scope bounds "
+            "(general knowledge). Resolved-incident pages should always set this."
+        ),
+    )
 
     model_config = {"arbitrary_types_allowed": True}
 
@@ -98,9 +224,41 @@ class WikiPage(BaseModel):
         sources = [str(s) for s in sources_raw]
 
         freshness_raw = str(meta.get("freshness") or "current")
-        if freshness_raw not in ("current", "stale", "archived", "needs_review"):
+        if freshness_raw not in (
+            "current",
+            "stale",
+            "archived",
+            "needs_review",
+            "pending_revalidation",
+        ):
             freshness_raw = "current"
         freshness: Freshness = freshness_raw  # type: ignore[assignment]
+
+        # Layer 1.5 / 1.6: parse config_dependencies + scope back from frontmatter.
+        # Tolerate missing/malformed entries — bad metadata shouldn't block ingest.
+        deps_raw = meta.get("config_dependencies") or []
+        config_dependencies: list[ConfigDependency] = []
+        if isinstance(deps_raw, list):
+            for entry in deps_raw:
+                if isinstance(entry, dict):
+                    try:
+                        config_dependencies.append(ConfigDependency.model_validate(entry))
+                    except Exception as exc:  # noqa: BLE001 - pydantic ValidationError
+                        logger.warning(
+                            "from_file: dropping invalid config_dependency on %s: %s",
+                            path,
+                            exc,
+                        )
+
+        scope_raw = meta.get("scope")
+        scope: ClaimScope | None = None
+        if isinstance(scope_raw, dict):
+            try:
+                scope = ClaimScope.model_validate(scope_raw)
+            except Exception as exc:  # noqa: BLE001 - pydantic ValidationError
+                logger.warning(
+                    "from_file: dropping invalid scope on %s: %s", path, exc
+                )
 
         return cls(
             title=title,
@@ -112,6 +270,8 @@ class WikiPage(BaseModel):
             last_updated=last_updated,
             sources=sources,
             freshness=freshness,
+            config_dependencies=config_dependencies,
+            scope=scope,
         )
 
     def to_markdown(self) -> str:
@@ -129,6 +289,16 @@ class WikiPage(BaseModel):
         meta["last_updated"] = self.last_updated.isoformat()
         meta["sources"] = list(dict.fromkeys(self.sources))  # de-dup, preserve order
         meta["freshness"] = self.freshness
+
+        # Layer 1.5 / 1.6 — nested pydantic models can't be YAML-serialized
+        # directly, so we dump them to plain dicts/lists first. Use mode="json"
+        # so Literals, datetimes, and other rich types come out as primitives.
+        meta["config_dependencies"] = [
+            dep.model_dump(mode="json") for dep in self.config_dependencies
+        ]
+        meta["scope"] = (
+            self.scope.model_dump(mode="json") if self.scope is not None else None
+        )
 
         post = frontmatter.Post(self.body, **meta)
         return frontmatter.dumps(post)

@@ -126,6 +126,82 @@ class InvalidationEngine:
                     event.artifact_id,
                 )
 
+    async def consume_with_batching(
+        self,
+        events: AsyncIterator[StateChangeEvent],
+        *,
+        batch_window: float = 0.1,
+    ) -> None:
+        """Drain ``events`` and collapse arrivals within ``batch_window``
+        seconds into a single fan-out per artifact_id.
+
+        Why batch: a flapping ConfigMap can fire six events in under a
+        second. Without batching we'd serialize six page-rewrites for
+        each dependent slug. With batching we dedupe by ``artifact_id``
+        (last event wins) and rewrite once per window. Design doc §5.
+
+        The first event opens the window; subsequent events extend the
+        batch but not the deadline — windows do not chain. When the
+        deadline elapses (or the stream ends), the batch fans out and
+        the next event opens a fresh window.
+
+        Per-event exceptions are logged and the loop continues, same
+        crash policy as :meth:`consume`. Stream termination flushes the
+        in-flight batch before returning.
+        """
+
+        iterator = events.__aiter__()
+        loop = asyncio.get_running_loop()
+        while True:
+            try:
+                first = await iterator.__anext__()
+            except StopAsyncIteration:
+                return
+
+            batch: dict[str, StateChangeEvent] = {first.artifact_id: first}
+            deadline = loop.time() + batch_window
+            stream_done = False
+            while True:
+                remaining = deadline - loop.time()
+                if remaining <= 0:
+                    break
+                try:
+                    nxt = await asyncio.wait_for(
+                        iterator.__anext__(), timeout=remaining
+                    )
+                except asyncio.TimeoutError:
+                    break
+                except StopAsyncIteration:
+                    stream_done = True
+                    break
+                # Coalesce by artifact: last event wins. The old value
+                # of an earlier event becomes irrelevant — the engine
+                # marks slugs pending regardless of value, only the
+                # audit log cares which value flipped.
+                batch[nxt.artifact_id] = nxt
+
+            await self._fanout_batch(batch)
+            if stream_done:
+                return
+
+    async def _fanout_batch(
+        self, batch: dict[str, StateChangeEvent]
+    ) -> None:
+        """Run :meth:`handle_event` for every entry in ``batch``.
+
+        Failures on one artifact must not block the others; mirror the
+        per-event exception swallow pattern from :meth:`consume`.
+        """
+
+        for ev in batch.values():
+            try:
+                await self.handle_event(ev)
+            except Exception:  # noqa: BLE001
+                logger.exception(
+                    "invalidation: batched handle_event failed for %s",
+                    ev.artifact_id,
+                )
+
     async def handle_event(
         self, event: StateChangeEvent
     ) -> InvalidationRecord:

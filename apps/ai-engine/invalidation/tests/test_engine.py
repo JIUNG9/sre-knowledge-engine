@@ -322,6 +322,50 @@ async def test_write_is_atomic_no_tempfiles_left_behind(
     assert [p.name for p in runbooks] == ["scaling-runbook.md"]
 
 
+async def test_batching_collapses_flapping_events(
+    tmp_vault: Path,
+    sample_pages: list[WikiPage],
+) -> None:
+    """A ConfigMap flaps six times in under 100ms. With batching, the
+    engine writes the audit log once for that artifact (last event
+    wins), not six times. Reconciliation handles the rare lost
+    intermediate value (design §5)."""
+    import asyncio
+
+    index = DependencyIndex()
+    await index.rebuild(sample_pages)
+    engine = InvalidationEngine(vault_root=tmp_vault, index=index)
+
+    artifact = "k8s:Deployment:default/auth-service:spec.replicas"
+
+    async def stream() -> AsyncIterator[StateChangeEvent]:
+        # Six events in a tight burst, then we close the stream.
+        for new_value in ("4", "5", "4", "6", "5", "7"):
+            yield StateChangeEvent(
+                artifact_kind="k8s",
+                artifact_id=artifact,
+                old_value="3",
+                new_value=new_value,
+                source="k8s://default/auth-service",
+            )
+            # Tiny gap so we don't blow past the batch window in one
+            # event-loop tick — still well under the 100ms deadline.
+            await asyncio.sleep(0.005)
+
+    await engine.consume_with_batching(stream(), batch_window=0.1)
+
+    log_records = _read_log(
+        tmp_vault / "_meta" / "invalidation-log.jsonl"
+    )
+    flap_records = [
+        r for r in log_records if r["artifact_id"] == artifact
+    ]
+    # Exactly one record for the flap — the last event's new_value
+    # wins and the intermediate flapping is collapsed.
+    assert len(flap_records) == 1
+    assert flap_records[0]["new_value"] == "7"
+
+
 async def test_concurrent_edit_skips_rewrite(
     tmp_vault: Path,
     sample_pages: list[WikiPage],

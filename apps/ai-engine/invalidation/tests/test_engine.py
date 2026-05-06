@@ -322,6 +322,72 @@ async def test_write_is_atomic_no_tempfiles_left_behind(
     assert [p.name for p in runbooks] == ["scaling-runbook.md"]
 
 
+async def test_fanout_cap_truncates_and_flags_record(
+    tmp_vault: Path,
+) -> None:
+    """An artifact that 50 pages depend on, with a fanout_cap of 5,
+    should produce: 5 marked pages, truncated=True, total_dependents=50."""
+    import frontmatter as fm
+    from datetime import datetime, timezone
+
+    artifact = "k8s:Deployment:default/popular-svc:spec.replicas"
+    pages: list[WikiPage] = []
+    for i in range(50):
+        slug = f"dep-page-{i:03d}"
+        path = tmp_vault / "entities" / f"{slug}.md"
+        meta = {
+            "title": slug,
+            "slug": slug,
+            "type": "entity",
+            "freshness": "current",
+            "last_updated": datetime.now(timezone.utc).isoformat(),
+            "config_dependencies": [
+                {
+                    "artifact_kind": "k8s",
+                    "artifact_id": artifact,
+                    "expected_value": "3",
+                    "invalidate_on_change": True,
+                }
+            ],
+        }
+        path.write_text(
+            fm.dumps(fm.Post(f"# {slug}\n", **meta)), encoding="utf-8"
+        )
+        pages.append(WikiPage.from_file(path))
+
+    index = DependencyIndex()
+    await index.rebuild(pages)
+    engine = InvalidationEngine(
+        vault_root=tmp_vault, index=index, fanout_cap=5
+    )
+
+    record = await engine.handle_event(
+        StateChangeEvent(
+            artifact_kind="k8s",
+            artifact_id=artifact,
+            old_value="3",
+            new_value="9",
+            source="k8s://default/popular-svc",
+        )
+    )
+
+    assert record.truncated is True
+    assert record.total_dependents == 50
+    assert len(record.affected_slugs) == 5
+    # Sorted prefix is deterministic — first 5 lexicographically.
+    assert record.affected_slugs == [f"dep-page-{i:03d}" for i in range(5)]
+    # Only the 5 that fit the cap should be marked; the other 45 stay
+    # `current` until reconciliation sweeps them.
+    assert (
+        _read_freshness(tmp_vault / "entities" / "dep-page-004.md")
+        == "pending_revalidation"
+    )
+    assert (
+        _read_freshness(tmp_vault / "entities" / "dep-page-005.md")
+        == "current"
+    )
+
+
 async def test_batching_collapses_flapping_events(
     tmp_vault: Path,
     sample_pages: list[WikiPage],

@@ -48,3 +48,18 @@ class InvalidationRecord(BaseModel):
             "any wiki pages. Useful for canary rollouts."
         ),
     )
+    truncated: bool = Field(
+        default=False,
+        description=(
+            "True when the per-event fanout cap dropped some dependents. "
+            "The dropped tail is recovered by the daily reconciliation "
+            "pass (design doc §7)."
+        ),
+    )
+    total_dependents: int | None = Field(
+        default=None,
+        description=(
+            "Total number of dependent slugs the index returned, before "
+            "applying the fanout cap. None when the cap did not engage."
+        ),
+    )

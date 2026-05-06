@@ -73,12 +73,15 @@ class InvalidationEngine:
     only *marks* pages; resynthesis is the scheduler's job.
     """
 
+    DEFAULT_PER_EVENT_FANOUT_CAP: int = 1000
+
     def __init__(
         self,
         vault_root: Path,
         index: DependencyIndex,
         log_path: Path | None = None,
         shadow_mode: bool = False,
+        fanout_cap: int | None = None,
     ) -> None:
         """Args:
 
@@ -92,6 +95,13 @@ class InvalidationEngine:
         shadow_mode: When True, the engine logs every record but never
             mutates pages. Useful as a canary while integrating Layer 1.6
             against a busy production vault.
+        fanout_cap: Hard upper bound on the number of slugs marked per
+            event. A massive Terraform apply touching 200 resources
+            could theoretically fan out to thousands of pages; the cap
+            stops the engine from melting under that load. Defaults to
+            :attr:`DEFAULT_PER_EVENT_FANOUT_CAP` (1000). The dropped
+            slugs are recovered by the daily reconciliation pass
+            (design doc §7 Burst overload).
         """
 
         self.vault_root = Path(vault_root)
@@ -100,6 +110,7 @@ class InvalidationEngine:
             self.vault_root / "_meta" / "invalidation-log.jsonl"
         )
         self.shadow_mode = shadow_mode
+        self.fanout_cap = fanout_cap or self.DEFAULT_PER_EVENT_FANOUT_CAP
         self._log_lock = asyncio.Lock()
         # Per-slug last_updated we last observed. Used to detect human
         # edits between our writes — if the on-disk last_updated is
@@ -221,14 +232,34 @@ class InvalidationEngine:
 
         slugs = await self.index.lookup(event.artifact_id)
         reason = "first_observation" if event.old_value is None else "value_change"
+        # Per-event fanout cap. A massive Terraform apply that touches
+        # 200 resources could fan out to tens of thousands of slugs in a
+        # single tick. We process at most fanout_cap slugs synchronously
+        # and let the daily reconciler pick up the dropped tail (design
+        # doc §7). Sorting before slicing makes the cap deterministic
+        # for tests and keeps the same prefix marked across replays.
+        all_affected = sorted(slugs)
+        truncated = len(all_affected) > self.fanout_cap
+        affected = all_affected[: self.fanout_cap]
         record = InvalidationRecord(
             artifact_id=event.artifact_id,
-            affected_slugs=sorted(slugs),
+            affected_slugs=affected,
             reason=reason,
             old_value=event.old_value,
             new_value=event.new_value,
             shadow_mode=self.shadow_mode,
+            truncated=truncated,
+            total_dependents=len(all_affected),
         )
+
+        if truncated:
+            logger.warning(
+                "invalidation: fanout for %s truncated %d -> %d "
+                "(reconciliation will sweep the tail)",
+                event.artifact_id,
+                len(all_affected),
+                self.fanout_cap,
+            )
 
         if not self.shadow_mode:
             for slug in record.affected_slugs:

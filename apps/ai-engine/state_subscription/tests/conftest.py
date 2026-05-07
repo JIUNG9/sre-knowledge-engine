@@ -116,18 +116,91 @@ class _FakeCoreV1Api:
         self.list_namespace = _FakeNamespacedList("list_namespace")
 
 
+class _FakeReviewStatus:
+    def __init__(self, allowed: bool) -> None:
+        self.allowed = allowed
+
+
+class _FakeReviewResult:
+    def __init__(self, allowed: bool) -> None:
+        self.status = _FakeReviewStatus(allowed)
+
+
+class _FakeAuthorizationV1Api:
+    """SelfSubjectAccessReview surface for the read-only self-check.
+
+    Tests configure ``allowed_verbs`` to a set of (verb, resource)
+    tuples that should report allowed=True; everything else is denied.
+    """
+
+    def __init__(
+        self, allowed_verbs: set[tuple[str, str]] | None = None
+    ) -> None:
+        self.allowed_verbs = allowed_verbs or set()
+        self.calls: list[tuple[str, str, str]] = []
+
+    def create_self_subject_access_review(self, body: Any) -> _FakeReviewResult:
+        attrs = body.spec.resource_attributes
+        self.calls.append((attrs.verb, attrs.resource, attrs.group))
+        return _FakeReviewResult(
+            allowed=(attrs.verb, attrs.resource) in self.allowed_verbs
+        )
+
+
+class _FakeResourceAttributes:
+    def __init__(self, verb: str, group: str, resource: str) -> None:
+        self.verb = verb
+        self.group = group
+        self.resource = resource
+
+
+class _FakeAccessReviewSpec:
+    def __init__(self, resource_attributes: _FakeResourceAttributes) -> None:
+        self.resource_attributes = resource_attributes
+
+
+class _FakeAccessReview:
+    def __init__(self, spec: _FakeAccessReviewSpec) -> None:
+        self.spec = spec
+
+
 class FakeKubeClient:
     """In-memory stand-in for the ``kubernetes.client`` module."""
 
-    def __init__(self) -> None:
+    def __init__(
+        self, allowed_verbs: set[tuple[str, str]] | None = None
+    ) -> None:
         self._apps = _FakeAppsV1Api()
         self._core = _FakeCoreV1Api()
+        self._auth = _FakeAuthorizationV1Api(allowed_verbs)
 
     def AppsV1Api(self) -> _FakeAppsV1Api:  # noqa: N802 - mirror real API
         return self._apps
 
     def CoreV1Api(self) -> _FakeCoreV1Api:  # noqa: N802 - mirror real API
         return self._core
+
+    def AuthorizationV1Api(self) -> _FakeAuthorizationV1Api:  # noqa: N802
+        return self._auth
+
+    # V1 builders the read-only self-check needs.
+    @staticmethod
+    def V1ResourceAttributes(  # noqa: N802 - mirror real API
+        verb: str, group: str, resource: str
+    ) -> _FakeResourceAttributes:
+        return _FakeResourceAttributes(verb=verb, group=group, resource=resource)
+
+    @staticmethod
+    def V1SelfSubjectAccessReviewSpec(  # noqa: N802 - mirror real API
+        resource_attributes: _FakeResourceAttributes,
+    ) -> _FakeAccessReviewSpec:
+        return _FakeAccessReviewSpec(resource_attributes=resource_attributes)
+
+    @staticmethod
+    def V1SelfSubjectAccessReview(  # noqa: N802 - mirror real API
+        spec: _FakeAccessReviewSpec,
+    ) -> _FakeAccessReview:
+        return _FakeAccessReview(spec=spec)
 
 
 # -- Fake watch ------------------------------------------------------- #

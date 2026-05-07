@@ -112,6 +112,83 @@ class KubernetesConsumer(Consumer):
         self._stop_event = threading.Event()
         self._threads: list[threading.Thread] = []
 
+    # -- Public API: startup self-check -------------------------------
+
+    # The verbs we never want to hold. We assert all of them so a
+    # service account that's been "fixed" with one stray RoleBinding
+    # is caught loudly. Order is verb / resource / api group.
+    _FORBIDDEN_VERBS: tuple[tuple[str, str, str], ...] = (
+        ("create", "deployments", "apps"),
+        ("update", "deployments", "apps"),
+        ("delete", "deployments", "apps"),
+        ("patch", "deployments", "apps"),
+        ("create", "configmaps", ""),
+        ("delete", "secrets", ""),
+    )
+
+    def assert_read_only(self) -> None:
+        """Refuse to start if the service account holds write verbs.
+
+        Per design doc §7 'Read-only credentials drift', a well-meaning
+        operator may grant write verbs to "fix" something. The consumer
+        is read-only by construction; any other state is a
+        misconfiguration we want to catch loudly at startup, not after
+        a watcher thread starts emitting writes that someone could
+        misinterpret as the engine acting.
+
+        Issues one ``SelfSubjectAccessReview`` per forbidden verb and
+        raises :class:`PermissionError` on the first ``allowed=True``
+        response. If the AuthorizationV1Api is unavailable we log a
+        warning and proceed — in dev environments without RBAC the
+        check is unenforceable, and refusing to start would be more
+        disruptive than the risk it guards against.
+        """
+
+        if not hasattr(self._client, "AuthorizationV1Api"):
+            logger.warning(
+                "k8s consumer: AuthorizationV1Api not available on the "
+                "client; skipping read-only self-check"
+            )
+            return
+        auth_api = self._client.AuthorizationV1Api()
+
+        for verb, resource, group in self._FORBIDDEN_VERBS:
+            if self._can_i(auth_api, verb, resource, group):
+                raise PermissionError(
+                    f"k8s consumer is misconfigured: service account is "
+                    f"allowed to `{verb} {resource}` "
+                    f"(group={group or 'core'}). The consumer is "
+                    f"read-only by construction; refusing to start. "
+                    f"Inspect the bound (Cluster)Role for unintended "
+                    f"write verbs."
+                )
+        logger.info(
+            "k8s consumer: read-only self-check passed (%d verbs denied)",
+            len(self._FORBIDDEN_VERBS),
+        )
+
+    def _can_i(
+        self, auth_api: Any, verb: str, resource: str, group: str
+    ) -> bool:
+        """Issue one SelfSubjectAccessReview and return ``status.allowed``.
+
+        Builds the V1 body from the client module (so test stubs that
+        expose simpler V1 builders work) and reads
+        ``response.status.allowed``. Failures of the API call itself
+        propagate to the caller — refusing to start is the correct
+        behavior when we cannot verify our own permissions.
+        """
+
+        cm = self._client
+        spec = cm.V1SelfSubjectAccessReviewSpec(
+            resource_attributes=cm.V1ResourceAttributes(
+                verb=verb, group=group, resource=resource
+            )
+        )
+        body = cm.V1SelfSubjectAccessReview(spec=spec)
+        result = auth_api.create_self_subject_access_review(body=body)
+        return bool(result.status.allowed)
+
     # -- Internals: kubernetes client wiring --------------------------
 
     def _init_client(self) -> Any:

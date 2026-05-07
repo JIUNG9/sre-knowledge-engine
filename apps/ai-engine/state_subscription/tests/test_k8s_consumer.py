@@ -274,3 +274,61 @@ async def test_healthcheck_calls_list_namespace(fake_watch, fake_kube_client):
     ok = await consumer.healthcheck()
     assert ok is True
     assert fake_kube_client.CoreV1Api().list_namespace.calls  # type: ignore[attr-defined]
+
+
+async def test_assert_read_only_passes_with_readonly_service_account(
+    fake_kube_client: FakeKubeClient,
+) -> None:
+    """Default FakeKubeClient denies every verb. The self-check should
+    issue one review per forbidden verb and return without raising."""
+    consumer = KubernetesConsumer(
+        namespaces=("default",),
+        client=fake_kube_client,
+        backoff_base=0.0,
+    )
+    consumer.assert_read_only()  # must not raise
+
+    auth = fake_kube_client.AuthorizationV1Api()
+    expected = len(KubernetesConsumer._FORBIDDEN_VERBS)
+    assert len(auth.calls) == expected
+
+
+async def test_assert_read_only_raises_when_service_account_has_writes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A service account that's been granted `create deployments` must
+    cause the consumer to refuse to start. Simulates the design doc's
+    'well-meaning operator who fixed something' (§7)."""
+    from state_subscription.tests.conftest import FakeKubeClient
+
+    bad_client = FakeKubeClient(
+        allowed_verbs={("create", "deployments")}
+    )
+    consumer = KubernetesConsumer(
+        namespaces=("default",),
+        client=bad_client,
+        backoff_base=0.0,
+    )
+    with pytest.raises(PermissionError, match="create deployments"):
+        consumer.assert_read_only()
+
+
+async def test_assert_read_only_skips_when_authorization_api_unavailable(
+    fake_kube_client: FakeKubeClient,
+) -> None:
+    """Some dev clusters / tools strip the AuthorizationV1Api surface.
+    We log and proceed in that case rather than blocking startup."""
+    # Strip the API to mimic an environment without authorization.k8s.io.
+    del fake_kube_client.__class__.AuthorizationV1Api
+
+    consumer = KubernetesConsumer(
+        namespaces=("default",),
+        client=fake_kube_client,
+        backoff_base=0.0,
+    )
+    consumer.assert_read_only()  # warns and returns; must not raise
+
+    # Restore for downstream tests in the same session.
+    def _restore(self):  # noqa: ANN001
+        return self._auth
+    fake_kube_client.__class__.AuthorizationV1Api = _restore  # type: ignore[assignment]

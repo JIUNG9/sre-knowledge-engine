@@ -1,7 +1,7 @@
 # Aegis Architecture
 
-**Version**: 4.0
-**Status**: Layers 0 + 1 built (2026-04-21). Layers 2, 4, 5 in active development. Layer 3 blocked on Layer 2 interfaces.
+**Version**: 4.0 (package: 1.1.0-alpha.0)
+**Status**: All 6 layers (0 through 5) built and shipping (2026-04-25). Layers 1.5 (state subscription) and 1.6 (invalidation engine) added in alpha, running in shadow mode. Phase 2 in progress (executor wiring, FinOps export, periodic sync scheduler).
 **Repository**: `github.com/JIUNG9/aegis`
 **Audience**: contributors, self-hosters, and reviewers evaluating the project for adoption.
 
@@ -9,17 +9,19 @@
 
 ## 1. Executive Summary
 
-Aegis is an AI-native DevSecOps command center built around a single idea: the operational knowledge a team needs in the middle of an incident should be pre-synthesized, not chunked and retrieved. A Large Language Model reads every runbook, post-mortem, Confluence page, and resolved incident exactly once, distills them into an Obsidian vault of canonical wiki pages, and then answers queries against that synthesized knowledge instead of against raw document fragments. The investigation loop sits on top of that vault: when an alert fires, Aegis pulls the relevant wiki context, enriches it with live telemetry from SigNoz, hands the bundle to Claude for analysis, and gates any proposed action through an explicit guardrails ladder. The platform ships as a five-layer stack — only Layer 1 is built today; the remaining four are planned and scoped in detail below.
+Aegis is an AI-native DevSecOps command center built around a single idea: the operational knowledge a team needs in the middle of an incident should be pre-synthesized, not chunked and retrieved. A Large Language Model reads every runbook, post-mortem, Confluence page, and resolved incident exactly once, distills them into an Obsidian vault of canonical wiki pages, and then answers queries against that synthesized knowledge instead of against raw document fragments. The investigation loop sits on top of that vault: when an alert fires, Aegis pulls the relevant wiki context, enriches it with live telemetry from SigNoz, hands the bundle to Claude for analysis, and gates any proposed action through an explicit guardrails ladder. The platform ships as a six-layer stack (Layers 0 through 5), all built and running, plus two newer layers (1.5 and 1.6) in alpha that close a known gap: a synthesized wiki is still a stale projection of live infra state, so Aegis subscribes to Terraform / k8s / ArgoCD events (Layer 1.5) and invalidates dependent wiki claims via a Truth Maintenance System fan-out (Layer 1.6). Full design for the new layers lives in [`docs/architecture/layer-1.5-state-subscription.md`](architecture/layer-1.5-state-subscription.md).
 
 ```mermaid
 graph TB
   subgraph AEGIS["AEGIS v4.0"]
     L0[Layer 0: Safety Foundation<br/>PII proxy / IAM / kill switch / OTel / honey tokens<br/>BUILT]
     L1[Layer 1: LLM Wiki<br/>Karpathy Pattern<br/>BUILT]
-    L2[Layer 2: SigNoz Connector<br/>HTTP API + pattern analyzer<br/>IN PROGRESS]
-    L3[Layer 3: Claude Control Tower<br/>Eco / Standard / Deep<br/>PLANNED]
-    L4[Layer 4: Production Guardrails<br/>4-Stage Ladder<br/>IN PROGRESS]
-    L5[Layer 5: MCP Doc Reconciliation<br/>IN PROGRESS]
+    L15[Layer 1.5: State Subscription<br/>k8s / Terraform / ArgoCD CDC consumers<br/>ALPHA · shadow mode]
+    L16[Layer 1.6: Invalidation Engine<br/>TMS fan-out · pending_revalidation<br/>ALPHA · shadow mode]
+    L2[Layer 2: SigNoz Connector<br/>HTTP API + pattern analyzer<br/>BUILT]
+    L3[Layer 3: Claude Control Tower<br/>Eco / Standard / Deep<br/>BUILT]
+    L4[Layer 4: Production Guardrails<br/>4-Stage Ladder<br/>BUILT]
+    L5[Layer 5: MCP Doc Reconciliation<br/>BUILT]
   end
   User[SRE Team] --> L3
   L3 --> L1
@@ -27,7 +29,12 @@ graph TB
   L3 --> L4
   L1 --> L5
   L2 --> L1
+  Infra[Live infra<br/>k8s · Terraform · ArgoCD] --> L15
+  L15 --> L16
+  L16 --> L1
   L0 -.wraps.-> L1
+  L0 -.wraps.-> L15
+  L0 -.wraps.-> L16
   L0 -.wraps.-> L2
   L0 -.wraps.-> L3
   L0 -.wraps.-> L4
@@ -99,6 +106,58 @@ Key modules:
 | `publisher.py` | `Publisher`, `PublisherConfig`, `PublishResult` | Commits and pushes the vault to a git remote using GitPython. Never adds AI co-author strings. |
 
 The engine is deliberately optimistic on import: `wiki/__init__.py:80-159` wraps every submodule import in a `try/except` so the service boots even while partially-built, and the FastAPI router returns 503 for the features that are not yet wired. This keeps Layer 1 usable during incremental buildout of Layers 2–5.
+
+### Layer 1.5 — State Subscription
+
+| Field | Value |
+| --- | --- |
+| **Status** | Alpha · shadow mode |
+| **Purpose** | Subscribe to live infra state so the wiki stops being a stale projection. Layer 1 reads sources once; Layer 1.5 keeps watching. |
+| **Code** | `apps/ai-engine/state_subscription/` |
+| **Entry point** | `state_subscription.consumers.k8s.KubernetesConsumer` (and protocol base `state_subscription.subscriber.Consumer`) |
+| **External deps** | Optional: `kubernetes` Python client. Falls back to `ConsumerUnavailable` when not present. |
+| **Cost profile** | $0 (read-only watches against existing infra) |
+
+Layer 1.5 fills the gap that Layer 1 alone leaves: the synthesized wiki is a snapshot, but operational truth lives in Terraform state, the Kubernetes API, ArgoCD app definitions, and cloud APIs. When that ground truth changes, claims that depended on the old state silently rot. Source-type decay (the `StalenessLinter` in Layer 1) is a coarse temporal signal that does not catch a `Postgres 13 → 16` upgrade or a `replicas: 3 → 5` change. Layer 1.5 treats those changes as **Change Data Capture (CDC) events** in the database-replication sense — every observed state mutation is published as a `StateChangeEvent` with a stable `artifact_id` (e.g. `k8s:Deployment:default/auth-service:spec.replicas`) and a before/after value pair.
+
+Key modules:
+
+| Module | Class | Responsibility |
+| --- | --- | --- |
+| `models.py` | `StateChangeEvent`, `ArtifactKind` | Pydantic v2 event shape with `artifact_kind`, `artifact_id`, `old_value`, `new_value`, `observed_at`, `source`, `metadata`. |
+| `subscriber.py` | `Consumer` (ABC), `ConsumerUnavailable` | Async-iterator protocol for long-running observers. Each consumer's `stream()` yields `StateChangeEvent` values; crashes end one stream without taking down others. |
+| `consumers/k8s.py` | `KubernetesConsumer` | `kubernetes.watch.Watch().stream()` over Deployments / StatefulSets / ConfigMaps / Secrets. Bridges sync watch iterator to async via `asyncio.to_thread()` + `asyncio.Queue`. Tracks `last_resource_versions` per artifact_id; emits only on change. Exponential-backoff reconnect on watch disconnect. |
+| `consumers/terraform.py` | `TerraformConsumer` (designed, not built) | Polls remote `tfstate` JSON in S3 backend, diffs resource attributes between snapshots, emits one event per changed attribute. Lower frequency than k8s. |
+| `consumers/argocd.py` | `ArgoCDConsumer` (designed, not built) | Polls `argocd app list -o json` or subscribes to ArgoCD's webhook events, emits on `Application.spec.source.targetRevision` and image digest changes. |
+
+Auth strategy: Kubernetes consumer tries in-cluster ServiceAccount first, falls back to `~/.kube/config`, raises `ConsumerUnavailable` if neither — never crashes the service at boot. Same optimistic-import discipline as Layer 1. Full design including failure modes, scope-aware retrieval, and migration phases is in [`docs/architecture/layer-1.5-state-subscription.md`](architecture/layer-1.5-state-subscription.md).
+
+### Layer 1.6 — Invalidation Engine
+
+| Field | Value |
+| --- | --- |
+| **Status** | Alpha · shadow mode |
+| **Purpose** | Fan out `StateChangeEvent` values to dependent wiki pages. Mark them `pending_revalidation` so the next scheduler tick re-synthesizes. |
+| **Code** | `apps/ai-engine/invalidation/` |
+| **Entry point** | `invalidation.engine.InvalidationEngine.consume(events)` |
+| **Pattern** | Truth Maintenance System (Doyle 1979); reverse-index + incremental view maintenance (Gupta & Mumick 1995) |
+
+Two new optional Pydantic fields on `WikiPage` (added by the schema migration in `apps/ai-engine/wiki/synthesizer.py`) make claims invalidatable:
+
+- `config_dependencies: list[ConfigDependency]` — each entry names an external artifact (`artifact_kind`, `artifact_id`, optional `expected_value`, `invalidate_on_change`). When a state event matches the artifact_id, every page in the reverse index gets marked.
+- `scope: ClaimScope | None` — bounds the claim's applicability (`specific_to: dict[str, str]`, `generalizes_to: yes|no|with_conditions`, `trust_in_scope`, `trust_out_of_scope`). Solves the resolved-incident overfit problem: high trust within `(service=auth-service, error_signature=OOMKilled)`, low trust outside it.
+
+A new freshness state, `pending_revalidation`, joins the existing `current | stale | archived | needs_review`.
+
+Key modules:
+
+| Module | Class | Responsibility |
+| --- | --- | --- |
+| `models.py` | `InvalidationRecord` | Append-only audit log entry: timestamp, artifact_id, affected_slugs, reason, old/new values. Persisted to `_meta/invalidation-log.jsonl`. |
+| `dependency_index.py` | `DependencyIndex` | In-memory reverse index `artifact_id → set[slug]`. `rebuild()` walks all pages on vault load (O(N)). `lookup()` is O(1) per event. `upsert_page()` updates incrementally on individual page writes. Protected by `asyncio.Lock`. |
+| `engine.py` | `InvalidationEngine` | `handle_event()` per event: lookup dependents, mark each page's frontmatter `freshness: pending_revalidation`, append `InvalidationRecord` to the JSONL log. `consume()` drains a consumer's async stream. `shadow_mode=True` logs without mutating frontmatter — used during the 2-week rollout window. |
+
+Reconciliation: a daily scheduler job re-walks the vault, rebuilds the dependency index, and re-syncs k8s/Terraform state from scratch. This is defense-in-depth against event loss (consumer crashes, watch disconnects between retries). The result is **eventual consistency** between the wiki view and live state, with a staleness bound equal to the reconciliation interval.
 
 ### Layer 2 — SigNoz Connector
 

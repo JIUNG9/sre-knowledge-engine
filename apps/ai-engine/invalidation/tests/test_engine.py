@@ -322,6 +322,72 @@ async def test_write_is_atomic_no_tempfiles_left_behind(
     assert [p.name for p in runbooks] == ["scaling-runbook.md"]
 
 
+async def test_resynth_queue_appended_with_affected_slugs(
+    tmp_vault: Path,
+    sample_pages: list[WikiPage],
+) -> None:
+    """After handle_event, the resynth queue file contains exactly the
+    slugs the record marked. Two events on the same dependents append
+    twice — the scheduler is expected to dedupe."""
+    index = DependencyIndex()
+    await index.rebuild(sample_pages)
+    engine = InvalidationEngine(vault_root=tmp_vault, index=index)
+
+    artifact = "k8s:Deployment:default/auth-service:spec.replicas"
+    await engine.handle_event(
+        StateChangeEvent(
+            artifact_kind="k8s",
+            artifact_id=artifact,
+            old_value="3",
+            new_value="5",
+            source="k8s://default/auth-service",
+        )
+    )
+
+    queue_path = tmp_vault / "_meta" / "resynth-queue.txt"
+    lines = queue_path.read_text(encoding="utf-8").splitlines()
+    assert sorted(lines) == ["auth-service", "scaling-runbook"]
+
+    await engine.handle_event(
+        StateChangeEvent(
+            artifact_kind="k8s",
+            artifact_id=artifact,
+            old_value="5",
+            new_value="6",
+            source="k8s://default/auth-service",
+        )
+    )
+    lines2 = queue_path.read_text(encoding="utf-8").splitlines()
+    # Second event appends — dedup is the scheduler's job, not ours.
+    assert len(lines2) == 4
+
+
+async def test_resynth_queue_skipped_in_shadow_mode(
+    tmp_vault: Path,
+    sample_pages: list[WikiPage],
+) -> None:
+    """Shadow mode means the engine logs but never mutates. The resynth
+    queue is a mutation — it must stay empty under the shadow flag."""
+    index = DependencyIndex()
+    await index.rebuild(sample_pages)
+    engine = InvalidationEngine(
+        vault_root=tmp_vault, index=index, shadow_mode=True
+    )
+
+    await engine.handle_event(
+        StateChangeEvent(
+            artifact_kind="k8s",
+            artifact_id="k8s:Deployment:default/auth-service:spec.replicas",
+            old_value="3",
+            new_value="5",
+            source="k8s://default/auth-service",
+        )
+    )
+
+    queue_path = tmp_vault / "_meta" / "resynth-queue.txt"
+    assert not queue_path.exists()
+
+
 async def test_fanout_cap_truncates_and_flags_record(
     tmp_vault: Path,
 ) -> None:

@@ -82,6 +82,7 @@ class InvalidationEngine:
         log_path: Path | None = None,
         shadow_mode: bool = False,
         fanout_cap: int | None = None,
+        resynth_queue_path: Path | None = None,
     ) -> None:
         """Args:
 
@@ -102,6 +103,11 @@ class InvalidationEngine:
             :attr:`DEFAULT_PER_EVENT_FANOUT_CAP` (1000). The dropped
             slugs are recovered by the daily reconciliation pass
             (design doc §7 Burst overload).
+        resynth_queue_path: File the engine appends pending slugs to so
+            the scheduler can pick them up on its next tick. Defaults
+            to ``<vault_root>/_meta/resynth-queue.txt``. The scheduler
+            owns truncation of the queue after it consumes; the engine
+            is append-only.
         """
 
         self.vault_root = Path(vault_root)
@@ -111,7 +117,11 @@ class InvalidationEngine:
         )
         self.shadow_mode = shadow_mode
         self.fanout_cap = fanout_cap or self.DEFAULT_PER_EVENT_FANOUT_CAP
+        self.resynth_queue_path = resynth_queue_path or (
+            self.vault_root / "_meta" / "resynth-queue.txt"
+        )
         self._log_lock = asyncio.Lock()
+        self._resynth_lock = asyncio.Lock()
         # Per-slug last_updated we last observed. Used to detect human
         # edits between our writes — if the on-disk last_updated is
         # newer than what we recorded, a concurrent edit happened and we
@@ -264,6 +274,7 @@ class InvalidationEngine:
         if not self.shadow_mode:
             for slug in record.affected_slugs:
                 await self._mark_pending(slug)
+            await self._enqueue_resynth(record.affected_slugs)
 
         await self._append_log(record)
         return record
@@ -385,3 +396,25 @@ class InvalidationEngine:
             line = record.model_dump_json()
             with self.log_path.open("a", encoding="utf-8") as f:
                 f.write(line + "\n")
+
+    async def _enqueue_resynth(self, slugs: list[str]) -> None:
+        """Append affected slugs to the scheduler's resynth queue.
+
+        The queue is a plain text file, one slug per line. The
+        scheduler reads it on its next tick, deduplicates, kicks off a
+        re-synthesis pass for each slug, and truncates the file. The
+        engine is strictly append-only — coordination of "what's been
+        consumed" lives on the scheduler side.
+
+        Why a flat file: matches the rest of the engine's filesystem-
+        first posture (design doc §5 'No DB'). grep-friendly for
+        operators tailing the directory during an incident.
+        """
+
+        if not slugs:
+            return
+        async with self._resynth_lock:
+            self.resynth_queue_path.parent.mkdir(parents=True, exist_ok=True)
+            with self.resynth_queue_path.open("a", encoding="utf-8") as f:
+                for slug in slugs:
+                    f.write(slug + "\n")

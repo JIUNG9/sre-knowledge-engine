@@ -5,6 +5,7 @@ Center. It provides endpoints for incident investigation, log/metric analysis,
 and interfaces with Claude API via MCP tools for autonomous SRE workflows.
 """
 
+import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -12,13 +13,18 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from config import settings
 from control_tower.api import control_tower_router, get_control_tower
 from executor import Executor, ExecutorConfig
 from executor.api import executor_router, get_executor
 from executor.audit import AuditLogger
+from invalidation.dependency_index import DependencyIndex
+from invalidation.engine import InvalidationEngine
 from routers import analyze, health, investigate, logs, mcp, wiki
 from scheduler import Scheduler, SchedulerConfig, default_jobs
 from scheduler.api import get_scheduler, scheduler_router
+from state_subscription.consumers.k8s import KubernetesConsumer
+from state_subscription.subscriber import ConsumerUnavailable
 
 # Layer 0.1 — PII Redaction Proxy for Claude API.
 #
@@ -98,6 +104,90 @@ def _build_scheduler() -> Scheduler | None:
         return None
 
 
+async def _build_invalidation(
+    app: FastAPI,
+) -> tuple[InvalidationEngine, list[asyncio.Task]] | None:
+    """Construct Layer 1.5/1.6 (state subscription + invalidation).
+
+    Returns ``None`` when the master kill switch (``invalidation_enabled``)
+    is False — the most common state by far, since the alpha rollout is
+    explicitly opt-in.
+
+    Otherwise:
+      1. Walk the wiki vault and build a populated DependencyIndex.
+         A missing or empty vault is logged but not fatal — the engine
+         with an empty index is still safe to run; events just no-op.
+      2. Instantiate the InvalidationEngine. shadow_mode is the inverse
+         of write_frontmatter so operators flip exactly one flag to go
+         live. Audit log path and resynth queue path fall back to the
+         engine's own _meta-relative defaults when None.
+      3. Optionally start the KubernetesConsumer. We catch
+         ConsumerUnavailable (no kubeconfig, no in-cluster creds) and
+         PermissionError (the read-only self-check failed) and degrade
+         to "engine running, no consumer feeding it". The engine
+         remains usable via API-injected events.
+
+    Returns the engine plus a list of supervised consumer tasks so the
+    lifespan can cancel and await them on shutdown.
+    """
+
+    if not settings.invalidation_enabled:
+        return None
+
+    index = await DependencyIndex.from_vault(settings.wiki_vault_root)
+    engine = InvalidationEngine(
+        vault_root=settings.wiki_vault_root,
+        index=index,
+        log_path=settings.invalidation_log_path,
+        shadow_mode=not settings.invalidation_write_frontmatter,
+        fanout_cap=settings.invalidation_fanout_cap,
+        resynth_queue_path=settings.invalidation_resynth_queue_path,
+    )
+    logger.info(
+        "invalidation: engine ready (shadow_mode=%s, fanout_cap=%d)",
+        engine.shadow_mode,
+        engine.fanout_cap,
+    )
+
+    tasks: list[asyncio.Task] = []
+    if not settings.invalidation_k8s_disabled:
+        try:
+            consumer = KubernetesConsumer(
+                namespaces=tuple(settings.invalidation_k8s_namespaces),
+                tracked_kinds=tuple(settings.invalidation_k8s_tracked_kinds),
+            )
+            consumer.assert_read_only()
+        except ConsumerUnavailable as exc:
+            logger.warning("k8s consumer not available: %s", exc)
+        except PermissionError as exc:
+            # Surface loudly — a misconfigured service account is
+            # exactly what the self-check is built to catch.
+            logger.error(
+                "k8s consumer refused: %s. The engine will run "
+                "without a k8s feed; fix the (Cluster)Role and "
+                "restart.",
+                exc,
+            )
+        else:
+            window = max(0.0, settings.invalidation_batch_window_ms / 1000.0)
+            task = asyncio.create_task(
+                engine.consume_with_batching(
+                    consumer.stream(), batch_window=window
+                ),
+                name="aegis.invalidation.k8s",
+            )
+            tasks.append(task)
+            logger.info(
+                "k8s consumer started (namespaces=%s, kinds=%s, "
+                "batch_window_ms=%d)",
+                settings.invalidation_k8s_namespaces,
+                settings.invalidation_k8s_tracked_kinds,
+                settings.invalidation_batch_window_ms,
+            )
+
+    return engine, tasks
+
+
 def _build_control_tower():
     """Construct a ControlTower instance for production use.
 
@@ -161,6 +251,26 @@ async def lifespan(app: FastAPI):
         app.dependency_overrides[get_executor] = lambda: executor
         logger.info("executor attached to /api/v1/executor")
 
+    # Layers 1.5 + 1.6 — state subscription + invalidation. Disabled by
+    # default; opt-in via ``AEGIS_INVALIDATION_ENABLED=1``. Within the
+    # opt-in, ``AEGIS_INVALIDATION_WRITE_FRONTMATTER=0`` (default) keeps
+    # the engine in shadow mode: every event is logged to the JSONL audit
+    # trail, but no wiki page is mutated and the resynth queue stays
+    # empty. Operators run two weeks of shadow observation, review the
+    # event-rate metrics, then flip write_frontmatter=1 for production
+    # invalidation. See docs/architecture/layer-1.5-state-subscription.md
+    # §8 for the full rollout plan.
+    invalidation_setup = await _build_invalidation(app)
+    if invalidation_setup is not None:
+        engine, tasks = invalidation_setup
+        app.state.invalidation_engine = engine
+        app.state.invalidation_tasks = tasks
+        logger.info(
+            "invalidation attached (tasks=%d, shadow=%s)",
+            len(tasks),
+            engine.shadow_mode,
+        )
+
     try:
         yield
     finally:
@@ -171,6 +281,28 @@ async def lifespan(app: FastAPI):
                 await active_scheduler.stop()
             except Exception as exc:  # noqa: BLE001
                 logger.warning("scheduler shutdown raised: %s", exc)
+
+        # Cancel and await invalidation consumer tasks. Each consumer
+        # owns daemon threads that need their stop signal to fire — the
+        # threads exit cleanly when KubernetesConsumer.stream() is
+        # cancelled and runs its finally clause.
+        active_tasks: list[asyncio.Task] = getattr(
+            app.state, "invalidation_tasks", []
+        )
+        for task in active_tasks:
+            task.cancel()
+        for task in active_tasks:
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(
+                    "invalidation task %s raised on shutdown: %s",
+                    task.get_name(),
+                    exc,
+                )
+
         logger.info("Aegis AI Engine shutting down")
 
 

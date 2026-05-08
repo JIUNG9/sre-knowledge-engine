@@ -133,3 +133,51 @@ async def test_rebuild_overwrites_previous_state(
     await index.rebuild(just_one)
     snapshot = await index.snapshot()
     assert snapshot == {}
+
+
+async def test_from_vault_walks_page_dirs(
+    tmp_vault, sample_pages: list[WikiPage]
+) -> None:
+    """The bootstrap loader walks the four standard page dirs and builds
+    the same index a hand-fed rebuild would. sample_pages already wrote
+    the pages to disk via the conftest fixture, so we just call the
+    loader and assert equivalence."""
+    index = await DependencyIndex.from_vault(tmp_vault)
+
+    replicas_id = "k8s:Deployment:default/auth-service:spec.replicas"
+    assert await index.lookup(replicas_id) == {
+        "auth-service", "scaling-runbook"
+    }
+
+
+async def test_from_vault_returns_empty_when_path_missing(tmp_path) -> None:
+    """A missing vault_root must not crash startup — return an empty
+    index and log a warning. The engine with an empty index is still
+    safe to run; it just no-ops on every event."""
+    missing = tmp_path / "does-not-exist"
+    index = await DependencyIndex.from_vault(missing)
+    assert await index.snapshot() == {}
+
+
+async def test_from_vault_skips_corrupt_pages(tmp_vault) -> None:
+    """A single corrupt frontmatter file must not block startup. The
+    loader logs and skips it, returning an index built from the
+    parseable peers."""
+    # One valid page.
+    valid = tmp_vault / "entities" / "valid.md"
+    valid.write_text(
+        "---\n"
+        "title: Valid\nslug: valid\ntype: entity\nfreshness: current\n"
+        "config_dependencies:\n"
+        "- {artifact_kind: k8s, artifact_id: 'k8s:Deployment:default/x:spec.replicas'}\n"
+        "---\n# Valid\n",
+        encoding="utf-8",
+    )
+    # One garbage file the parser can't handle.
+    garbage = tmp_vault / "entities" / "garbage.md"
+    garbage.write_text("not yaml frontmatter at all\n%%%\n", encoding="utf-8")
+
+    index = await DependencyIndex.from_vault(tmp_vault)
+    snapshot = await index.snapshot()
+    # Valid page got indexed; garbage was skipped.
+    assert "k8s:Deployment:default/x:spec.replicas" in snapshot

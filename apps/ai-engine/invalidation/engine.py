@@ -28,6 +28,7 @@ import frontmatter
 from state_subscription.models import StateChangeEvent
 
 from .dependency_index import DependencyIndex
+from .metrics import record_conflict, record_invalidation
 from .models import InvalidationRecord
 
 logger = logging.getLogger("aegis.invalidation")
@@ -277,6 +278,14 @@ class InvalidationEngine:
             await self._enqueue_resynth(record.affected_slugs)
 
         await self._append_log(record)
+        record_invalidation(
+            shadow=self.shadow_mode,
+            reason=reason,
+            pages_marked=(
+                0 if self.shadow_mode else len(record.affected_slugs)
+            ),
+            truncated=truncated,
+        )
         return record
 
     # -- Internals ----------------------------------------------------- #
@@ -320,6 +329,7 @@ class InvalidationEngine:
                 on_disk_updated.isoformat(),
                 last_seen.isoformat(),
             )
+            record_conflict()
             # Refresh last-seen so the next event doesn't keep flagging.
             self._last_seen[slug] = on_disk_updated
             return

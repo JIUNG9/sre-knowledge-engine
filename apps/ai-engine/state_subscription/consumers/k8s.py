@@ -31,6 +31,8 @@ import time
 from collections.abc import AsyncIterator, Iterable
 from typing import Any
 
+from invalidation.metrics import record_consumer_error, record_consumer_event
+
 from ..models import StateChangeEvent
 from ..subscriber import Consumer, ConsumerUnavailable
 
@@ -51,6 +53,16 @@ DEFAULT_TRACKED_KINDS: tuple[str, ...] = (
 # The drain loop checks the type and either exits cleanly or raises.
 _STREAM_END = object()
 _STREAM_ERROR = object()
+
+
+def _kind_from_artifact(artifact_id: str) -> str | None:
+    """Extract the k8s Kind from a ``k8s:<Kind>:<ns>/<name>:<path>`` id.
+
+    Returns ``None`` on any parse failure — the kind label is purely
+    for metric grouping and a missing label is not worth raising over.
+    """
+    parts = artifact_id.split(":", 3)
+    return parts[1] if len(parts) > 1 and parts[0] == "k8s" else None
 
 
 class KubernetesConsumer(Consumer):
@@ -263,8 +275,12 @@ class KubernetesConsumer(Consumer):
                     continue
                 if event is _STREAM_ERROR:
                     # Bubble up — the engine will log and unsubscribe us.
+                    record_consumer_error(self.name, "watcher_exhausted")
                     raise RuntimeError("k8s watcher thread exhausted retries")
                 if isinstance(event, StateChangeEvent):
+                    record_consumer_event(
+                        self.name, kind=_kind_from_artifact(event.artifact_id)
+                    )
                     yield event
         finally:
             self._stop_event.set()

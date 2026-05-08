@@ -14,9 +14,23 @@ nothing and complicate reasoning about consistency.
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections.abc import Iterable
+from pathlib import Path
 
 from wiki.synthesizer import WikiPage
+
+logger = logging.getLogger("aegis.invalidation.index")
+
+# Subdirectories of the vault that may contain wiki pages. Mirror the
+# layout used by InvalidationEngine._find_page_file so the loader and
+# the writer agree on which files exist.
+_VAULT_PAGE_DIRS: tuple[str, ...] = (
+    "entities",
+    "concepts",
+    "incidents",
+    "runbooks",
+)
 
 
 class DependencyIndex:
@@ -94,3 +108,61 @@ class DependencyIndex:
 
         async with self._lock:
             return {k: set(v) for k, v in self._index.items()}
+
+    @classmethod
+    async def from_vault(cls, vault_root: Path) -> "DependencyIndex":
+        """Build a populated index by walking ``vault_root``.
+
+        Walks the four standard page directories (entities, concepts,
+        incidents, runbooks) and parses every ``*.md`` file via
+        :meth:`WikiPage.from_file`. Pages that fail to parse are
+        logged at WARNING and skipped — a single corrupt frontmatter
+        file should never block app startup. The remaining pages feed
+        :meth:`rebuild`.
+
+        Returns an instance whose internal state is consistent with
+        the vault at the moment of the walk. Subsequent page writes
+        should call :meth:`upsert_page` on this instance to keep the
+        index live.
+
+        This is the intended entry point from the FastAPI lifespan
+        handler. Tests can either call this directly against a tmp
+        vault or instantiate ``DependencyIndex()`` and feed canned
+        pages via :meth:`rebuild` — both code paths exercise the same
+        index data structure.
+        """
+
+        if not vault_root.exists():
+            logger.warning(
+                "invalidation: vault_root %s does not exist; "
+                "returning empty index",
+                vault_root,
+            )
+            return cls()
+
+        pages: list[WikiPage] = []
+        skipped = 0
+        for type_dir in _VAULT_PAGE_DIRS:
+            type_path = vault_root / type_dir
+            if not type_path.exists():
+                continue
+            for page_path in sorted(type_path.rglob("*.md")):
+                try:
+                    pages.append(WikiPage.from_file(page_path))
+                except Exception as exc:  # noqa: BLE001
+                    skipped += 1
+                    logger.warning(
+                        "invalidation: failed to load %s: %s",
+                        page_path,
+                        exc,
+                    )
+
+        index = cls()
+        await index.rebuild(pages)
+        logger.info(
+            "invalidation: built index from %d pages (%d skipped) at %s",
+            len(pages),
+            skipped,
+            vault_root,
+        )
+        return index

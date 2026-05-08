@@ -132,6 +132,35 @@ def staleness_lint_job(
     )
 
 
+def resynth_queue_drain_job(
+    *,
+    func: JobFunc,
+    interval_seconds: int = 60,
+    enabled: bool = True,
+) -> Job:
+    """Factory: drain the InvalidationEngine's resynth-hint queue.
+
+    The engine appends slugs to ``<vault_root>/_meta/resynth-queue.txt``;
+    this job rotates the file, dedupes the slugs, and re-synthesizes
+    each one via the injected ``func``. ``func`` must be self-contained
+    — production code wraps :func:`invalidation.resynth_queue.drain_resynth_queue`
+    bound to the live queue path and a WikiEngine-backed resynth callable.
+
+    Default cadence is 60s — fast enough to keep ``pending_revalidation``
+    pages from lingering, slow enough not to thrash the LLM. Tunable via
+    ``AEGIS_RESYNTH_DRAIN_INTERVAL_SEC`` if the rollout demands either
+    direction.
+    """
+    return Job(
+        id="resynth_queue_drain",
+        name="Invalidation resynth queue drain",
+        interval_seconds=max(1, interval_seconds),
+        func=func,
+        enabled=enabled,
+        metadata={"connector": "invalidation_engine"},
+    )
+
+
 def doc_reconciliation_job(
     *,
     func: JobFunc,

@@ -112,7 +112,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         # Pinned to a release rather than @master: this job's result should change
         # when the code or the advisory database changes, not when the action does.
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .

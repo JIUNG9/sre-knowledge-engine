@@ -46,7 +46,7 @@ logger = logging.getLogger("aegis.wiki.publish")
 
 
 _DEFAULT_VAULT_ROOT = Path("~/Documents/obsidian-sre").expanduser()
-_DEFAULT_REMOTE_URL = "git@github.com:JIUNG9/aegis-wiki.git"
+_DEFAULT_REMOTE_URL = "git@github.com:JIUNG9/sre-knowledge-wiki.git"
 _META_DIR_NAME = "_meta"
 _LOG_FILENAME = "publish-log.jsonl"
 

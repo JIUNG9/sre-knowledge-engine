@@ -110,9 +110,15 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        # Pinned to a release rather than @master: this job's result should change
+        # when the code or the advisory database changes, not when the action does.
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: fs
           scan-ref: .
           severity: CRITICAL,HIGH
+          # Only fail on findings that have a published fix. An unfixed advisory in
+          # a transitive dependency is not something this repo can act on, and
+          # failing the build on it just trains people to ignore the red X.
+          ignore-unfixed: true
           exit-code: 1

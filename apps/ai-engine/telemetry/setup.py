@@ -31,7 +31,7 @@ logger = logging.getLogger("aegis.telemetry")
 
 _lock = threading.Lock()
 _initialized: bool = False
-_provider: "TracerProvider | None" = None
+_provider: TracerProvider | None = None
 _active_config: TelemetryConfig | None = None
 
 
@@ -49,7 +49,7 @@ def setup_telemetry(
     config: TelemetryConfig | None = None,
     *,
     force: bool = False,
-) -> "TracerProvider | None":
+) -> TracerProvider | None:
     """Install the global OTel TracerProvider for Aegis.
 
     Args:

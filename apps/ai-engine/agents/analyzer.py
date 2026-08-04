@@ -6,7 +6,7 @@ anomalies, patterns, and actionable insights for SRE workflows.
 
 import re
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from config import settings
 
@@ -125,7 +125,7 @@ class LogAnalyzer:
                 "Check database write latency and connection pool metrics",
                 "Review recent deployments to downstream-service-b",
             ],
-            "analyzed_at": datetime.now(timezone.utc).isoformat(),
+            "analyzed_at": datetime.now(UTC).isoformat(),
         }
 
     # ------------------------------------------------------------------ #
@@ -181,7 +181,7 @@ class LogAnalyzer:
             if msg not in seen_messages:
                 seen_messages.add(msg)
                 key_events.append({
-                    "timestamp": entry.get("timestamp", datetime.now(timezone.utc).isoformat()),
+                    "timestamp": entry.get("timestamp", datetime.now(UTC).isoformat()),
                     "service": entry.get("service", "unknown"),
                     "level": entry.get("level", "error"),
                     "message": msg,
@@ -511,5 +511,5 @@ class MetricAnalyzer:
                 "Profile application for CPU-intensive code paths",
                 "Check for recent deployments that may have introduced regression",
             ],
-            "analyzed_at": datetime.now(timezone.utc).isoformat(),
+            "analyzed_at": datetime.now(UTC).isoformat(),
         }

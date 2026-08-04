@@ -1,5 +1,7 @@
 """MCP (Model Context Protocol) management endpoints."""
 
+from datetime import UTC
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -73,14 +75,14 @@ async def execute_tool(tool_name: str, request: ToolExecuteRequest):
 
     # In production, WRITE tools would require Slack approval
     # For testing, we execute with mock results
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     result = {
         "tool": tool_name,
         "params": request.params,
         "result": f"Mock execution result for {tool_name}",
         "requires_approval": requires_approval,
-        "executed_at": datetime.now(timezone.utc).isoformat(),
+        "executed_at": datetime.now(UTC).isoformat(),
     }
 
     # Log to audit trail

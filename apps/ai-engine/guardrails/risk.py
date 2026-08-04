@@ -18,8 +18,9 @@ always carries a penalty.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Any, Iterable
+from typing import Any
 
 from .tiers import AutomationTier, tier_cap_for_risk
 
@@ -110,9 +111,7 @@ class Action:
             return True
         # Handle phrases like "scale to 0" / "scale to zero".
         hay = f"{self.name} {self.verb}".lower()
-        if "scale" in hay and ("to 0" in hay or "to zero" in hay):
-            return True
-        return False
+        return bool("scale" in hay and ("to 0" in hay or "to zero" in hay))
 
 
 @dataclass(frozen=True)
@@ -132,7 +131,7 @@ class RiskScore:
     def __post_init__(self) -> None:
         object.__setattr__(self, "score", max(0, min(100, int(self.score))))
 
-    def with_additional(self, delta: int, reason: str) -> "RiskScore":
+    def with_additional(self, delta: int, reason: str) -> RiskScore:
         """Return a new :class:`RiskScore` with ``delta`` added."""
         new_score = max(0, min(100, self.score + int(delta)))
         return RiskScore(

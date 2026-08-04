@@ -85,9 +85,8 @@ def test_llm_span_records_exception(memory_exporter) -> None:
     class LLMBoom(Exception):
         pass
 
-    with pytest.raises(LLMBoom):
-        with trace_llm_call(model="claude-opus-4-7", operation="chat"):
-            raise LLMBoom("rate limited")
+    with pytest.raises(LLMBoom), trace_llm_call(model="claude-opus-4-7", operation="chat"):
+        raise LLMBoom("rate limited")
 
     spans = memory_exporter.get_finished_spans()
     assert len(spans) == 1

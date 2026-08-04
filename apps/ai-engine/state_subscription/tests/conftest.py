@@ -218,7 +218,7 @@ class FakeWatch:
 
     # Class-level batches so the consumer's own ``Watch()`` call hits us.
     batches: list[tuple[list[dict[str, Any]], Exception | None]] = []
-    instances: list["FakeWatch"] = []
+    instances: list[FakeWatch] = []
 
     @classmethod
     def reset(cls) -> None:

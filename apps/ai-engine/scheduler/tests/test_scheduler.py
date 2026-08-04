@@ -22,7 +22,6 @@ from scheduler.history import JobHistory
 from scheduler.jobs import Job
 from scheduler.scheduler import Scheduler
 
-
 # --------------------------------------------------------------------------- #
 # Facade unit tests (no APScheduler needed)
 # --------------------------------------------------------------------------- #

@@ -37,13 +37,13 @@ Every decision is logged at INFO with its driving signals for audit.
 from __future__ import annotations
 
 import logging
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any, AsyncIterator, Literal
+from typing import Any, Literal
 
 from .backends import ClaudeBackend, OllamaBackend, OllamaUnavailable
 from .config import LLMRouterConfig
 from .sensitivity import Sensitivity, classify_sensitivity
-
 
 logger = logging.getLogger("aegis.llm_router")
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from control_tower.config import ControlTowerConfig
 from control_tower.modes import (
@@ -84,5 +85,5 @@ def test_config_custom_budget():
 
 
 def test_config_rejects_too_small_eco_budget():
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         ControlTowerConfig(eco_context_tokens=0)

@@ -23,8 +23,9 @@ import hashlib
 import re
 import struct
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 # Regex order matters — apply longest/most-specific first.
 _CANON_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
@@ -125,7 +126,7 @@ class _MinHash:
     def jaccard(a: tuple[int, ...], b: tuple[int, ...]) -> float:
         if not a or not b or len(a) != len(b):
             return 0.0
-        matches = sum(1 for x, y in zip(a, b) if x == y)
+        matches = sum(1 for x, y in zip(a, b, strict=False) if x == y)
         return matches / len(a)
 
 

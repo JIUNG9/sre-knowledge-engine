@@ -18,7 +18,7 @@ over budget we record a warning on the context rather than blowing up.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any, Protocol
 
 from .config import InvestigationModeName
@@ -187,7 +187,7 @@ class ContextBuilder:
         """
         spec: ModeSpec = get_mode_spec(mode)
         ctx = Context(mode=mode, budget_tokens=budget_tokens)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         start = now - timedelta(minutes=self.lookback_minutes)
 
         if spec.include_wiki:

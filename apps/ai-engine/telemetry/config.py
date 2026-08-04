@@ -77,7 +77,7 @@ class TelemetryConfig:
             )
 
     @classmethod
-    def from_env(cls) -> "TelemetryConfig":
+    def from_env(cls) -> TelemetryConfig:
         """Build a config from environment variables.
 
         Precedence: AEGIS_TELEMETRY_EXPORTER overrides auto-detection.

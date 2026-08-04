@@ -17,8 +17,9 @@ import os
 import secrets
 import string
 import time
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
-from typing import Iterable, List, Literal, Optional
+from typing import Literal
 
 from .registry import HoneyTokenRegistry
 
@@ -120,7 +121,7 @@ def _render(category: TokenCategory, marker: str) -> str:
 class HoneyTokenGenerator:
     """Create and persist honey tokens."""
 
-    def __init__(self, registry: Optional[HoneyTokenRegistry] = None) -> None:
+    def __init__(self, registry: HoneyTokenRegistry | None = None) -> None:
         self._registry = registry or HoneyTokenRegistry()
 
     @property
@@ -149,7 +150,7 @@ class HoneyTokenGenerator:
     def create_batch(
         self,
         categories: Iterable[TokenCategory],
-    ) -> List[HoneyToken]:
+    ) -> list[HoneyToken]:
         return [self.create(c) for c in categories]
 
     def all_categories(self) -> tuple[TokenCategory, ...]:

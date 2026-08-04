@@ -8,7 +8,6 @@ full Aegis dependency stack (useful for CI and unit tests).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -29,7 +28,7 @@ class HoneyTokenConfig:
 
     enabled: bool = True
     registry_path: str = "./honeytokens.db"
-    webhook_url: Optional[str] = None
+    webhook_url: str | None = None
     seed_demo_vault: bool = True
     otel_service_name: str = "aegis-ai-engine"
     log_registry_contents: bool = False

@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import json
-
 import importlib
+import json
 
 ad = importlib.import_module("mcp.tools.read.finops.anomaly_detect")
 

@@ -11,8 +11,9 @@ README so reviewers know they were a deliberate choice, not an oversight.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Iterator
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -64,11 +65,11 @@ class LLMSpanHandle:
             )
     """
 
-    def __init__(self, otel_span: "Span | None") -> None:
+    def __init__(self, otel_span: Span | None) -> None:
         self._span = otel_span
 
     @property
-    def span(self) -> "Span | None":
+    def span(self) -> Span | None:
         return self._span
 
     def _set(self, key: str, value: Any) -> None:

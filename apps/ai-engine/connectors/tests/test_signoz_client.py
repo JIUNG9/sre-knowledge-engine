@@ -11,7 +11,6 @@ import pytest
 
 from connectors.signoz_client import SigNozClient, SigNozError
 
-
 pytestmark = pytest.mark.asyncio
 
 

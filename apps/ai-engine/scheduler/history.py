@@ -12,9 +12,9 @@ from __future__ import annotations
 
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from threading import Lock
-from typing import Any, Deque, Literal
+from typing import Any, Literal
 
 JobOutcome = Literal["success", "skipped", "failed"]
 
@@ -62,7 +62,7 @@ class JobHistory:
 
     def __init__(self, max_per_job: int = 100) -> None:
         self._max_per_job = max(1, max_per_job)
-        self._records: dict[str, Deque[JobRunRecord]] = {}
+        self._records: dict[str, deque[JobRunRecord]] = {}
         self._lock = Lock()
 
     def record(self, run: JobRunRecord) -> None:
@@ -105,4 +105,4 @@ class JobHistory:
 
 def utc_now_iso() -> str:
     """Helper for consistent ISO-8601 UTC timestamps across the package."""
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import pytest
@@ -178,7 +178,7 @@ async def test_compare_handles_garbled_llm_payload(two_sources):
 
 @pytest.mark.asyncio
 async def test_llm_pair_limit_caps_router_calls():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     docs = [
         Doc(id=f"a{i}", source="obsidian", title=f"DB {i}", body=f"postgres {13+i}", last_modified=now - timedelta(days=i))
         for i in range(5)

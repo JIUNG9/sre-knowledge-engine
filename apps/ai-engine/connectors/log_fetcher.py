@@ -15,7 +15,6 @@ from typing import Any
 from connectors.models import LogEntry
 from connectors.signoz_client import SigNozClient
 
-
 logger = logging.getLogger("aegis.connectors.logs")
 
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import AsyncIterator
+from datetime import UTC
 from pathlib import Path
 
 import frontmatter
@@ -14,7 +15,6 @@ from invalidation.engine import InvalidationEngine
 from invalidation.models import InvalidationRecord
 from state_subscription.models import StateChangeEvent
 from wiki.synthesizer import WikiPage
-
 
 pytestmark = pytest.mark.asyncio
 
@@ -393,8 +393,9 @@ async def test_fanout_cap_truncates_and_flags_record(
 ) -> None:
     """An artifact that 50 pages depend on, with a fanout_cap of 5,
     should produce: 5 marked pages, truncated=True, total_dependents=50."""
+    from datetime import datetime
+
     import frontmatter as fm
-    from datetime import datetime, timezone
 
     artifact = "k8s:Deployment:default/popular-svc:spec.replicas"
     pages: list[WikiPage] = []
@@ -406,7 +407,7 @@ async def test_fanout_cap_truncates_and_flags_record(
             "slug": slug,
             "type": "entity",
             "freshness": "current",
-            "last_updated": datetime.now(timezone.utc).isoformat(),
+            "last_updated": datetime.now(UTC).isoformat(),
             "config_dependencies": [
                 {
                     "artifact_kind": "k8s",
@@ -505,7 +506,7 @@ async def test_concurrent_edit_skips_rewrite(
     """A human edits the page after the engine first marked it. A
     second event with a stale last-seen must NOT clobber the human's
     edit — concurrent-edit conflict, operator wins (design §7)."""
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     index = DependencyIndex()
     await index.rebuild(sample_pages)
@@ -531,7 +532,7 @@ async def test_concurrent_edit_skips_rewrite(
     post = frontmatter.load(str(page_path))
     post["freshness"] = "current"
     post["last_updated"] = datetime(
-        2099, 1, 1, tzinfo=timezone.utc
+        2099, 1, 1, tzinfo=UTC
     ).isoformat()
     page_path.write_text(frontmatter.dumps(post), encoding="utf-8")
 

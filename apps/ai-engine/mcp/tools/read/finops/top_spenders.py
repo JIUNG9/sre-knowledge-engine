@@ -13,7 +13,7 @@ backend's unavailability in the ``providers`` sub-map and moves on.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from mcp.scoped_tool import scoped_tool
@@ -176,7 +176,7 @@ def _window_to_dates(window: str) -> tuple[str, str]:
     Cost Explorer ``End`` is exclusive, so we set it to tomorrow's date.
     """
     days = _window_to_days(window)
-    today = datetime.now(timezone.utc).date()
+    today = datetime.now(UTC).date()
     start = today - timedelta(days=days)
     end = today + timedelta(days=1)  # exclusive
     return start.isoformat(), end.isoformat()

@@ -16,7 +16,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal
 
@@ -53,7 +53,7 @@ class SignozSyncResult(BaseModel):
     """
 
     synced_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
     alerts_fetched: int = 0
     incidents_ingested: int = 0
@@ -206,14 +206,11 @@ class SignozSync:
             resp = await self._request_with_retry(client, "GET", url)
         body = resp.json()
         # API sometimes wraps in {"status": "success", "data": [...]}
-        if isinstance(body, dict):
-            alerts = body.get("data") or body.get("alerts") or []
-        else:
-            alerts = body
+        alerts = body.get("data") or body.get("alerts") or [] if isinstance(body, dict) else body
         if not isinstance(alerts, list):
             alerts = []
 
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
+        cutoff = datetime.now(UTC) - timedelta(hours=hours)
         filtered: list[dict[str, Any]] = []
         for alert in alerts:
             ts_raw = (
@@ -377,7 +374,7 @@ class SignozSync:
     def _save_synced_ids(self, ids: set[str]) -> None:
         self._meta_dir.mkdir(parents=True, exist_ok=True)
         payload = {
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
             "ids": sorted(ids),
         }
         tmp = self._synced_path.with_suffix(".json.tmp")

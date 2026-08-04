@@ -25,9 +25,9 @@ Why an injectable client?
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import threading
-import time
 from collections.abc import AsyncIterator, Iterable
 from typing import Any
 
@@ -212,7 +212,8 @@ class KubernetesConsumer(Consumer):
         """
 
         try:
-            from kubernetes import client, config as kube_config  # type: ignore
+            from kubernetes import client  # type: ignore
+            from kubernetes import config as kube_config
         except ImportError as exc:
             raise ConsumerUnavailable(
                 "kubernetes Python client not installed. "
@@ -348,9 +349,8 @@ class KubernetesConsumer(Consumer):
                     self._max_retries,
                     sleep_for,
                 )
-                if sleep_for > 0:
-                    if self._stop_event.wait(sleep_for):
-                        break
+                if sleep_for > 0 and self._stop_event.wait(sleep_for):
+                    break
 
         self._enqueue(loop, queue, _STREAM_END)
 
@@ -480,11 +480,9 @@ class KubernetesConsumer(Consumer):
                     "k8s consumer: event queue full; dropping event (raise queue_maxsize)"
                 )
 
-        try:
+        # Loop already closed — caller cancelled. Nothing to do.
+        with contextlib.suppress(RuntimeError):
             loop.call_soon_threadsafe(_put)
-        except RuntimeError:
-            # Loop already closed — caller cancelled. Nothing to do.
-            pass
 
 
 # -- Module helpers ---------------------------------------------------

@@ -33,8 +33,9 @@ The two backends are merged and deduplicated in the ``hybrid`` provider.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, Literal
+from typing import Literal
 
 # --------------------------------------------------------------------------- #
 # Built-in regex patterns

@@ -5,7 +5,7 @@
   "description": "AI-Native DevSecOps Command Center",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JIUNG9/aegis.git"
+    "url": "https://github.com/JIUNG9/sre-knowledge-engine.git"
   },
   "author": "June Gu <junegu@aegis-devsecops.dev>",
   "license": "Apache-2.0",

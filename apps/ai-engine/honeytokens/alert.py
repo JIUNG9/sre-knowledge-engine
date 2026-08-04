@@ -19,7 +19,8 @@ import json
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Iterable, Optional
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from .config import get_config
 
@@ -32,7 +33,7 @@ log = logging.getLogger("aegis.honeytokens.alert")
 _BANNER = "!" * 72
 
 
-def _emit_otel(hits: Iterable["HoneyTokenHit"]) -> None:
+def _emit_otel(hits: Iterable[HoneyTokenHit]) -> None:
     try:  # pragma: no cover - exercised only when OTel is installed
         from opentelemetry import trace
         from opentelemetry.trace.status import Status, StatusCode
@@ -48,7 +49,7 @@ def _emit_otel(hits: Iterable["HoneyTokenHit"]) -> None:
             span.set_status(Status(StatusCode.ERROR, "honey token leaked"))
 
 
-def _emit_webhook(hits: Iterable["HoneyTokenHit"], url: str) -> None:
+def _emit_webhook(hits: Iterable[HoneyTokenHit], url: str) -> None:
     payload = {
         "event": "aegis.honeytoken.hit",
         "count": 0,
@@ -84,7 +85,7 @@ def _emit_webhook(hits: Iterable["HoneyTokenHit"], url: str) -> None:
         log.error("webhook delivery failed: %s", exc)
 
 
-def _emit_stderr(hits: Iterable["HoneyTokenHit"]) -> None:
+def _emit_stderr(hits: Iterable[HoneyTokenHit]) -> None:
     hits_list = list(hits)
     if not hits_list:
         return
@@ -101,7 +102,7 @@ def _emit_stderr(hits: Iterable["HoneyTokenHit"]) -> None:
     print(_BANNER, file=sys.stderr)
 
 
-def fire(hits: Iterable["HoneyTokenHit"], *, webhook_url: Optional[str] = None) -> None:
+def fire(hits: Iterable[HoneyTokenHit], *, webhook_url: str | None = None) -> None:
     """Dispatch all configured alert channels for the given hits.
 
     Safe to call with an empty iterable (no-op). Never raises; every

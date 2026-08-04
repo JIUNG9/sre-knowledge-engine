@@ -16,11 +16,12 @@ abort the entire stream.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import os
 import tempfile
 from collections.abc import AsyncIterator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import frontmatter
@@ -55,13 +56,13 @@ def _coerce_datetime(value: object) -> datetime | None:
     if value is None:
         return None
     if isinstance(value, datetime):
-        return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+        return value if value.tzinfo else value.replace(tzinfo=UTC)
     if isinstance(value, str):
         try:
             parsed = datetime.fromisoformat(value)
         except ValueError:
             return None
-        return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
     return None
 
 
@@ -191,7 +192,7 @@ class InvalidationEngine:
                     nxt = await asyncio.wait_for(
                         iterator.__anext__(), timeout=remaining
                     )
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     break
                 except StopAsyncIteration:
                     stream_done = True
@@ -335,7 +336,7 @@ class InvalidationEngine:
             return
 
         post["freshness"] = "pending_revalidation"
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         post["last_invalidation_at"] = now.isoformat()
         self._atomic_write(page_path, frontmatter.dumps(post))
         # The engine just touched the file; record what we wrote so the
@@ -373,10 +374,8 @@ class InvalidationEngine:
         except Exception:
             # Best-effort cleanup; the OS will GC the tempfile eventually
             # but explicit removal keeps the directory tidy.
-            try:
+            with contextlib.suppress(OSError):
                 os.unlink(tmp_path)
-            except OSError:
-                pass
             raise
 
     def _find_page_file(self, slug: str) -> Path | None:

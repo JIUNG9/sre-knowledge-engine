@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
 import pytest
 
 from control_tower.context_builder import ContextBuilder, WikiAdapter
 from control_tower.investigation import Alert, WikiSnippet
-
 
 # --------------------------------------------------------------------------- #
 # Stubs
@@ -98,7 +97,7 @@ class StubPatternAnalyzer:
 
 def _log_row(**kwargs):
     base = {
-        "timestamp": datetime.now(timezone.utc),
+        "timestamp": datetime.now(UTC),
         "body": "error opening connection",
         "severity": "error",
         "service": "acme-api",
@@ -111,7 +110,7 @@ def _log_row(**kwargs):
 def _metric_row(value=0.42):
     return SimpleNamespace(
         labels={"service": "acme-api"},
-        points=[SimpleNamespace(value=value, timestamp=datetime.now(timezone.utc))],
+        points=[SimpleNamespace(value=value, timestamp=datetime.now(UTC))],
     )
 
 
@@ -129,7 +128,7 @@ def _alert_event(rule_id="r-1"):
     return SimpleNamespace(
         rule_id=rule_id,
         state="firing",
-        fired_at=datetime.now(timezone.utc) - timedelta(minutes=5),
+        fired_at=datetime.now(UTC) - timedelta(minutes=5),
     )
 
 
@@ -301,14 +300,14 @@ def test_wiki_adapter_substring_ranking():
         title="Acme API runbook",
         slug="acme-api-runbook",
         body="the Acme API exposes /health",
-        last_updated=datetime.now(timezone.utc),
+        last_updated=datetime.now(UTC),
         type="runbook",
     )
     page2 = SimpleNamespace(
         title="Overview",
         slug="overview",
         body="unrelated overview page",
-        last_updated=datetime.now(timezone.utc),
+        last_updated=datetime.now(UTC),
         type="concept",
     )
     engine = SimpleNamespace(_pages=[page1, page2])

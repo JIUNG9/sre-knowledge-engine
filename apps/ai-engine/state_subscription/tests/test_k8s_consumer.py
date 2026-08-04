@@ -28,7 +28,6 @@ from state_subscription.tests.conftest import (  # type: ignore[import-not-found
     FakeKubeClient,
 )
 
-
 pytestmark = pytest.mark.asyncio
 
 

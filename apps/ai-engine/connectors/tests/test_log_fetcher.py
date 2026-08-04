@@ -10,7 +10,6 @@ import pytest
 from connectors.log_fetcher import LogFetcher
 from connectors.signoz_client import SigNozClient
 
-
 pytestmark = pytest.mark.asyncio
 
 

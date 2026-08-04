@@ -16,10 +16,9 @@ stale on its own.
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from .models import Doc, StalenessScore
-
 
 # Anything older than this caps the age contribution at 1.0.
 _AGE_FLOOR_DAYS = 730  # 2 years
@@ -71,7 +70,7 @@ def score_staleness(
     The function is pure — it takes ``now`` as an argument so tests can
     freeze time without monkey-patching ``datetime``.
     """
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
     reasons: list[str] = []
     stale_indicators: list[str] = []
     decommissioned_refs: list[str] = []
@@ -82,7 +81,7 @@ def score_staleness(
     ts = doc.last_modified
     if ts is not None:
         if ts.tzinfo is None:
-            ts = ts.replace(tzinfo=timezone.utc)
+            ts = ts.replace(tzinfo=UTC)
         delta = now - ts
         age_days = max(delta.days, 0)
         age_score = min(age_days / _AGE_FLOOR_DAYS, 1.0)

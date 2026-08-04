@@ -7,7 +7,6 @@ query translation, and anomaly detection features.
 
 from pydantic import BaseModel, Field
 
-
 # ------------------------------------------------------------------ #
 # Log summarization
 # ------------------------------------------------------------------ #

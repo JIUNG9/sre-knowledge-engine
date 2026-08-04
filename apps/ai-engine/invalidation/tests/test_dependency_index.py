@@ -7,7 +7,6 @@ import pytest
 from invalidation.dependency_index import DependencyIndex
 from wiki.synthesizer import ConfigDependency, WikiPage
 
-
 pytestmark = pytest.mark.asyncio
 
 

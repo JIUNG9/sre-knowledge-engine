@@ -21,7 +21,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 Outcome = Literal["executed", "refused", "failed"]
 
 
@@ -52,7 +51,7 @@ class ExecutionResult(BaseModel):
         target: str = "",
         investigation_id: str | None = None,
         audit_id: str | None = None,
-    ) -> "ExecutionResult":
+    ) -> ExecutionResult:
         """Convenience constructor for refusals — no command was run."""
         return cls(
             outcome="refused",

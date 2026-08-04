@@ -84,13 +84,23 @@ jobs:
 
       - name: Install dependencies
         working-directory: apps/ai-engine
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          # Test + lint deps. Previously undeclared, so this job could lint but
+          # never run the suite.
+          pip install -e ".[dev]"
 
       - name: Lint
         working-directory: apps/ai-engine
-        run: |
-          pip install ruff
-          ruff check .
+        # ruff is version-pinned in the dev extra on purpose. It was unpinned, and
+        # ruff 0.16 widened its implicit default rule set from ~4 findings to ~600
+        # on this tree — CI went red on a dependency release, with no code change.
+        # The rule set is now declared in pyproject.toml [tool.ruff.lint].
+        run: ruff check .
+
+      - name: Test
+        working-directory: apps/ai-engine
+        run: pytest -q
 
   security-scan:
     name: Security Scan

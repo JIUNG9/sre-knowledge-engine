@@ -18,7 +18,8 @@ of the ai-engine already depends on.
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
 
 import httpx
 
@@ -69,7 +70,7 @@ class OllamaBackend:
     # ------------------------------------------------------------------ #
     # Public API
     # ------------------------------------------------------------------ #
-    async def complete(self, messages: list[dict]) -> "RouterResponse":
+    async def complete(self, messages: list[dict]) -> RouterResponse:
         """Run a non-streaming completion via ``POST /api/chat``."""
         from ..router import RouterResponse  # local to avoid cycle
 
@@ -138,12 +139,14 @@ class OllamaBackend:
         }
 
         try:
-            async with httpx.AsyncClient(timeout=self.timeout_s) as client:
-                async with client.stream(
+            async with (
+                httpx.AsyncClient(timeout=self.timeout_s) as client,
+                client.stream(
                     "POST",
                     f"{self.base_url}/api/chat",
                     json=payload,
-                ) as resp:
+                ) as resp,
+            ):
                     if resp.status_code >= 400:
                         body = await resp.aread()
                         raise OllamaUnavailable(

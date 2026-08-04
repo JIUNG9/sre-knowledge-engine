@@ -11,8 +11,9 @@ import logging
 import os
 import sqlite3
 import threading
+from collections.abc import Iterable
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Iterable, List, Optional
+from typing import TYPE_CHECKING
 
 from .config import get_config
 
@@ -39,7 +40,7 @@ CREATE INDEX IF NOT EXISTS idx_honey_marker ON honey_tokens(marker);
 class HoneyTokenRegistry:
     """Thread-safe SQLite registry for honey tokens."""
 
-    def __init__(self, path: Optional[str] = None) -> None:
+    def __init__(self, path: str | None = None) -> None:
         self._path = path or get_config().registry_path
         self._lock = threading.RLock()
         parent = os.path.dirname(os.path.abspath(self._path))
@@ -65,7 +66,7 @@ class HoneyTokenRegistry:
 
     # ------------------------------------------------------------------ CRUD
 
-    def insert(self, token: "HoneyToken") -> None:
+    def insert(self, token: HoneyToken) -> None:
         with self._lock, self._connect() as conn:
             conn.execute(
                 """
@@ -88,7 +89,7 @@ class HoneyTokenRegistry:
         # Deliberately NO info-level log of the value.
         log.warning("honey token persisted id=%s category=%s", token.id, token.category)
 
-    def all_markers(self) -> List[str]:
+    def all_markers(self) -> list[str]:
         with self._lock, self._connect() as conn:
             rows = conn.execute("SELECT marker FROM honey_tokens").fetchall()
             return [r[0] for r in rows]
@@ -97,7 +98,7 @@ class HoneyTokenRegistry:
         with self._lock, self._connect() as conn:
             return int(conn.execute("SELECT COUNT(*) FROM honey_tokens").fetchone()[0])
 
-    def get_by_marker(self, marker: str) -> Optional[dict]:
+    def get_by_marker(self, marker: str) -> dict | None:
         with self._lock, self._connect() as conn:
             row = conn.execute(
                 "SELECT id, category, value, marker, fingerprint, created_at, "
@@ -116,7 +117,7 @@ class HoneyTokenRegistry:
                 "seeded_locations": [p for p in (row[6] or "").split("\n") if p],
             }
 
-    def list_metadata(self) -> List[dict]:
+    def list_metadata(self) -> list[dict]:
         """Return metadata WITHOUT values. Safe for admin UI."""
         with self._lock, self._connect() as conn:
             rows = conn.execute(

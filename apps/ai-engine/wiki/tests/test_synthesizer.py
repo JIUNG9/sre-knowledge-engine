@@ -10,11 +10,12 @@ from __future__ import annotations
 
 import sys
 import textwrap
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import frontmatter
 import pytest
+from pydantic import ValidationError
 
 # Ensure ``from wiki.synthesizer import ...`` resolves to apps/ai-engine when
 # the suite is run via an explicit path (this dir is not in pyproject's
@@ -28,7 +29,6 @@ from wiki.synthesizer import (  # noqa: E402 - sys.path tweak above
     ConfigDependency,
     WikiPage,
 )
-
 
 # --- Backward compatibility -------------------------------------------------- #
 
@@ -80,7 +80,7 @@ def test_wikipage_roundtrips_config_dependencies() -> None:
         path=Path("entities/auth-service.md"),
         frontmatter={},
         body="...",
-        last_updated=datetime(2026, 4, 26, tzinfo=timezone.utc),
+        last_updated=datetime(2026, 4, 26, tzinfo=UTC),
         sources=[],
         freshness="current",
         config_dependencies=[
@@ -112,7 +112,7 @@ def test_wikipage_roundtrips_through_disk(tmp_path: Path) -> None:
         path=tmp_path / "entities" / "auth-service.md",
         frontmatter={},
         body="Body.",
-        last_updated=datetime(2026, 4, 26, tzinfo=timezone.utc),
+        last_updated=datetime(2026, 4, 26, tzinfo=UTC),
         sources=["confluence:Auth"],
         freshness="pending_revalidation",
         config_dependencies=[
@@ -203,9 +203,9 @@ def test_claim_scope_generalizes_caps_trust() -> None:
 
 def test_claim_scope_rejects_out_of_range_trust() -> None:
     """Pydantic field constraints (ge=0, le=1) must hold."""
-    with pytest.raises(Exception):  # pydantic.ValidationError
+    with pytest.raises(ValidationError):
         ClaimScope(specific_to={}, trust_in_scope=1.5)
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         ClaimScope(specific_to={}, trust_out_of_scope=-0.1)
 
 
@@ -220,7 +220,7 @@ def test_pending_revalidation_freshness_state() -> None:
         path=Path("entities/x.md"),
         frontmatter={},
         body="",
-        last_updated=datetime.now(timezone.utc),
+        last_updated=datetime.now(UTC),
         sources=[],
         freshness="pending_revalidation",
     )
@@ -237,7 +237,7 @@ def test_legacy_freshness_states_still_accepted() -> None:
             path=Path("entities/x.md"),
             frontmatter={},
             body="",
-            last_updated=datetime.now(timezone.utc),
+            last_updated=datetime.now(UTC),
             sources=[],
             freshness=state,  # type: ignore[arg-type]
         )

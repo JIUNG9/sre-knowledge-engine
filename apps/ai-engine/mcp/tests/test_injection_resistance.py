@@ -25,7 +25,6 @@ import mcp.tools.write  # noqa: F401
 from mcp.manifest import manifest
 from mcp.scope_config import MCPScopeConfig
 
-
 PROMPT_INJECTION_SIMULATIONS = [
     # A log line that hijacks the agent.
     (

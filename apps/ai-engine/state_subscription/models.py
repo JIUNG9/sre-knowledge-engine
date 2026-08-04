@@ -12,11 +12,10 @@ write-side mutation observed in an external infra subsystem.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
-
 
 ArtifactKind = Literal["terraform", "k8s", "argocd", "cloud", "source_file"]
 
@@ -46,7 +45,7 @@ class StateChangeEvent(BaseModel):
         description="Current value. None means the artifact was deleted.",
     )
     observed_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
     source: str = Field(
         description=(

@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
-
 
 InvalidationReason = Literal[
     "value_change",
@@ -25,7 +24,7 @@ class InvalidationRecord(BaseModel):
     """
 
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
     artifact_id: str = Field(description="The changed artifact_id.")
     affected_slugs: list[str] = Field(

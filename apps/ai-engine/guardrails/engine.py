@@ -18,9 +18,10 @@ Internally ``evaluate`` does:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from .approval import (
     ApprovalGate,
@@ -33,7 +34,6 @@ from .audit import AuditLogger, AuditRecord
 from .policy import GuardrailsPolicy, PolicyDecision
 from .risk import Action, RiskAssessment, RiskScore
 from .tiers import AutomationTier, tier_cap_for_risk
-
 
 # Kill-switch dependency is *optional* at import time — the engine works
 # fine without a switch wired up (useful for unit tests that don't want to
@@ -104,7 +104,7 @@ class GuardrailsEngine:
         audit_path: str | Path,
         approval_gate: ApprovalGate | None = None,
         killswitch_check: KillSwitchCheck | None = None,
-    ) -> "GuardrailsEngine":
+    ) -> GuardrailsEngine:
         """Convenience constructor — one call to wire everything up."""
         return cls(
             policy=GuardrailsPolicy.load(policy_path),

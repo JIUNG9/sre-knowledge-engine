@@ -110,7 +110,7 @@ class DependencyIndex:
             return {k: set(v) for k, v in self._index.items()}
 
     @classmethod
-    async def from_vault(cls, vault_root: Path) -> "DependencyIndex":
+    async def from_vault(cls, vault_root: Path) -> DependencyIndex:
         """Build a populated index by walking ``vault_root``.
 
         Walks the four standard page directories (entities, concepts,

@@ -11,7 +11,6 @@ import respx
 from mcp.tools.read.finops import opencost
 from mcp.tools.read.finops.config import FinOpsConfig, set_config
 
-
 OPENCOST_URL = "http://opencost.opencost.svc.cluster.local:9003"
 
 

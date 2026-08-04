@@ -1,6 +1,11 @@
 """Pydantic models for the Aegis AI Engine."""
 
-from models.analysis import AnomalyResult, LogAnalysisRequest, LogAnalysisResult, MetricAnalysisRequest
+from models.analysis import (
+    AnomalyResult,
+    LogAnalysisRequest,
+    LogAnalysisResult,
+    MetricAnalysisRequest,
+)
 from models.incident import IncidentContext, InvestigationRequest, InvestigationResult
 from models.logs import (
     AnomalyDetectionRequest,

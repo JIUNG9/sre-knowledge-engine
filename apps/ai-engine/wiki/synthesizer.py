@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
@@ -167,7 +167,7 @@ class WikiPage(BaseModel):
     frontmatter: dict[str, Any] = Field(default_factory=dict)
     body: str = ""
     last_updated: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
     sources: list[str] = Field(default_factory=list)
     freshness: Freshness = "current"
@@ -215,7 +215,7 @@ class WikiPage(BaseModel):
 
         last_updated_raw = meta.get("last_updated") or meta.get("updated")
         last_updated = _parse_datetime(last_updated_raw) or datetime.fromtimestamp(
-            path.stat().st_mtime, tz=timezone.utc
+            path.stat().st_mtime, tz=UTC
         )
 
         sources_raw = meta.get("sources") or []
@@ -488,7 +488,7 @@ class Synthesizer:
             path=Path(f"{meta.get('slug') or slug}.md"),
             frontmatter=meta,
             body=post.content,
-            last_updated=datetime.now(timezone.utc),
+            last_updated=datetime.now(UTC),
             sources=[str(s) for s in meta.get("sources", [source.path_or_url])],
             freshness="current",
         )
@@ -541,7 +541,7 @@ class Synthesizer:
             )
         )
         meta["sources"] = merged_sources
-        meta["last_updated"] = datetime.now(timezone.utc).isoformat()
+        meta["last_updated"] = datetime.now(UTC).isoformat()
         meta.setdefault("type", existing_page.type)
         meta.setdefault("slug", existing_page.slug)
         meta.setdefault("freshness", "current")
@@ -557,7 +557,7 @@ class Synthesizer:
             path=existing_page.path,
             frontmatter=meta,
             body=post.content,
-            last_updated=datetime.now(timezone.utc),
+            last_updated=datetime.now(UTC),
             sources=merged_sources,
             freshness="current",
         )
@@ -681,11 +681,11 @@ def _parse_datetime(value: Any) -> datetime | None:
     if value is None:
         return None
     if isinstance(value, datetime):
-        return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+        return value if value.tzinfo else value.replace(tzinfo=UTC)
     if isinstance(value, str):
         try:
             parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
-            return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+            return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
         except ValueError:
             return None
     return None

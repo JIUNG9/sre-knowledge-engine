@@ -9,8 +9,7 @@ from __future__ import annotations
 
 import random
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 
 @dataclass
@@ -18,10 +17,10 @@ class Event:
     """Minimal event dataclass that duck-types `IncidentLike`."""
 
     timestamp: datetime
-    service: Optional[str]
+    service: str | None
     severity: str
     message: str
-    trace_id: Optional[str]
+    trace_id: str | None
 
 
 def monday_9am_events(
@@ -34,11 +33,11 @@ def monday_9am_events(
     The rest are scattered uniformly across a 4-week window.
     """
     rng = random.Random(seed)
-    base_monday = datetime(2026, 3, 2, 9, 0, 0, tzinfo=timezone.utc)  # Monday
+    base_monday = datetime(2026, 3, 2, 9, 0, 0, tzinfo=UTC)  # Monday
     events: list[Event] = []
     n_monday = int(round(total * monday_ratio))
 
-    for i in range(n_monday):
+    for _i in range(n_monday):
         # Random week 0..3 at Monday 9am +/- 30 min
         week = rng.randint(0, 3)
         minute_jitter = rng.randint(-30, 30)
@@ -96,7 +95,7 @@ def templated_log_lines(
         ("critical", "OOM killed process pid={pid} rss={mb}MB"),
     ]
     events: list[Event] = []
-    base = datetime(2026, 3, 1, 0, 0, 0, tzinfo=timezone.utc)
+    base = datetime(2026, 3, 1, 0, 0, 0, tzinfo=UTC)
     for t_idx, (sev, tmpl) in enumerate(templates):
         for i in range(per_template):
             msg = tmpl.format(
@@ -133,7 +132,7 @@ def correlated_services(
     hours, producing near-zero correlation with either.
     """
     rng = random.Random(seed)
-    base = datetime(2026, 3, 10, 0, 0, 0, tzinfo=timezone.utc)
+    base = datetime(2026, 3, 10, 0, 0, 0, tzinfo=UTC)
     events: list[Event] = []
     # Paired A and B — B fires 5-30s after A
     for i in range(n_pairs):

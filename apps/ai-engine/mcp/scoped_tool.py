@@ -21,10 +21,10 @@ The decorator is idempotent — reimporting a module does not double-register.
 
 from __future__ import annotations
 
-from typing import Callable, Literal
+from collections.abc import Callable
+from typing import Literal
 
 from mcp.manifest import manifest
-
 
 Scope = Literal["read", "write", "blocked"]
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import Any
 
@@ -12,7 +12,6 @@ import pytest
 from control_tower.config import ControlTowerConfig
 from control_tower.investigation import Alert, Investigation, WikiSnippet
 from control_tower.orchestrator import ControlTower
-
 
 pytestmark = pytest.mark.asyncio
 
@@ -243,7 +242,7 @@ async def test_deep_mode_runs_pattern_analyzer():
     logs = FakeLogFetcher(
         rows=[
             SimpleNamespace(
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 body="boom",
                 severity="error",
                 service="acme-api",

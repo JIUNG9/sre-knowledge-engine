@@ -19,7 +19,6 @@ import pytest
 
 from proxy.detector import PIIDetector
 
-
 REGEX_DETECTOR = PIIDetector(provider="regex")
 
 
@@ -140,7 +139,7 @@ def test_detections_are_sorted_and_nonoverlapping() -> None:
     # Sorted ascending.
     assert hits == sorted(hits, key=lambda d: d.start)
     # Non-overlapping.
-    for a, b in zip(hits, hits[1:]):
+    for a, b in zip(hits, hits[1:], strict=False):
         assert a.end <= b.start
 
 

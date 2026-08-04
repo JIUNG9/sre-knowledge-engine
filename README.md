@@ -4,7 +4,7 @@
 
 ### AI-Native DevSecOps Command Center
 
-[![CI](https://img.shields.io/github/actions/workflow/status/JIUNG9/aegis/ci.yml?label=ci&logo=github)](https://github.com/JIUNG9/aegis/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/JIUNG9/sre-knowledge-engine/ci.yml?label=ci&logo=github)](https://github.com/JIUNG9/sre-knowledge-engine/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-v4.0%20%C2%B7%20Layers%200--5%20built%20%C2%B7%20Layers%201.5%2F1.6%20alpha%20%C2%B7%20Phase%202-brightgreen)](docs/ARCHITECTURE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -15,7 +15,7 @@
 
 **An AI-native DevSecOps command center built on the Karpathy LLM Wiki pattern, not traditional RAG. Runs for about fifteen dollars a month.**
 
-[Architecture](docs/ARCHITECTURE.md) | [Live wiki](https://github.com/JIUNG9/aegis-wiki) | [Article series](#read-the-series) | [Author](#about-the-author)
+[Architecture](docs/ARCHITECTURE.md) | [Live wiki](https://github.com/JIUNG9/sre-knowledge-wiki) | [Article series](#read-the-series) | [Author](#about-the-author)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 Most "AI for SRE" products are a retrieval-augmented chatbot pointed at a Confluence export. That design is fundamentally wrong for incident response. Chunk-based retrieval returns the three highest-scoring fragments and calls it context — and those fragments are usually stale, contradictory, or lifted from a runbook that no one has touched in two years. The agent answers confidently from a knowledge base it cannot evaluate. Aegis rejects that pattern.
 
-Aegis uses the **LLM Wiki pattern** popularized by Andrej Karpathy: every source (runbook, post-mortem, Confluence page, resolved incident) is read exactly once by an LLM and synthesized into a canonical Obsidian page. Contradictions are flagged at ingest time. Staleness is tracked per source. The Control Tower queries pre-synthesized knowledge instead of raw chunks. The vault is public — it doubles as a portfolio artifact at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki), edited locally in Obsidian and auto-published.
+Aegis uses the **LLM Wiki pattern** popularized by Andrej Karpathy: every source (runbook, post-mortem, Confluence page, resolved incident) is read exactly once by an LLM and synthesized into a canonical Obsidian page. Contradictions are flagged at ingest time. Staleness is tracked per source. The Control Tower queries pre-synthesized knowledge instead of raw chunks. The vault is public — it doubles as a portfolio artifact at [github.com/JIUNG9/sre-knowledge-wiki](https://github.com/JIUNG9/sre-knowledge-wiki), edited locally in Obsidian and auto-published.
 
 The whole platform targets a specific constraint: **under fifteen dollars a month of recurring cost**. Claude Haiku 4.5 does the cheap synthesis work, Sonnet 4.6 does the reasoning, Opus only when the operator explicitly asks for it. SigNoz is OSS and self-hostable. Postgres, ClickHouse, and Redis run on a single VM. MCP (Model Context Protocol) is native, not bolted on. A four-stage automation ladder (Observe → Recommend → Low-Auto → Full-Auto) keeps the agent out of production until the operator trusts it.
 
@@ -126,7 +126,7 @@ Frontend modules already shipped: Log Explorer, SLO Dashboard, FinOps, Incidents
 ### Clone and boot
 
 ```bash
-git clone https://github.com/JIUNG9/aegis.git
+git clone https://github.com/JIUNG9/sre-knowledge-engine.git
 cd aegis
 cp .env.example .env                  # fill in ANTHROPIC_API_KEY
 pnpm install
@@ -207,7 +207,7 @@ Each article directory also contains a `linkedin-post.md` with three variants (t
 
 ## Related Repos
 
-- **[github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki)** — the live, sanitized Obsidian vault published by the Aegis LLM Wiki Engine. This is what a self-maintaining SRE knowledge base looks like in practice. Recruiters and reviewers: start there.
+- **[github.com/JIUNG9/sre-knowledge-wiki](https://github.com/JIUNG9/sre-knowledge-wiki)** — the live, sanitized Obsidian vault published by the Aegis LLM Wiki Engine. This is what a self-maintaining SRE knowledge base looks like in practice. Recruiters and reviewers: start there.
 
 ---
 

@@ -18,10 +18,8 @@ from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import InMemoryMetricReader
 
 from invalidation.dependency_index import DependencyIndex
-from invalidation.engine import InvalidationEngine
 from state_subscription.models import StateChangeEvent
 from wiki.synthesizer import WikiPage
-
 
 pytestmark = pytest.mark.asyncio
 
@@ -66,6 +64,7 @@ async def test_handle_event_increments_records_and_pages(
     # NOTE: meters are cached at module import time. Re-importing is the
     # simplest way to make sure they bind to the now-installed provider.
     import importlib
+
     import invalidation.metrics as m
 
     importlib.reload(m)
@@ -118,6 +117,7 @@ async def test_shadow_mode_records_but_does_not_count_pages_marked(
     """Shadow mode increments the audit-record counter but not
     pages-marked — the engine logs but doesn't mutate."""
     import importlib
+
     import invalidation.metrics as m
 
     importlib.reload(m)

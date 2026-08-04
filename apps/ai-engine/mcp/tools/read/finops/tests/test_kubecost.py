@@ -11,7 +11,6 @@ import respx
 from mcp.tools.read.finops import kubecost
 from mcp.tools.read.finops.config import FinOpsConfig, set_config
 
-
 KUBECOST_URL = "http://kubecost-cost-analyzer.kubecost.svc.cluster.local:9090"
 
 

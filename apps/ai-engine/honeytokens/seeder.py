@@ -12,7 +12,7 @@ from __future__ import annotations
 import logging
 import random
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING
 
 from .generator import HoneyTokenGenerator, TokenCategory
 
@@ -26,7 +26,7 @@ SEED_SECTION_HEADER = "\n\n---\n\n<!-- aegis-honey-seeded -->\n## Deprecated leg
 SEED_SECTION_FOOTER = "\n<!-- /aegis-honey-seeded -->\n"
 
 
-def _iter_markdown(vault_dir: Path) -> List[Path]:
+def _iter_markdown(vault_dir: Path) -> list[Path]:
     return [p for p in vault_dir.rglob("*.md") if p.is_file()]
 
 
@@ -34,8 +34,8 @@ def _is_already_seeded(text: str) -> bool:
     return SEED_SENTINEL in text
 
 
-def _render_block(tokens: List["HoneyToken"]) -> str:
-    lines: List[str] = []
+def _render_block(tokens: list[HoneyToken]) -> str:
+    lines: list[str] = []
     for t in tokens:
         lines.append(f"### {t.category}")
         lines.append("```")
@@ -49,10 +49,10 @@ def seed_vault(
     vault_dir: Path,
     count_per_category: int = 2,
     *,
-    generator: Optional[HoneyTokenGenerator] = None,
-    rng: Optional[random.Random] = None,
-    categories: Optional[List[TokenCategory]] = None,
-) -> Dict[str, List[str]]:
+    generator: HoneyTokenGenerator | None = None,
+    rng: random.Random | None = None,
+    categories: list[TokenCategory] | None = None,
+) -> dict[str, list[str]]:
     """Insert honey tokens into a markdown vault.
 
     Args:
@@ -73,7 +73,7 @@ def seed_vault(
 
     gen = generator or HoneyTokenGenerator()
     rng = rng or random.Random()
-    cats: List[TokenCategory] = list(categories) if categories else list(gen.all_categories())
+    cats: list[TokenCategory] = list(categories) if categories else list(gen.all_categories())
 
     md_files = _iter_markdown(vault_dir)
     if not md_files:
@@ -81,7 +81,7 @@ def seed_vault(
         return {}
 
     # Generate tokens.
-    tokens: List["HoneyToken"] = []
+    tokens: list[HoneyToken] = []
     for cat in cats:
         for _ in range(count_per_category):
             tokens.append(gen.create(cat))
@@ -89,12 +89,12 @@ def seed_vault(
     # Distribute them across markdown files (round-robin from a shuffled
     # list so the placement is deterministic given the rng).
     rng.shuffle(md_files)
-    placements: Dict[Path, List["HoneyToken"]] = {}
+    placements: dict[Path, list[HoneyToken]] = {}
     for i, t in enumerate(tokens):
         target = md_files[i % len(md_files)]
         placements.setdefault(target, []).append(t)
 
-    result: Dict[str, List[str]] = {}
+    result: dict[str, list[str]] = {}
     for path, token_group in placements.items():
         existing = path.read_text(encoding="utf-8", errors="ignore")
         if _is_already_seeded(existing):

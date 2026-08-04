@@ -9,7 +9,7 @@ list so tests can assert against either.
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import frontmatter
@@ -41,7 +41,7 @@ def _write_page(
         "slug": slug,
         "type": type_dir.rstrip("s") if type_dir != "concepts" else "concept",
         "freshness": "current",
-        "last_updated": datetime.now(timezone.utc).isoformat(),
+        "last_updated": datetime.now(UTC).isoformat(),
         # Round-trip the dependencies through dict so YAML serializes them.
         "config_dependencies": [d.model_dump() for d in config_dependencies],
     }

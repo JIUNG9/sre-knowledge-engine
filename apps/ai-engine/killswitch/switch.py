@@ -24,7 +24,7 @@ import logging
 import os
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from killswitch.config import KillSwitchConfig
@@ -136,7 +136,7 @@ class KillSwitch:
     @classmethod
     def with_redis_client(
         cls, client: Any, config: KillSwitchConfig | None = None
-    ) -> "KillSwitch":
+    ) -> KillSwitch:
         """Construct a :class:`KillSwitch` around a pre-built Redis client.
 
         Used primarily by tests with ``fakeredis`` so that the switch does
@@ -331,4 +331,4 @@ class KillSwitch:
 
 
 def _utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()

@@ -82,7 +82,7 @@ class ExecutorConfig:
     require_two_approvals_for_execute: bool = True
 
     @classmethod
-    def from_env(cls) -> "ExecutorConfig":
+    def from_env(cls) -> ExecutorConfig:
         """Build an :class:`ExecutorConfig` from ``AEGIS_EXECUTOR_*`` env."""
         return cls(
             enabled=_env_bool("AEGIS_EXECUTOR_ENABLED", False),

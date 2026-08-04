@@ -12,7 +12,7 @@ These verify:
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import httpx
 import pytest
@@ -26,7 +26,6 @@ from mcp.tools.read import _docs_runtime as docs_runtime
 from reconciliation.models import Doc
 from reconciliation.reconciler import Reconciler
 from reconciliation.sources import DocSource
-
 
 # ---- Tiny in-memory source -------------------------------------------- #
 
@@ -52,7 +51,7 @@ def reset_reconciler():
 
 @pytest.fixture
 def seeded_reconciler():
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     obs = InMemSource(
         "obsidian",
         [

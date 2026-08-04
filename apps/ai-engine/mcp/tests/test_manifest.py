@@ -4,18 +4,15 @@ from __future__ import annotations
 
 import pytest
 
-from mcp.manifest import ToolManifest
-from mcp.scope_config import DEFAULT_BLOCKED_TOOL_NAMES, MCPScopeConfig
-
-
 # Import the tool packages so their decorators run against the shared
 # manifest. The assertions below use the package-level manifest.
 import mcp.tools.blocked  # noqa: F401
 import mcp.tools.read  # noqa: F401
 import mcp.tools.write  # noqa: F401
+from mcp.manifest import ToolManifest
 from mcp.manifest import manifest as shared_manifest
+from mcp.scope_config import DEFAULT_BLOCKED_TOOL_NAMES, MCPScopeConfig
 from mcp.scoped_tool import scoped_tool
-
 
 # ---------------------------------------------------------------------- #
 # Defaults

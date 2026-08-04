@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from state_subscription.models import StateChangeEvent
 
@@ -54,14 +54,14 @@ def test_is_change_true_for_deletion() -> None:
 
 
 def test_observed_at_defaults_to_utc_now() -> None:
-    before = datetime.now(timezone.utc)
+    before = datetime.now(UTC)
     evt = StateChangeEvent(
         artifact_kind="terraform",
         artifact_id="terraform:rds.tf:aurora_postgres_version",
         new_value="16",
         source="terraform://aegis-prod",
     )
-    after = datetime.now(timezone.utc)
+    after = datetime.now(UTC)
     assert evt.observed_at.tzinfo is not None
     assert before <= evt.observed_at <= after
 

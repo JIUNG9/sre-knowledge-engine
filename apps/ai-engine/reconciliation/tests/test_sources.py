@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 from reconciliation.sources import (
     ConfluenceSource,
     GitHubWikiSource,
@@ -12,7 +11,6 @@ from reconciliation.sources import (
     SlackPinSource,
     extract_links,
 )
-
 
 # --- ObsidianSource -------------------------------------------------------- #
 

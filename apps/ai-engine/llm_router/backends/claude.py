@@ -12,7 +12,8 @@ The import of ``anthropic`` is deferred so the rest of the router
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, AsyncIterator
+from collections.abc import AsyncIterator
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from ..router import RouterResponse
@@ -81,7 +82,7 @@ class ClaudeBackend:
     # ------------------------------------------------------------------ #
     # Public API
     # ------------------------------------------------------------------ #
-    async def complete(self, messages: list[dict]) -> "RouterResponse":
+    async def complete(self, messages: list[dict]) -> RouterResponse:
         """Run a one-shot (non-streaming) completion."""
         from ..router import RouterResponse  # local to avoid cycle
 

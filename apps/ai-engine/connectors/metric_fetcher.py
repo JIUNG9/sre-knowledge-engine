@@ -14,7 +14,6 @@ from typing import Any
 from connectors.models import MetricPoint, MetricSeries, MetricSeriesRow
 from connectors.signoz_client import SigNozClient
 
-
 logger = logging.getLogger("aegis.connectors.metrics")
 
 

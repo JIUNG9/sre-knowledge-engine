@@ -33,6 +33,16 @@ presidio = [
     "presidio-analyzer>=2.2.0",
 ]
 aws = ["boto3>=1.34.0"]
+# Test-only dependencies. These were previously undeclared, which is why CI could
+# lint the AI engine but never run its 470 tests — the workflow had no way to know
+# what to install.
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "fakeredis>=2.26.0",
+    "respx>=0.22.0",
+    "ruff==0.16.1",
+]
 # Phase 2.2 FinOps MCP tools. `boto3` is required for AWS Cost Explorer;
 # OpenCost and Kubecost use plain httpx which is already a core dep.
 finops = [
@@ -75,3 +85,26 @@ testpaths = [
     "invalidation/tests",
 ]
 pythonpath = ["."]
+
+# Declared explicitly so the lint result depends on this file, not on whichever
+# ruff version CI happens to install. Ruff 0.16 widened its implicit defaults
+# from ~4 findings to ~600 on this tree with no code change — CI went red on a
+# dependency release. The version is pinned in the workflow for the same reason.
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",   # line length is enforced by the formatter, not the linter
+    "B008",   # FastAPI's Depends() in defaults is the framework's idiom
+    # UP042 wants (str, Enum) -> StrEnum. Deliberately declined: StrEnum changes
+    # what str(member) returns (the value, not "Class.MEMBER"), and these enums are
+    # serialized into JSON payloads and wiki frontmatter. The rewrite is a silent
+    # format change on persisted data, which is not worth a lint score.
+    "UP042",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]

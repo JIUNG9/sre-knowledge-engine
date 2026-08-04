@@ -12,7 +12,6 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # --------------------------------------------------------------------------- #
 # Logs
 # --------------------------------------------------------------------------- #
@@ -57,7 +56,7 @@ class MetricSeries(BaseModel):
     start: datetime
     end: datetime
     step_seconds: int
-    series: list["MetricSeriesRow"] = Field(default_factory=list)
+    series: list[MetricSeriesRow] = Field(default_factory=list)
 
 
 class MetricSeriesRow(BaseModel):

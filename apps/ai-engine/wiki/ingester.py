@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -55,7 +55,7 @@ class Source(BaseModel):
     content: str
     metadata: dict[str, Any] = Field(default_factory=dict)
     ingested_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
 
 

@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from reconciliation.drift import is_stale, score_staleness
 from reconciliation.models import Doc
 
-
-_NOW = datetime(2026, 4, 21, tzinfo=timezone.utc)
+_NOW = datetime(2026, 4, 21, tzinfo=UTC)
 
 
 def _doc(**overrides) -> Doc:

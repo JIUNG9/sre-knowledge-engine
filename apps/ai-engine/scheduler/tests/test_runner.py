@@ -20,7 +20,6 @@ from scheduler.history import JobHistory
 from scheduler.jobs import Job
 from scheduler.runner import JobRunner, run_with_safety
 
-
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #

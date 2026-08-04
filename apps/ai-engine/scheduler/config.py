@@ -69,7 +69,7 @@ class SchedulerConfig:
     max_history: int = 100
 
     @classmethod
-    def from_env(cls) -> "SchedulerConfig":
+    def from_env(cls) -> SchedulerConfig:
         """Build a :class:`SchedulerConfig` from the environment.
 
         Recognized env vars:

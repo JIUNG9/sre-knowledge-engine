@@ -8,7 +8,6 @@ import pytest
 
 from invalidation.resynth_queue import drain_resynth_queue, rotate_queue
 
-
 pytestmark = pytest.mark.asyncio
 
 

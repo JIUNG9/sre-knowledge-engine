@@ -17,14 +17,14 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 from .ingester import Ingester, Source, SourceType
-from .synthesizer import Synthesizer, SynthesisDecision, WikiPage
+from .synthesizer import SynthesisDecision, Synthesizer, WikiPage
 
 logger = logging.getLogger("aegis.wiki")
 
@@ -278,7 +278,7 @@ class WikiEngine:
         )
 
         final_body = f"{preamble}{OVERVIEW_MARKER}\n\n{generated.strip()}\n"
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         page = WikiPage(
             title="SRE Knowledge Vault",
             type="concept",
@@ -323,7 +323,7 @@ class WikiEngine:
             latest = max(p.last_updated for p in pages)
             last_updated_iso = latest.isoformat()
 
-        stale_threshold = datetime.now(timezone.utc) - timedelta(
+        stale_threshold = datetime.now(UTC) - timedelta(
             days=self.config.stale_threshold_days
         )
         inferred_stale = sum(

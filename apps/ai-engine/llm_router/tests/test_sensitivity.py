@@ -11,7 +11,6 @@ import pytest
 
 from llm_router.sensitivity import classify_sensitivity
 
-
 # --------------------------------------------------------------------------- #
 # Sensitive fixtures — must NOT leak to cloud
 # --------------------------------------------------------------------------- #

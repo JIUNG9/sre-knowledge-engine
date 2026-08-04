@@ -15,7 +15,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
@@ -62,7 +62,7 @@ class ConfluenceSyncResult(BaseModel):
     """
 
     synced_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
     pages_fetched: int = 0
     pages_ingested: int = 0
@@ -353,7 +353,7 @@ class ConfluenceSync:
         self._meta_dir.mkdir(parents=True, exist_ok=True)
         payload = {
             "space_key": self.config.space_key,
-            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(UTC).isoformat(),
             "ids": sorted(ids),
         }
         tmp = self._synced_path.with_suffix(".json.tmp")
@@ -383,7 +383,7 @@ class ConfluenceSync:
         except Exception:  # noqa: BLE001 — reset on corruption
             existing = {}
         archive_log: dict[str, Any] = existing.get("archived", {})
-        stamp = datetime.now(timezone.utc).isoformat()
+        stamp = datetime.now(UTC).isoformat()
         for page_id in deleted_ids:
             archive_log.setdefault(page_id, {"archived_at": stamp})
         payload = {"archived": archive_log, "updated_at": stamp}

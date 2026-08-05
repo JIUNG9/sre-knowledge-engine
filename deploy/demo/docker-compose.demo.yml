@@ -73,6 +73,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      # Without start_period the check gets interval x retries = 50s total, and
+      # ClickHouse doesn't finish starting in 50s on a CI runner sharing a box with
+      # eight other containers. It was killed at 51s with only "Processing
+      # configuration file" in its log — still booting, not broken. Failures during
+      # start_period don't count against retries.
+      start_period: 120s
     deploy:
       resources:
         limits:
@@ -199,6 +205,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      # Same 50s ceiling as ClickHouse had. LocalStack with PERSISTENCE=1 and six
+      # services to bring up is the other slow starter here; give it room before
+      # the retry budget starts counting.
+      start_period: 90s
     deploy:
       resources:
         limits:

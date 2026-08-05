@@ -35,7 +35,16 @@ services:
   # ═══════════════════════════════════════════════════════════
   signoz-zookeeper:
     <<: *demo-common
-    image: bitnami/zookeeper:3.7.1
+    # Was bitnami/zookeeper:3.7.1, which now 404s — Bitnami pulled its legacy tags
+    # from Docker Hub, so a pin that worked when this was written stopped resolving.
+    # bitnamilegacy is their archive namespace and is a genuine drop-in: same
+    # ALLOW_ANONYMOUS_LOGIN / ZOO_AUTOPURGE_INTERVAL contract, same
+    # /bitnami/zookeeper data path.
+    #
+    # It is an archive, so it won't get patches. The forward path is ClickHouse
+    # Keeper, which SigNoz supports and which drops ZooKeeper from the stack
+    # entirely — worth doing, but it's a stack change, not a build fix.
+    image: bitnamilegacy/zookeeper:3.7.1
     container_name: aegis-demo-zookeeper
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes

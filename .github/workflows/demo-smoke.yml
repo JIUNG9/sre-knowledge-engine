@@ -32,6 +32,24 @@ jobs:
           docker system prune -af || true
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/share/boost || true
 
+      # Every failure of this job so far has been a pinned image tag that stopped
+      # resolving — otel/opentelemetry-demo (never existed) and
+      # bitnami/zookeeper:3.7.1 (tags pulled from Docker Hub). Checking manifests
+      # first turns a 45-second mystery into a named tag, and costs seconds.
+      - name: Verify every pinned image still resolves
+        working-directory: deploy/demo
+        run: |
+          missing=0
+          for img in $(grep -oE 'image: [^ ]+' docker-compose.demo.yml | awk '{print $2}' | sort -u); do
+            if docker manifest inspect "$img" >/dev/null 2>&1; then
+              echo "ok       $img"
+            else
+              echo "MISSING  $img"
+              missing=1
+            fi
+          done
+          exit $missing
+
       - name: Start demo stack
         working-directory: deploy/demo
         run: |

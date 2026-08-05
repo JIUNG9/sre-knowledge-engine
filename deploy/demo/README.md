@@ -33,7 +33,8 @@ URLs for every UI.
 | aegis-api           | `8000`              | AI engine + REST API (FastAPI)           |
 | signoz-frontend     | `3301`              | SigNoz observability UI                  |
 | signoz-otel-collector | `4317, 4318`      | OTLP ingest                              |
-| otel-telemetrygen   | _(no port)_         | Synthetic OTLP traces/metrics/logs       |
+| otel-telemetrygen-{traces,metrics,logs} | _(no port)_ | Synthetic OTLP, one service per signal |
+| signoz-schema-migrator | _(runs once)_    | Creates the signoz_* ClickHouse databases |
 | localstack          | `4566`              | Fake S3 / EC2 / IAM / CloudWatch Logs    |
 | confluence-mock     | `8090`              | 20 canned runbook pages                  |
 | redis               | `6379`              | Kill switch + cache                      |

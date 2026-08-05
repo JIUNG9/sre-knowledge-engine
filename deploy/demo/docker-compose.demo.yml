@@ -71,6 +71,9 @@ services:
       # Binds to 0.0.0.0 instead of the default `::`. Without this nothing is bound
       # at all on an IPv6-less Docker network. See the comments in the file.
       - ./clickhouse/listen.xml:/etc/clickhouse-server/config.d/listen.xml:ro
+      # Defines the cluster named "cluster" plus zookeeper and the shard/replica
+      # macros. SigNoz's migrator uses ON CLUSTER DDL and fails without it.
+      - ./clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
     healthcheck:
       # 127.0.0.1, not localhost. /etc/hosts in this image maps localhost to ::1
       # only, so once ClickHouse is IPv4-only (above) a check against localhost gets
@@ -129,6 +132,28 @@ services:
         limits:
           memory: 256M
 
+  # SigNoz keeps its ClickHouse schema in a separate migrator, and this compose file
+  # never ran it. Without it the databases signoz_traces / signoz_logs / signoz_metrics
+  # don't exist, so the collector crash-loops on startup:
+  #   code: 81, message: Database signoz_logs does not exist
+  # Runs to completion, then the collector starts. Version matches the collector.
+  signoz-schema-migrator:
+    <<: *demo-common
+    image: signoz/signoz-schema-migrator:0.88.24
+    container_name: aegis-demo-schema-migrator
+    # No --up flag on 0.88.24; that's a newer SigNoz argument. `sync --help` on this
+    # tag accepts only dsn, cluster-name, replication, verbose and the two sort
+    # feature flags.
+    command: ["sync", "--dsn=tcp://signoz-clickhouse:9000"]
+    depends_on:
+      signoz-clickhouse:
+        condition: service_healthy
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
   signoz-otel-collector:
     <<: *demo-common
     image: signoz/signoz-otel-collector:0.88.24
@@ -145,6 +170,8 @@ services:
     depends_on:
       signoz-clickhouse:
         condition: service_healthy
+      signoz-schema-migrator:
+        condition: service_completed_successfully
     deploy:
       resources:
         limits:
@@ -164,31 +191,55 @@ services:
   #  job: emit OTLP traces/metrics/logs at a fixed rate. What the demo actually
   #  needs is data flowing into SigNoz so Aegis has something to reason about —
   #  not an astronomy shop.
-  otel-telemetrygen:
+  #  One service per signal, and no shell wrapper. The image is distroless — it has
+  #  no /bin/sh — so an `entrypoint: ["/bin/sh","-c"]` loop dies with
+  #  `stat /bin/sh: no such file or directory`. `--duration inf` makes the loop
+  #  unnecessary anyway.
+  otel-telemetrygen-traces: &telemetrygen
     <<: *demo-common
     image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.158.0
-    container_name: aegis-demo-telemetrygen
-    entrypoint: ["/bin/sh", "-c"]
+    container_name: aegis-demo-telemetrygen-traces
     command:
-      - |
-        while true; do
-          for signal in traces metrics logs; do
-            /telemetrygen "$$signal" \
-              --otlp-endpoint signoz-otel-collector:4317 \
-              --otlp-insecure \
-              --duration 30s \
-              --rate 5 \
-              --otlp-attributes 'service.name="astronomy-shop"' \
-              --otlp-attributes 'service.namespace="demo"' \
-              --otlp-attributes 'deployment.environment="demo"' || true
-          done
-        done
+      - traces
+      - --otlp-endpoint=signoz-otel-collector:4317
+      - --otlp-insecure
+      - --duration=inf
+      - --rate=5
+      - --otlp-attributes=service.name="astronomy-shop"
+      - --otlp-attributes=service.namespace="demo"
+      - --otlp-attributes=deployment.environment="demo"
     depends_on:
       - signoz-otel-collector
     deploy:
       resources:
         limits:
           memory: 256M
+
+  otel-telemetrygen-metrics:
+    <<: *telemetrygen
+    container_name: aegis-demo-telemetrygen-metrics
+    command:
+      - metrics
+      - --otlp-endpoint=signoz-otel-collector:4317
+      - --otlp-insecure
+      - --duration=inf
+      - --rate=5
+      - --otlp-attributes=service.name="astronomy-shop"
+      - --otlp-attributes=service.namespace="demo"
+      - --otlp-attributes=deployment.environment="demo"
+
+  otel-telemetrygen-logs:
+    <<: *telemetrygen
+    container_name: aegis-demo-telemetrygen-logs
+    command:
+      - logs
+      - --otlp-endpoint=signoz-otel-collector:4317
+      - --otlp-insecure
+      - --duration=inf
+      - --rate=5
+      - --otlp-attributes=service.name="astronomy-shop"
+      - --otlp-attributes=service.namespace="demo"
+      - --otlp-attributes=deployment.environment="demo"
 
   # ═══════════════════════════════════════════════════════════
   #  LocalStack (AWS mocks: S3, EC2, CloudWatch Logs, IAM)

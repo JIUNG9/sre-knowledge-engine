@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+  ClickHouse's default config listens on `::`. A Docker bridge network without IPv6
+  rejects that, and the server logs one of these per port:
+
+    Listen [::]:8123 failed: DNS error: EAI: Address family for hostname not supported
+
+  Every listener fails, so 8123 never opens, the container healthcheck against
+  localhost:8123/ping can never succeed, and the container stays "unhealthy"
+  forever. Anything gated on it through depends_on goes down with it: here that is
+  signoz-query-service and signoz-otel-collector, i.e. the whole observability half
+  of the demo.
+
+  It presents as a slow start, which is misleading. It is not slow; the port is
+  never bound. ClickHouse's own error message recommends this exact override.
+
+  Note for future edits: an XML comment may not contain a double hyphen, so don't
+  write CLI flags in here. Doing that turned this file into a startup crash loop.
+-->
+<clickhouse>
+    <listen_host>0.0.0.0</listen_host>
+</clickhouse>

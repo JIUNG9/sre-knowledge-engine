@@ -129,24 +129,44 @@ services:
           memory: 512M
 
   # ═══════════════════════════════════════════════════════════
-  #  OpenTelemetry Demo (astronomy-shop — synthetic traces/logs/metrics)
+  #  Synthetic telemetry generator (traces + metrics + logs -> collector)
   # ═══════════════════════════════════════════════════════════
-  otel-demo:
+  #  Was `otel/opentelemetry-demo:1.11.1`, which does not exist — the
+  #  OpenTelemetry demo has never shipped as a single all-in-one image; it is a
+  #  ~15-service compose project, and `otel/demo` publishes one tag per service
+  #  (latest-frontend, latest-payment, ...). The pull failed with "repository does
+  #  not exist", so `docker compose up` aborted and this workflow could never have
+  #  passed. See deploy/demo/README.md.
+  #
+  #  telemetrygen is the collector-contrib project's own tool for exactly this
+  #  job: emit OTLP traces/metrics/logs at a fixed rate. What the demo actually
+  #  needs is data flowing into SigNoz so Aegis has something to reason about —
+  #  not an astronomy shop.
+  otel-telemetrygen:
     <<: *demo-common
-    image: otel/opentelemetry-demo:1.11.1
-    container_name: aegis-demo-otel-app
-    ports:
-      - "8080:8080"   # Astronomy-shop frontend proxy
-    environment:
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://signoz-otel-collector:4317
-      - OTEL_SERVICE_NAME=astronomy-shop
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=demo,deployment.environment=demo
+    image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.158.0
+    container_name: aegis-demo-telemetrygen
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          for signal in traces metrics logs; do
+            /telemetrygen "$$signal" \
+              --otlp-endpoint signoz-otel-collector:4317 \
+              --otlp-insecure \
+              --duration 30s \
+              --rate 5 \
+              --otlp-attributes 'service.name="astronomy-shop"' \
+              --otlp-attributes 'service.namespace="demo"' \
+              --otlp-attributes 'deployment.environment="demo"' || true
+          done
+        done
     depends_on:
       - signoz-otel-collector
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 256M
 
   # ═══════════════════════════════════════════════════════════
   #  LocalStack (AWS mocks: S3, EC2, CloudWatch Logs, IAM)
@@ -308,7 +328,6 @@ services:
       NEXT_PUBLIC_API_URL: "http://localhost:8000"
       NEXT_PUBLIC_DEMO_MODE: "true"
       NEXT_PUBLIC_SIGNOZ_URL: "http://localhost:3301"
-      NEXT_PUBLIC_OTEL_DEMO_URL: "http://localhost:8080"
     depends_on:
       - aegis-api
     deploy:

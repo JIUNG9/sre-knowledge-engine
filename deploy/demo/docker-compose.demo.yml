@@ -215,11 +215,13 @@ services:
     container_name: aegis-demo-confluence
     ports:
       - "8090:8090"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8090/healthz"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # No healthcheck override here on purpose. This service's own Dockerfile already
+    # declares one using python's urllib, which is the right call because the base is
+    # python:3.12-slim and that image has no curl. The override this replaced ran
+    # `curl -f http://localhost:8090/healthz`, so it failed every time regardless of
+    # the app's state — uvicorn logged "Application startup complete" and compose
+    # still reported the container unhealthy, which took aegis-api down with it via
+    # depends_on. Verified: `docker run --rm python:3.12-slim which curl` finds nothing.
     deploy:
       resources:
         limits:

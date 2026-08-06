@@ -8,9 +8,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
-	"github.com/junegu/aegis/api/handlers"
-	"github.com/junegu/aegis/api/middleware"
-	"github.com/junegu/aegis/api/store"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/handlers"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/middleware"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/store"
 )
 
 // Setup registers all API routes on the Fiber app.

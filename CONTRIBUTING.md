@@ -10,7 +10,7 @@ This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDU
 
 ### Reporting Bugs
 
-1. Check existing [issues](https://github.com/junegu/aegis/issues) to avoid duplicates
+1. Check existing [issues](https://github.com/JIUNG9/sre-knowledge-engine/issues) to avoid duplicates
 2. Use the bug report template when creating a new issue
 3. Include reproduction steps, expected behavior, and actual behavior
 4. Add screenshots or logs if applicable
@@ -118,5 +118,5 @@ aegis/
 ## Need Help?
 
 - Join our [Discord](https://discord.gg/aegis)
-- Open a [Discussion](https://github.com/junegu/aegis/discussions)
+- Open a [Discussion](https://github.com/JIUNG9/sre-knowledge-engine/discussions)
 - Read the [Documentation](https://aegis-devsecops.dev/docs)

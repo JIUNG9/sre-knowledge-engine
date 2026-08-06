@@ -12,8 +12,8 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
-	"github.com/junegu/aegis/api/mock"
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/mock"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // alertStore provides thread-safe in-memory storage for alerts.

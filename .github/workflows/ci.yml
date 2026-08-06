@@ -61,16 +61,25 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          # Read from go.mod rather than pinned here. This was pinned to 1.22 while
+          # go.mod required 1.26.2, so the two could drift apart silently.
+          go-version-file: apps/api/go.mod
           cache-dependency-path: apps/api/go.sum
 
       - name: Build
         working-directory: apps/api
         run: go build ./...
 
+      - name: Vet
+        working-directory: apps/api
+        run: go vet ./...
+
       - name: Test
         working-directory: apps/api
-        run: go test ./... -v
+        # -race matters here: the rate limiter guards shared per-IP counters with a
+        # mutex, and there's a test that hammers it from 200 goroutines. Without the
+        # detector that test can pass while the locking is subtly wrong.
+        run: go test ./... -race -v
 
   build-ai-engine:
     name: Build AI Engine

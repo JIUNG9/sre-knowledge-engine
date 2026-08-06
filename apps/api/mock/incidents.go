@@ -3,7 +3,7 @@ package mock
 import (
 	"time"
 
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // now anchors all mock timestamps relative to a consistent point.

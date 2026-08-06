@@ -10,9 +10,9 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 
-	"github.com/junegu/aegis/api/mock"
-	"github.com/junegu/aegis/api/models"
-	"github.com/junegu/aegis/api/store"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/mock"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/store"
 )
 
 // LogHandlers holds dependencies for log query handlers.

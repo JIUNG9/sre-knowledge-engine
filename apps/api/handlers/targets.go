@@ -6,7 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/junegu/aegis/api/middleware"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/middleware"
 )
 
 // TeamTargets represents SLO, MTTR, SLA, Error Budget, and Cost Budget targets

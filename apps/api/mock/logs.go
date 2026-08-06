@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // Services is the list of services that generate mock logs.

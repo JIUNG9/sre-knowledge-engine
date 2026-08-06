@@ -256,7 +256,7 @@ Budget guardrails in `apps/web/src/app/(dashboard)/settings/` auto-downgrade to 
 **June Gu** (Jiung Gu). Site Reliability Engineer at [Placen](https://placen.kr), a subsidiary of NAVER Corporation. Previously at Coupang (NYSE: CPNG), Hyundai IT&E, and Lotte Shopping. Aegis is a nights-and-weekends project built while operating multi-account AWS infrastructure, EKS clusters, and PostgreSQL fleets at day-job scale. Relocating to Canada in 2027.
 
 - LinkedIn: [linkedin.com/in/jiung-gu](https://linkedin.com/in/jiung-gu)
-- Medium: [medium.com/@junegu](https://medium.com/@junegu)
+- Medium: [medium.com/@June-Gu](https://medium.com/@June-Gu)
 - GitHub: [github.com/JIUNG9](https://github.com/JIUNG9)
 
 ---

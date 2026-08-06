@@ -1,4 +1,4 @@
-module github.com/junegu/aegis/api
+module github.com/JIUNG9/sre-knowledge-engine/apps/api
 
 go 1.26.2
 

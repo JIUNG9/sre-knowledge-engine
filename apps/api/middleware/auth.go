@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // User represents the authenticated user extracted from JWT claims.
@@ -25,13 +26,6 @@ type User struct {
 // MockUser represents the fallback user for development mode.
 // Kept for backwards compatibility with existing handler code.
 type MockUser = User
-
-// jwtHeader represents the header section of a JWT.
-type jwtHeader struct {
-	Alg string `json:"alg"`
-	Kid string `json:"kid"`
-	Typ string `json:"typ"`
-}
 
 // jwtClaims represents the relevant claims from an OIDC JWT.
 type jwtClaims struct {
@@ -105,15 +99,15 @@ func OIDCAuth(issuerURL, clientID string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 
-		// If no auth header, fall back to mock user in dev mode.
+		// A missing header is unauthenticated, full stop. This used to inject the
+		// dev mock user — an admin — which meant that with OIDC configured, sending
+		// a bad token got you 401 but sending no token at all got you admin. Dev
+		// mode is reached by leaving issuerURL empty, not by omitting a header.
 		if authHeader == "" {
-			c.Locals("user", User{
-				ID:    "user-001",
-				Email: "dev@aegis.local",
-				Name:  "Dev User",
-				Role:  "admin",
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error":   "missing_token",
+				"message": "Authorization header is required",
 			})
-			return c.Next()
 		}
 
 		// Extract the Bearer token.
@@ -142,61 +136,64 @@ func OIDCAuth(issuerURL, clientID string) fiber.Handler {
 	}
 }
 
-// validateJWT parses a JWT, fetches JWKS, and validates signature and claims.
+// allowedSigningAlgs is an allow-list, not a hint. Accepting whatever the token's
+// own header asks for is how alg-confusion attacks work: a forged token declaring
+// alg=none or alg=HS256 (with the RSA public key used as an HMAC secret) would
+// otherwise validate.
+var allowedSigningAlgs = []string{"RS256", "RS384", "RS512"}
+
+// validateJWT parses a JWT and verifies its signature against the provider's JWKS,
+// then validates exp, iss and aud.
+//
+// This previously decoded the token without verifying the signature at all — the
+// old code fetched the public key, assigned it to `_`, and returned the claims from
+// the *unverified* payload. Any attacker could mint a token by base64-encoding a
+// header and a claims blob with the right iss/aud and a future exp; no key
+// required. It also returned success when the JWKS endpoint was unreachable.
+// Both are closed now: verification is mandatory and every failure path returns an
+// error.
 func validateJWT(token, jwksURL, issuerURL, clientID string) (*jwtClaims, error) {
-	// Split the JWT into parts.
-	parts := strings.Split(token, ".")
-	if len(parts) != 3 {
-		return nil, fmt.Errorf("malformed JWT: expected 3 parts, got %d", len(parts))
+	keyFunc := func(t *jwt.Token) (interface{}, error) {
+		kid, ok := t.Header["kid"].(string)
+		if !ok || kid == "" {
+			return nil, fmt.Errorf("token header has no kid; cannot select a verification key")
+		}
+		// A JWKS we can't reach is a verification failure, not a pass.
+		pubKey, err := getPublicKey(jwksURL, kid)
+		if err != nil {
+			return nil, fmt.Errorf("could not resolve signing key %q: %w", kid, err)
+		}
+		return pubKey, nil
 	}
 
-	// Decode header.
-	headerBytes, err := base64URLDecode(parts[0])
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode JWT header: %w", err)
+	parserOpts := []jwt.ParserOption{
+		jwt.WithValidMethods(allowedSigningAlgs),
+		jwt.WithExpirationRequired(),
 	}
-	var header jwtHeader
-	if err := json.Unmarshal(headerBytes, &header); err != nil {
-		return nil, fmt.Errorf("failed to parse JWT header: %w", err)
+	if issuerURL != "" {
+		parserOpts = append(parserOpts, jwt.WithIssuer(issuerURL))
+	}
+	if clientID != "" {
+		parserOpts = append(parserOpts, jwt.WithAudience(clientID))
 	}
 
-	// Decode claims.
-	claimsBytes, err := base64URLDecode(parts[1])
+	parsed, err := jwt.Parse(token, keyFunc, parserOpts...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode JWT claims: %w", err)
+		return nil, fmt.Errorf("token verification failed: %w", err)
+	}
+	if !parsed.Valid {
+		return nil, fmt.Errorf("token is not valid")
+	}
+
+	// Re-marshal the verified claims into the project's own struct so the rest of
+	// the package keeps its existing shape (roles, realm_access, preferred_username).
+	raw, err := json.Marshal(parsed.Claims)
+	if err != nil {
+		return nil, fmt.Errorf("failed to re-encode verified claims: %w", err)
 	}
 	var claims jwtClaims
-	if err := json.Unmarshal(claimsBytes, &claims); err != nil {
-		return nil, fmt.Errorf("failed to parse JWT claims: %w", err)
-	}
-
-	// Validate expiration.
-	if claims.Exp > 0 && time.Now().Unix() > claims.Exp {
-		return nil, fmt.Errorf("token has expired")
-	}
-
-	// Validate issuer.
-	if issuerURL != "" && claims.Iss != issuerURL {
-		return nil, fmt.Errorf("invalid issuer: expected %s, got %s", issuerURL, claims.Iss)
-	}
-
-	// Validate audience.
-	if clientID != "" && !audienceContains(claims.Aud, clientID) {
-		return nil, fmt.Errorf("token audience does not contain client ID %s", clientID)
-	}
-
-	// Verify RSA signature using JWKS if key ID is present.
-	if header.Kid != "" && (header.Alg == "RS256" || header.Alg == "RS384" || header.Alg == "RS512") {
-		pubKey, err := getPublicKey(jwksURL, header.Kid)
-		if err != nil {
-			// Log but don't fail in dev — JWKS might not be reachable.
-			// In production, this should be a hard failure.
-			return &claims, nil
-		}
-		_ = pubKey // Full RSA verification requires crypto/rsa.VerifyPKCS1v15
-		// with the appropriate hash — omitted here to avoid pulling in
-		// a full JWT library. In production, use github.com/golang-jwt/jwt/v5
-		// or github.com/coreos/go-oidc/v3.
+	if err := json.Unmarshal(raw, &claims); err != nil {
+		return nil, fmt.Errorf("failed to parse verified claims: %w", err)
 	}
 
 	return &claims, nil
@@ -301,21 +298,6 @@ func userFromClaims(claims *jwtClaims) User {
 		Name:  name,
 		Role:  role,
 	}
-}
-
-// audienceContains checks if the audience claim contains the expected client ID.
-func audienceContains(aud interface{}, clientID string) bool {
-	switch v := aud.(type) {
-	case string:
-		return v == clientID
-	case []interface{}:
-		for _, a := range v {
-			if s, ok := a.(string); ok && s == clientID {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 // base64URLDecode decodes a base64url-encoded string (no padding).

@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // Store defines the interface for log storage backends.

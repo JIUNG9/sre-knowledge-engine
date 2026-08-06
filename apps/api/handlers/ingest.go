@@ -4,8 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
-	"github.com/junegu/aegis/api/models"
-	"github.com/junegu/aegis/api/store"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/store"
 )
 
 // IngestHandlers holds dependencies for log ingestion endpoints.

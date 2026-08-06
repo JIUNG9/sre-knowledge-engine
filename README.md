@@ -254,7 +254,7 @@ Budget guardrails in `apps/web/src/app/(dashboard)/settings/` auto-downgrade to 
 ## About the Author
 
 
-- Medium: [medium.com/@junegu](https://medium.com/@junegu)
+- Medium: [medium.com/@June-Gu](https://medium.com/@June-Gu)
 - GitHub: [github.com/JIUNG9](https://github.com/JIUNG9)
 
 ---

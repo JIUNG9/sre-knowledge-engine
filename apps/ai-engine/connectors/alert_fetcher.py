@@ -16,7 +16,6 @@ from typing import Any, Literal
 from connectors.models import AlertEvent, AlertRule
 from connectors.signoz_client import SigNozClient
 
-
 logger = logging.getLogger("aegis.connectors.alerts")
 
 

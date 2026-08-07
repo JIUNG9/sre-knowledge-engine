@@ -16,7 +16,6 @@ import mcp.tools.read  # noqa: F401
 from mcp.manifest import manifest as shared_manifest
 from mcp.scope_config import MCPScopeConfig
 
-
 FINOPS_TOOL_NAMES = {
     "query_aws_costs",
     "query_opencost_allocation",

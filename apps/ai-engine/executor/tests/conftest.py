@@ -18,7 +18,6 @@ from executor.audit import AuditLogger  # noqa: E402
 from executor.config import ExecutorConfig  # noqa: E402
 from executor.executor import Executor  # noqa: E402
 
-
 # --------------------------------------------------------------------------- #
 # Test doubles
 # --------------------------------------------------------------------------- #

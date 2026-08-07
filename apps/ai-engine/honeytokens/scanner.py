@@ -11,8 +11,9 @@ from __future__ import annotations
 import logging
 import threading
 from collections import deque
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, List, Optional, Sequence
+from typing import TYPE_CHECKING
 
 from .registry import HoneyTokenRegistry
 
@@ -72,7 +73,7 @@ class _PurePythonAhoCorasick:
         # BFS to build failure links.
         fail = [0] * len(goto)
         queue: deque[int] = deque()
-        for ch, nxt in goto[0].items():
+        for nxt in goto[0].values():
             fail[nxt] = 0
             queue.append(nxt)
         while queue:
@@ -111,7 +112,7 @@ class OutboundScanner:
     so callers can register new tokens without forcing a manual refresh.
     """
 
-    def __init__(self, registry: Optional[HoneyTokenRegistry] = None) -> None:
+    def __init__(self, registry: HoneyTokenRegistry | None = None) -> None:
         self._registry = registry or HoneyTokenRegistry()
         self._lock = threading.RLock()
         self._automaton = None  # type: ignore[assignment]
@@ -151,14 +152,14 @@ class OutboundScanner:
                 if self._automaton is None:
                     self._build()
 
-    def scan(self, text: str) -> List[HoneyTokenHit]:
+    def scan(self, text: str) -> list[HoneyTokenHit]:
         """Return every honey-token hit in `text`. Empty on no tokens."""
         if not text:
             return []
         self._ensure()
         if self._automaton is None:
             return []
-        hits: List[HoneyTokenHit] = []
+        hits: list[HoneyTokenHit] = []
         seen: set[tuple[str, int]] = set()
         if _HAS_AC:  # pragma: no cover
             for end_idx, marker in self._automaton.iter(text):
@@ -193,8 +194,8 @@ class OutboundScanner:
             context=context,
         )
 
-    def scan_many(self, texts: Sequence[str]) -> List[HoneyTokenHit]:
-        out: List[HoneyTokenHit] = []
+    def scan_many(self, texts: Sequence[str]) -> list[HoneyTokenHit]:
+        out: list[HoneyTokenHit] = []
         for t in texts:
             out.extend(self.scan(t))
         return out
@@ -202,7 +203,7 @@ class OutboundScanner:
 
 # Module-level convenience scanner. Lazily initialised so importing the
 # module has no filesystem side effects.
-_default_scanner: Optional[OutboundScanner] = None
+_default_scanner: OutboundScanner | None = None
 _default_lock = threading.Lock()
 
 

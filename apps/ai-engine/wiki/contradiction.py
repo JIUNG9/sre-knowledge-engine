@@ -15,9 +15,10 @@ import logging
 import re
 import uuid
 from collections import defaultdict
-from datetime import datetime, timezone
+from collections.abc import Iterable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable, Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Literal
 
 import anyio
 from pydantic import BaseModel, Field
@@ -67,7 +68,7 @@ class Contradiction(BaseModel):
     claim_b: str
     severity: SeverityT
     category: CategoryT
-    detected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    detected_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     resolved: bool = False
     resolution_note: str | None = None
 
@@ -75,7 +76,7 @@ class Contradiction(BaseModel):
 class ContradictionReport(BaseModel):
     """Output of a vault-wide contradiction scan."""
 
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     total_pages_scanned: int
     contradictions: list[Contradiction] = Field(default_factory=list)
     summary: dict[str, int] = Field(default_factory=dict)
@@ -150,7 +151,7 @@ class ContradictionDetector:
 
     def __init__(
         self,
-        anthropic_client: "AsyncAnthropic",
+        anthropic_client: AsyncAnthropic,
         model: str = "claude-sonnet-4-6",
         persist_path: Path | None = None,
     ) -> None:
@@ -162,8 +163,8 @@ class ContradictionDetector:
 
     async def detect_in_pair(
         self,
-        page_a: "WikiPage",
-        page_b: "WikiPage",
+        page_a: WikiPage,
+        page_b: WikiPage,
     ) -> list[Contradiction]:
         """Compare two existing wiki pages."""
         topic = _infer_topic(page_a, page_b)
@@ -182,7 +183,7 @@ class ContradictionDetector:
     async def detect_new_vs_existing(
         self,
         new_content: str,
-        existing_page: "WikiPage",
+        existing_page: WikiPage,
         source_id: str = "incoming",
     ) -> list[Contradiction]:
         """Compare an incoming source chunk against a page before merging."""
@@ -199,7 +200,7 @@ class ContradictionDetector:
             for item in items
         ]
 
-    async def scan_vault(self, pages: list["WikiPage"]) -> ContradictionReport:
+    async def scan_vault(self, pages: list[WikiPage]) -> ContradictionReport:
         """Pairwise scan. Clusters pages by shared tags/wikilinks first to
         avoid O(n^2) Claude calls on unrelated pages."""
         clusters = _cluster_pages_by_topic(pages)
@@ -394,7 +395,7 @@ def _summarize(contradictions: list[Contradiction]) -> dict[str, int]:
     return dict(summary)
 
 
-def _infer_topic(a: "WikiPage", b: "WikiPage") -> str:
+def _infer_topic(a: WikiPage, b: WikiPage) -> str:
     """Pick a human-readable topic string for the prompt."""
     if a.title and b.title and a.title == b.title:
         return a.title
@@ -405,7 +406,7 @@ def _extract_wikilinks(body: str) -> set[str]:
     return {m.group(1).strip().lower() for m in _WIKILINK_RE.finditer(body or "")}
 
 
-def _page_tags(page: "WikiPage") -> set[str]:
+def _page_tags(page: WikiPage) -> set[str]:
     """Collect tag-ish keys for clustering. Uses frontmatter.tags and wikilinks."""
     tags: set[str] = set()
     fm = getattr(page, "frontmatter", None) or {}
@@ -423,11 +424,11 @@ def _page_tags(page: "WikiPage") -> set[str]:
     return tags
 
 
-def _cluster_pages_by_topic(pages: list["WikiPage"]) -> dict[str, list["WikiPage"]]:
+def _cluster_pages_by_topic(pages: list[WikiPage]) -> dict[str, list[WikiPage]]:
     """Cheap clustering: any shared tag or wikilink puts pages in the same bucket.
     One page can be in multiple buckets — pair dedup happens in _unique_pairs.
     """
-    clusters: dict[str, list["WikiPage"]] = defaultdict(list)
+    clusters: dict[str, list[WikiPage]] = defaultdict(list)
     for p in pages:
         keys = _page_tags(p)
         if not keys:
@@ -438,7 +439,7 @@ def _cluster_pages_by_topic(pages: list["WikiPage"]) -> dict[str, list["WikiPage
     return clusters
 
 
-def _unique_pairs(pages: Iterable["WikiPage"]) -> Iterable[tuple["WikiPage", "WikiPage"]]:
+def _unique_pairs(pages: Iterable[WikiPage]) -> Iterable[tuple[WikiPage, WikiPage]]:
     """Yield each unordered pair exactly once across the whole scan."""
     seen: set[tuple[str, str]] = set()
     lst = list(pages)

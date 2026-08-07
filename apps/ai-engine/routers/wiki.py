@@ -13,7 +13,7 @@ import json
 import logging
 import tempfile
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -30,8 +30,10 @@ from pydantic import BaseModel, Field
 
 from config import settings
 from wiki import (
-    ContradictionDetector,
     DEFAULT_RULES,
+    ConfluenceConfig,
+    ConfluenceSync,
+    ContradictionDetector,
     Publisher,
     PublisherConfig,
     SignozConfig,
@@ -41,7 +43,6 @@ from wiki import (
     WikiEngineConfig,
     WikiPage,
 )
-from wiki import ConfluenceConfig, ConfluenceSync
 
 logger = logging.getLogger("aegis.wiki.api")
 
@@ -64,7 +65,7 @@ def _new_job(kind: str) -> str:
         "id": job_id,
         "kind": kind,
         "status": "pending",
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "started_at": None,
         "finished_at": None,
         "result": None,
@@ -77,14 +78,14 @@ def _mark_started(job_id: str) -> None:
     job = _JOBS.get(job_id)
     if job is not None:
         job["status"] = "running"
-        job["started_at"] = datetime.now(timezone.utc).isoformat()
+        job["started_at"] = datetime.now(UTC).isoformat()
 
 
 def _mark_finished(job_id: str, result: Any) -> None:
     job = _JOBS.get(job_id)
     if job is not None:
         job["status"] = "succeeded"
-        job["finished_at"] = datetime.now(timezone.utc).isoformat()
+        job["finished_at"] = datetime.now(UTC).isoformat()
         job["result"] = result
 
 
@@ -92,7 +93,7 @@ def _mark_failed(job_id: str, error: str) -> None:
     job = _JOBS.get(job_id)
     if job is not None:
         job["status"] = "failed"
-        job["finished_at"] = datetime.now(timezone.utc).isoformat()
+        job["finished_at"] = datetime.now(UTC).isoformat()
         job["error"] = error
 
 
@@ -410,9 +411,8 @@ async def list_pages(
     pages = await _load_vault(engine)
 
     def matches(p: WikiPage) -> bool:
-        if type is not None:
-            if str(getattr(p, "type", "") or "").lower() != type.lower():
-                return False
+        if type is not None and str(getattr(p, "type", "") or "").lower() != type.lower():
+            return False
         if freshness is not None:
             fm = getattr(p, "frontmatter", {}) or {}
             page_freshness = (fm.get("freshness") or fm.get("status") or "").lower()
@@ -631,7 +631,7 @@ async def _run_confluence_sync(job_id: str, engine: WikiEngine) -> None:
         )
         sync = ConfluenceSync(config=config, engine=engine)
         result = await sync.sync()
-        _LAST_EVENTS["confluence_sync"] = datetime.now(timezone.utc).isoformat()
+        _LAST_EVENTS["confluence_sync"] = datetime.now(UTC).isoformat()
         _mark_finished(job_id, _model_to_dict(result))
     except Exception as exc:
         logger.exception("confluence sync failed")
@@ -664,7 +664,7 @@ async def _run_signoz_sync(job_id: str, engine: WikiEngine) -> None:
         )
         sync = SignozSync(config=config, engine=engine)
         result = await sync.sync()
-        _LAST_EVENTS["signoz_sync"] = datetime.now(timezone.utc).isoformat()
+        _LAST_EVENTS["signoz_sync"] = datetime.now(UTC).isoformat()
         _mark_finished(job_id, _model_to_dict(result))
     except Exception as exc:
         logger.exception("signoz sync failed")
@@ -693,7 +693,7 @@ async def _run_publish(job_id: str) -> None:
         )
         publisher = Publisher(config=config)
         result = await _maybe_await(publisher.publish())
-        _LAST_EVENTS["publish"] = datetime.now(timezone.utc).isoformat()
+        _LAST_EVENTS["publish"] = datetime.now(UTC).isoformat()
         _mark_finished(job_id, _model_to_dict(result))
     except Exception as exc:
         logger.exception("publish failed")

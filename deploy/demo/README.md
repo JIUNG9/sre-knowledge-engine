@@ -12,7 +12,7 @@ no Confluence or SigNoz subscriptions required.
 - ~6 GB free disk for images and volumes
 - Python 3.10+ on the host (for seed scripts; optional — the
   `make demo-seed` target will skip gracefully if missing)
-- Ports free: `3000, 3301, 4317, 4318, 4566, 6379, 8000, 8080, 8090`
+- Ports free: `3000, 3301, 4317, 4318, 4566, 6379, 8000, 8090`
 
 ## Quick start
 
@@ -33,7 +33,8 @@ URLs for every UI.
 | aegis-api           | `8000`              | AI engine + REST API (FastAPI)           |
 | signoz-frontend     | `3301`              | SigNoz observability UI                  |
 | signoz-otel-collector | `4317, 4318`      | OTLP ingest                              |
-| otel-demo           | `8080`              | Astronomy-shop synthetic traffic         |
+| otel-telemetrygen-{traces,metrics,logs} | _(no port)_ | Synthetic OTLP, one service per signal |
+| signoz-schema-migrator | _(runs once)_    | Creates the signoz_* ClickHouse databases |
 | localstack          | `4566`              | Fake S3 / EC2 / IAM / CloudWatch Logs    |
 | confluence-mock     | `8090`              | 20 canned runbook pages                  |
 | redis               | `6379`              | Kill switch + cache                      |
@@ -44,8 +45,13 @@ URLs for every UI.
 - **Aegis dashboard** — open http://localhost:3000, click _Incidents_
   for the synthetic list, _FinOps_ for LocalStack cost data, _On-Call_
   for the fake runbook wiki.
-- **SigNoz** — http://localhost:3301 shows live OTel traces/logs/metrics
-  flowing from the astronomy shop demo.
+- **SigNoz** — http://localhost:3301 shows live OTel traces/logs/metrics.
+  They come from `telemetrygen`, emitting a steady stream under the
+  `astronomy-shop` service name. This was previously the full OpenTelemetry
+  demo app, but that project has never published a single all-in-one image —
+  the reference used here (`otel/opentelemetry-demo`) does not exist, so the
+  stack could not start at all. If you want the real shop UI, run the upstream
+  demo's own compose alongside this one; don't expect one image to provide it.
 - **Patterns demo** — incidents are skewed toward Mondays 9am UTC so
   the "recurring pattern" article has reproducible data.
 

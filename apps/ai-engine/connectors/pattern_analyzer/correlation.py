@@ -18,9 +18,10 @@ long tail into an "<other>" node.
 from __future__ import annotations
 
 from collections import Counter, defaultdict, deque
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Iterable, Protocol, runtime_checkable
+from datetime import UTC, datetime
+from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -67,8 +68,8 @@ class ServiceCorrelationGraph:
 
 def _as_utc(dt: datetime) -> datetime:
     if dt.tzinfo is None:
-        return dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
+        return dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
 
 
 def service_correlation_graph(

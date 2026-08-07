@@ -42,7 +42,7 @@ class AutomationTier(IntEnum):
         return self.name
 
     @classmethod
-    def from_str(cls, value: str | "AutomationTier") -> "AutomationTier":
+    def from_str(cls, value: str | AutomationTier) -> AutomationTier:
         """Parse a tier from an arbitrary string (case-insensitive)."""
         if isinstance(value, AutomationTier):
             return value

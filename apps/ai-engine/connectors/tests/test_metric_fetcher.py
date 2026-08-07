@@ -11,7 +11,6 @@ import pytest
 from connectors.metric_fetcher import MetricFetcher
 from connectors.signoz_client import SigNozClient
 
-
 pytestmark = pytest.mark.asyncio
 
 

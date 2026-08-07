@@ -20,13 +20,13 @@ import asyncio
 import logging
 import random
 import uuid
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from typing import Any
 
 import httpx
 
 from connectors.config import SigNozConnectorConfig
-
 
 logger = logging.getLogger("aegis.connectors.signoz")
 
@@ -122,7 +122,7 @@ class SigNozClient:
         config: SigNozConnectorConfig,
         *,
         transport: httpx.AsyncBaseTransport | None = None,
-    ) -> "SigNozClient":
+    ) -> SigNozClient:
         """Build a client from a :class:`SigNozConnectorConfig`.
 
         When ``config.use_mock=True`` the client is wired to the
@@ -147,7 +147,7 @@ class SigNozClient:
     # ------------------------------------------------------------------ #
     # Context manager
     # ------------------------------------------------------------------ #
-    async def __aenter__(self) -> "SigNozClient":
+    async def __aenter__(self) -> SigNozClient:
         return self
 
     async def __aexit__(self, *exc: Any) -> None:

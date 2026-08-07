@@ -24,7 +24,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -46,7 +46,7 @@ logger = logging.getLogger("aegis.wiki.publish")
 
 
 _DEFAULT_VAULT_ROOT = Path("~/Documents/obsidian-sre").expanduser()
-_DEFAULT_REMOTE_URL = "git@github.com:JIUNG9/aegis-wiki.git"
+_DEFAULT_REMOTE_URL = "git@github.com:JIUNG9/sre-knowledge-wiki.git"
 _META_DIR_NAME = "_meta"
 _LOG_FILENAME = "publish-log.jsonl"
 
@@ -66,7 +66,7 @@ class PublishResult(BaseModel):
     """Summary of one publish pass."""
 
     published_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
     commit_sha: str | None = None
     files_changed: int = 0
@@ -158,12 +158,11 @@ class Publisher:
 
             # Add the remote only if it isn't already present.
             remote_names = [r.name for r in repo.remotes]
-            if "origin" not in remote_names:
-                if self.config.remote_url:
-                    logger.info(
-                        "adding remote origin -> %s", self.config.remote_url
-                    )
-                    repo.create_remote("origin", self.config.remote_url)
+            if "origin" not in remote_names and self.config.remote_url:
+                logger.info(
+                    "adding remote origin -> %s", self.config.remote_url
+                )
+                repo.create_remote("origin", self.config.remote_url)
 
         await asyncio.to_thread(_work)
 
@@ -219,7 +218,7 @@ class Publisher:
                 last_commit = repo.head.commit
                 last_sha = last_commit.hexsha
                 last_at = datetime.fromtimestamp(
-                    last_commit.committed_date, tz=timezone.utc
+                    last_commit.committed_date, tz=UTC
                 ).isoformat()
 
             return {
@@ -274,7 +273,7 @@ class Publisher:
 
             msg = commit_message or (
                 f"wiki: sync {result.files_changed} pages updated at "
-                f"{datetime.now(timezone.utc).isoformat()}"
+                f"{datetime.now(UTC).isoformat()}"
             )
             # Explicit Actor to guarantee the configured identity is used
             # even if the local git config was modified out-of-band.

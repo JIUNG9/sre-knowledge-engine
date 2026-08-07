@@ -53,9 +53,9 @@ if TYPE_CHECKING:
     from wiki.engine import WikiEngine, WikiEngineConfig  # noqa: F401
     from wiki.ingester import Ingester, Source, SourceType  # noqa: F401
     from wiki.publisher import (  # noqa: F401
-        PublishResult,
         Publisher,
         PublisherConfig,
+        PublishResult,
     )
     from wiki.signoz_sync import (  # noqa: F401
         SignozConfig,
@@ -149,9 +149,9 @@ except Exception:  # pragma: no cover
 
 try:
     from wiki.publisher import (  # type: ignore[assignment]
-        PublishResult,
         Publisher,
         PublisherConfig,
+        PublishResult,
     )
 except Exception:  # pragma: no cover
     Publisher = None  # type: ignore[assignment]

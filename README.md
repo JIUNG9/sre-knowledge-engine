@@ -4,9 +4,9 @@
 
 ### AI-Native DevSecOps Command Center
 
-[![CI](https://img.shields.io/github/actions/workflow/status/JIUNG9/aegis/ci.yml?label=ci&logo=github)](https://github.com/JIUNG9/aegis/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/JIUNG9/sre-knowledge-engine/ci.yml?label=ci&logo=github)](https://github.com/JIUNG9/sre-knowledge-engine/actions)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v4.0%20Layers%200--5%20built%20%C2%B7%20Phase%202%20starting-brightgreen)](docs/ARCHITECTURE.md)
+[![Status](https://img.shields.io/badge/status-v4.0%20%C2%B7%20Layers%200--5%20built%20%C2%B7%20Layers%201.5%2F1.6%20alpha%20%C2%B7%20Phase%202-brightgreen)](docs/ARCHITECTURE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-000?logo=next.js)](https://nextjs.org/)
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
@@ -15,7 +15,7 @@
 
 **An AI-native DevSecOps command center built on the Karpathy LLM Wiki pattern, not traditional RAG. Runs for about fifteen dollars a month.**
 
-[Architecture](docs/ARCHITECTURE.md) | [Live wiki](https://github.com/JIUNG9/aegis-wiki) | [Article series](#read-the-series) | [Author](#about-the-author)
+[Architecture](docs/ARCHITECTURE.md) | [Live wiki](https://github.com/JIUNG9/sre-knowledge-wiki) | [Article series](#read-the-series) | [Author](#about-the-author)
 
 </div>
 
@@ -25,7 +25,7 @@
 
 Most "AI for SRE" products are a retrieval-augmented chatbot pointed at a Confluence export. That design is fundamentally wrong for incident response. Chunk-based retrieval returns the three highest-scoring fragments and calls it context — and those fragments are usually stale, contradictory, or lifted from a runbook that no one has touched in two years. The agent answers confidently from a knowledge base it cannot evaluate. Aegis rejects that pattern.
 
-Aegis uses the **LLM Wiki pattern** popularized by Andrej Karpathy: every source (runbook, post-mortem, Confluence page, resolved incident) is read exactly once by an LLM and synthesized into a canonical Obsidian page. Contradictions are flagged at ingest time. Staleness is tracked per source. The Control Tower queries pre-synthesized knowledge instead of raw chunks. The vault is public — it doubles as a portfolio artifact at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki), edited locally in Obsidian and auto-published.
+Aegis uses the **LLM Wiki pattern** popularized by Andrej Karpathy: every source (runbook, post-mortem, Confluence page, resolved incident) is read exactly once by an LLM and synthesized into a canonical Obsidian page. Contradictions are flagged at ingest time. Staleness is tracked per source. The Control Tower queries pre-synthesized knowledge instead of raw chunks. The vault is public — it doubles as a portfolio artifact at [github.com/JIUNG9/sre-knowledge-wiki](https://github.com/JIUNG9/sre-knowledge-wiki), edited locally in Obsidian and auto-published.
 
 The whole platform targets a specific constraint: **under fifteen dollars a month of recurring cost**. Claude Haiku 4.5 does the cheap synthesis work, Sonnet 4.6 does the reasoning, Opus only when the operator explicitly asks for it. SigNoz is OSS and self-hostable. Postgres, ClickHouse, and Redis run on a single VM. MCP (Model Context Protocol) is native, not bolted on. A four-stage automation ladder (Observe → Recommend → Low-Auto → Full-Auto) keeps the agent out of production until the operator trusts it.
 
@@ -35,9 +35,11 @@ The whole platform targets a specific constraint: **under fifteen dollars a mont
 
 ```mermaid
 graph TB
-  subgraph AEGIS["Aegis v4.0 — 6 Layers"]
+  subgraph AEGIS["Aegis v4.0 · 6 Layers + State Subscription"]
     L0[Layer 0: Safety Foundation<br/>PII proxy / IAM / kill switch / OTel / honey tokens<br/><b>BUILT</b>]
     L1[Layer 1: LLM Wiki<br/>Karpathy Pattern<br/><b>BUILT</b>]
+    L15[Layer 1.5: State Subscription<br/>k8s / Terraform / ArgoCD CDC consumers<br/><b>ALPHA · shadow mode</b>]
+    L16[Layer 1.6: Invalidation Engine<br/>TMS-style fan-out · pending_revalidation<br/><b>ALPHA · shadow mode</b>]
     L2[Layer 2: SigNoz Connector<br/>HTTP API + pattern analyzer<br/><b>BUILT</b>]
     L3[Layer 3: Claude Control Tower<br/>Eco / Standard / Deep<br/><b>BUILT</b>]
     L4[Layer 4: Production Guardrails<br/>4-Stage Automation Ladder<br/><b>BUILT</b>]
@@ -50,6 +52,9 @@ graph TB
   L3 --> L4
   L5 --> L1
   L2 --> L5
+  Infra[Live infra<br/>k8s · Terraform · ArgoCD] --> L15
+  L15 --> L16
+  L16 --> L1
   L1 --> Vault[Obsidian vault<br/>aegis-wiki repo]
   L0 -.wraps every layer.-> L3
 ```
@@ -76,6 +81,11 @@ Full design document, component boundaries, trust model, and cost envelope: [doc
 | 1 | Confluence sync | Built | `apps/ai-engine/wiki/confluence_sync.py` |
 | 1 | SigNoz wiki sync | Built | `apps/ai-engine/wiki/signoz_sync.py` |
 | 1 | Git publisher | Built | `apps/ai-engine/wiki/publisher.py` |
+| 1.5 | State subscription · Consumer protocol | Alpha (shadow mode) | `apps/ai-engine/state_subscription/subscriber.py` |
+| 1.5 | State subscription · KubernetesConsumer (watch API) | Alpha (shadow mode) | `apps/ai-engine/state_subscription/consumers/k8s.py` |
+| 1.5 | State subscription · Terraform / ArgoCD consumers | Designed (not yet built) | `docs/architecture/layer-1.5-state-subscription.md` |
+| 1.6 | Invalidation engine · Reverse dependency index | Alpha (shadow mode) | `apps/ai-engine/invalidation/dependency_index.py` |
+| 1.6 | Invalidation engine · TMS fan-out + JSONL audit log | Alpha (shadow mode) | `apps/ai-engine/invalidation/engine.py` |
 | 2 | SigNoz HTTP connector | Built | `apps/ai-engine/connectors/` |
 | 2 | Time-based pattern analyzer | Built | `apps/ai-engine/connectors/pattern_analyzer/` |
 | 3 | Claude Control Tower | Built | `apps/ai-engine/control_tower/` |
@@ -116,7 +126,7 @@ Frontend modules already shipped: Log Explorer, SLO Dashboard, FinOps, Incidents
 ### Clone and boot
 
 ```bash
-git clone https://github.com/JIUNG9/aegis.git
+git clone https://github.com/JIUNG9/sre-knowledge-engine.git
 cd aegis
 cp .env.example .env                  # fill in ANTHROPIC_API_KEY
 pnpm install
@@ -197,7 +207,7 @@ Each article directory also contains a `linkedin-post.md` with three variants (t
 
 ## Related Repos
 
-- **[github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki)** — the live, sanitized Obsidian vault published by the Aegis LLM Wiki Engine. This is what a self-maintaining SRE knowledge base looks like in practice. Recruiters and reviewers: start there.
+- **[github.com/JIUNG9/sre-knowledge-wiki](https://github.com/JIUNG9/sre-knowledge-wiki)** — the live, sanitized Obsidian vault published by the Aegis LLM Wiki Engine. This is what a self-maintaining SRE knowledge base looks like in practice. Recruiters and reviewers: start there.
 
 ---
 
@@ -246,7 +256,7 @@ Budget guardrails in `apps/web/src/app/(dashboard)/settings/` auto-downgrade to 
 **June Gu** (Jiung Gu). Site Reliability Engineer at [Placen](https://placen.kr), a subsidiary of NAVER Corporation. Previously at Coupang (NYSE: CPNG), Hyundai IT&E, and Lotte Shopping. Aegis is a nights-and-weekends project built while operating multi-account AWS infrastructure, EKS clusters, and PostgreSQL fleets at day-job scale. Relocating to Canada in 2027.
 
 - LinkedIn: [linkedin.com/in/jiung-gu](https://linkedin.com/in/jiung-gu)
-- Medium: [medium.com/@junegu](https://medium.com/@junegu)
+- Medium: [medium.com/@June-Gu](https://medium.com/@June-Gu)
 - GitHub: [github.com/JIUNG9](https://github.com/JIUNG9)
 
 ---

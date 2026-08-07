@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -115,7 +115,7 @@ def contradicting_docs(tmp_path: Path) -> list[Any]:
     """Two Docs with deliberate contradictions — versions + procedures."""
     from reconciliation.models import Doc
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     return [
         Doc(
             id="runbooks/db.md",

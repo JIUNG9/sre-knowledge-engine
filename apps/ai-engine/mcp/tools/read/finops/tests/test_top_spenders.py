@@ -7,9 +7,8 @@ don't care about the individual backends here (those are covered by
 
 from __future__ import annotations
 
-import json
-
 import importlib
+import json
 
 ts = importlib.import_module("mcp.tools.read.finops.top_spenders")
 

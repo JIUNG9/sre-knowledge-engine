@@ -13,7 +13,20 @@ If you discover a security vulnerability in Aegis, please report it responsibly.
 
 **Do NOT create a public GitHub issue for security vulnerabilities.**
 
-Instead, please email: **security@aegis-devsecops.dev**
+Instead, report it privately through GitHub:
+[**Report a vulnerability**](https://github.com/JIUNG9/sre-knowledge-engine/security/advisories/new)
+
+That opens an advisory visible only to you and the maintainer, and nothing is public
+until there's a fix.
+
+> This previously said to email `security@aegis-devsecops.dev`. That domain doesn't
+> resolve — no MX, no A record — so any report sent there bounced. A dead reporting
+> channel is worse than none, because a researcher tries it, gets nothing, and either
+> gives up or discloses publicly.
+>
+> **Maintainer note:** the advisory link requires *Private vulnerability reporting*
+> switched on under **Settings → Advanced Security**. One checkbox, free on public
+> repos. Until it's on, that URL 404s for outside reporters.
 
 ### What to Include
 

@@ -14,9 +14,9 @@ import json
 import logging
 import re
 import shutil
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Literal
 
 import anyio
 from pydantic import BaseModel, Field
@@ -102,7 +102,7 @@ class StaleEntry(BaseModel):
 class StalenessReport(BaseModel):
     """Vault-wide freshness summary."""
 
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     total_pages: int = 0
     current_count: int = 0
     stale_count: int = 0
@@ -134,7 +134,7 @@ class StalenessLinter:
 
     # --- public API --------------------------------------------------------
 
-    async def lint_page(self, page: "WikiPage") -> FreshnessT:
+    async def lint_page(self, page: WikiPage) -> FreshnessT:
         """Return the computed freshness label for a single page."""
         # Manual override: frontmatter can pin freshness (e.g. "evergreen" ==
         # current). Honor an explicit archived flag regardless.
@@ -155,14 +155,14 @@ class StalenessLinter:
             return "stale"
         return "current"
 
-    async def find_orphans(self, pages: list["WikiPage"]) -> list["WikiPage"]:
+    async def find_orphans(self, pages: list[WikiPage]) -> list[WikiPage]:
         """Return pages that no other page links to via [[wikilinks]]."""
         linked: set[str] = set()
         for p in pages:
             for target in _extract_wikilink_targets(getattr(p, "body", "") or ""):
                 linked.add(target.lower())
 
-        orphans: list["WikiPage"] = []
+        orphans: list[WikiPage] = []
         for p in pages:
             slug = (p.slug or "").lower()
             title = (getattr(p, "title", "") or "").lower()
@@ -178,7 +178,7 @@ class StalenessLinter:
             orphans.append(p)
         return orphans
 
-    async def scan_vault(self, pages: list["WikiPage"]) -> StalenessReport:
+    async def scan_vault(self, pages: list[WikiPage]) -> StalenessReport:
         """Compute freshness for every page, mutate in place, return report."""
         report = StalenessReport(total_pages=len(pages))
 
@@ -273,7 +273,7 @@ class StalenessLinter:
 
     # --- internals ---------------------------------------------------------
 
-    def _rule_for(self, page: "WikiPage") -> StalenessRule:
+    def _rule_for(self, page: WikiPage) -> StalenessRule:
         """Resolve the rule by page frontmatter source_type or page.type."""
         fm = getattr(page, "frontmatter", None) or {}
         source_type = None
@@ -322,8 +322,8 @@ def _days_since(ts: Any) -> int | None:
     if not isinstance(ts, datetime):
         return None
     if ts.tzinfo is None:
-        ts = ts.replace(tzinfo=timezone.utc)
-    delta = datetime.now(timezone.utc) - ts
+        ts = ts.replace(tzinfo=UTC)
+    delta = datetime.now(UTC) - ts
     return max(delta.days, 0)
 
 

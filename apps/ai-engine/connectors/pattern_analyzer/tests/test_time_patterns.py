@@ -1,10 +1,11 @@
 """Tests for time_patterns primitives and TimePattern composition."""
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
+from connectors.pattern_analyzer.tests.fixtures import Event, monday_9am_events
 from connectors.pattern_analyzer.time_patterns import (
     build_time_pattern,
     burst_detector,
@@ -12,7 +13,6 @@ from connectors.pattern_analyzer.time_patterns import (
     hour_of_day_skew,
     week_over_week_anomaly,
 )
-from connectors.pattern_analyzer.tests.fixtures import Event, monday_9am_events
 
 
 def test_day_of_week_distribution_is_zero_filled():
@@ -51,7 +51,7 @@ def test_80pct_monday_9am_is_detected():
 
 def test_week_over_week_anomaly_detects_spike():
     # 3 baseline weeks @ ~20 events, then a spike week @ 200 events.
-    base = datetime(2026, 1, 5, 10, 0, 0, tzinfo=timezone.utc)  # Monday
+    base = datetime(2026, 1, 5, 10, 0, 0, tzinfo=UTC)  # Monday
     events: list[Event] = []
     for week in range(3):
         for i in range(20):
@@ -81,7 +81,7 @@ def test_week_over_week_anomaly_detects_spike():
 
 
 def test_burst_detector_finds_short_spike():
-    base = datetime(2026, 2, 1, 0, 0, 0, tzinfo=timezone.utc)
+    base = datetime(2026, 2, 1, 0, 0, 0, tzinfo=UTC)
     events: list[Event] = []
     # 10 minutes of quiet (1 event per minute)
     for i in range(10):

@@ -52,5 +52,46 @@ class Settings(BaseSettings):
     wiki_git_author_email: str = "aegis-bot@localhost"
     wiki_auto_push: bool = False
 
+    # ---------------------------------------------------------------- #
+    # Layer 1.5 / 1.6 — State Subscription + Invalidation
+    # ---------------------------------------------------------------- #
+    # Master kill switch. False (default) keeps the entire CDC + invalidation
+    # plane out of the app lifespan, even if other knobs are misconfigured.
+    # Operators flip this to True once they've reviewed the rollout.
+    invalidation_enabled: bool = False
+
+    # The Phase 2 rollout flag from the design doc. When False (default), the
+    # engine logs every record but never mutates a wiki page or appends to the
+    # resynth queue. Operators run two weeks of shadow-mode observation
+    # before flipping this to True. Internally we pass `shadow_mode = not
+    # invalidation_write_frontmatter` so there's exactly one switch to flip.
+    invalidation_write_frontmatter: bool = False
+
+    # Per-event fanout cap. Caps the number of dependent slugs marked per
+    # event before the cap engages and reconciliation has to sweep the tail.
+    # 1000 is the design-doc default; tune lower under bursty TF applies.
+    invalidation_fanout_cap: int = 1000
+
+    # Coalescing window for consume_with_batching. Events within this many
+    # milliseconds of each other for the same artifact_id collapse to a
+    # single fan-out. 100ms is the design-doc default; raise under heavy
+    # ConfigMap flap, lower for incident-grade detection latency.
+    invalidation_batch_window_ms: int = 100
+
+    # Override paths. Defaults derive from wiki_vault_root.
+    invalidation_log_path: Path | None = None
+    invalidation_resynth_queue_path: Path | None = None
+
+    # Kubernetes consumer scope.
+    invalidation_k8s_namespaces: list[str] = ["default"]
+    invalidation_k8s_tracked_kinds: list[str] = [
+        "Deployment", "StatefulSet", "ConfigMap", "Secret"
+    ]
+    # Skip the Kubernetes consumer entirely. Useful when running the
+    # ai-engine outside a cluster and not pointed at a kubeconfig — without
+    # this knob we'd noisy-warn at every startup. Defaults to True so the
+    # safe state is "do not try to talk to a cluster we may not have".
+    invalidation_k8s_disabled: bool = True
+
 
 settings = Settings()

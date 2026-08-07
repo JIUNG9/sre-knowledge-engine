@@ -16,19 +16,18 @@ Features:
 import json
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
-
-from mcp.manifest import manifest as tool_manifest
-from mcp.scope_config import MCPScopeConfig
-from mcp.tools.infrastructure import INFRASTRUCTURE_TOOLS
-from mcp.tools.observability import OBSERVABILITY_TOOLS
-from mcp.tools.workflow import WORKFLOW_TOOLS
 
 # Importing these packages triggers @scoped_tool registration.
 import mcp.tools.blocked  # noqa: F401
 import mcp.tools.read  # noqa: F401
 import mcp.tools.write  # noqa: F401
+from mcp.manifest import manifest as tool_manifest
+from mcp.scope_config import MCPScopeConfig
+from mcp.tools.infrastructure import INFRASTRUCTURE_TOOLS
+from mcp.tools.observability import OBSERVABILITY_TOOLS
+from mcp.tools.workflow import WORKFLOW_TOOLS
 
 logger = logging.getLogger("aegis.mcp")
 
@@ -53,7 +52,7 @@ class ToolExecutionAuditEntry:
         self.duration_ms = duration_ms
         self.approved = approved
         self.investigation_id = investigation_id
-        self.timestamp = datetime.now(timezone.utc).isoformat()
+        self.timestamp = datetime.now(UTC).isoformat()
 
     def to_dict(self) -> dict[str, Any]:
         entry: dict[str, Any] = {
@@ -205,8 +204,11 @@ class MCPServer:
 
         # Check approval requirement for write tools
         requires_approval = tool_schema.get("requires_approval", False)
-        if requires_approval and not skip_approval_check:
-            if not self._check_approval(name, params, investigation_id):
+        if (
+            requires_approval
+            and not skip_approval_check
+            and not self._check_approval(name, params, investigation_id)
+        ):
                 audit_entry = ToolExecutionAuditEntry(
                     tool_name=name,
                     params=params,
@@ -674,7 +676,7 @@ class MCPServer:
             "params": params,
             "investigation_id": investigation_id,
             "approved": False,
-            "queued_at": datetime.now(timezone.utc).isoformat(),
+            "queued_at": datetime.now(UTC).isoformat(),
         }
         return approval_key
 

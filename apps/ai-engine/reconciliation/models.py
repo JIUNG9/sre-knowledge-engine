@@ -7,11 +7,10 @@ in tests without touching real sources.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
-
 
 # --------------------------------------------------------------------------- #
 # Primary doc model
@@ -95,7 +94,7 @@ class ReconciliationReport(BaseModel):
     """Output of a cross-source reconciliation pass for one topic."""
 
     topic: str
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     docs: list[DocRef] = Field(default_factory=list)
     contradictions: list[Contradiction] = Field(default_factory=list)
     sources_queried: list[str] = Field(default_factory=list)
@@ -143,7 +142,7 @@ class LinkReport(BaseModel):
 
     doc_id: str
     source: SourceName
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     checked: list[LinkCheckResult] = Field(default_factory=list)
     internal_links: list[str] = Field(default_factory=list)
     external_links: list[str] = Field(default_factory=list)

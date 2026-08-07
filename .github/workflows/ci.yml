@@ -61,16 +61,25 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          # Read from go.mod rather than pinned here. This was pinned to 1.22 while
+          # go.mod required 1.26.2, so the two could drift apart silently.
+          go-version-file: apps/api/go.mod
           cache-dependency-path: apps/api/go.sum
 
       - name: Build
         working-directory: apps/api
         run: go build ./...
 
+      - name: Vet
+        working-directory: apps/api
+        run: go vet ./...
+
       - name: Test
         working-directory: apps/api
-        run: go test ./... -v
+        # -race matters here: the rate limiter guards shared per-IP counters with a
+        # mutex, and there's a test that hammers it from 200 goroutines. Without the
+        # detector that test can pass while the locking is subtly wrong.
+        run: go test ./... -race -v
 
   build-ai-engine:
     name: Build AI Engine
@@ -84,13 +93,23 @@ jobs:
 
       - name: Install dependencies
         working-directory: apps/ai-engine
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          # Test + lint deps. Previously undeclared, so this job could lint but
+          # never run the suite.
+          pip install -e ".[dev]"
 
       - name: Lint
         working-directory: apps/ai-engine
-        run: |
-          pip install ruff
-          ruff check .
+        # ruff is version-pinned in the dev extra on purpose. It was unpinned, and
+        # ruff 0.16 widened its implicit default rule set from ~4 findings to ~600
+        # on this tree — CI went red on a dependency release, with no code change.
+        # The rule set is now declared in pyproject.toml [tool.ruff.lint].
+        run: ruff check .
+
+      - name: Test
+        working-directory: apps/ai-engine
+        run: pytest -q
 
   security-scan:
     name: Security Scan
@@ -100,9 +119,15 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        # Pinned to a release rather than @master: this job's result should change
+        # when the code or the advisory database changes, not when the action does.
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
           severity: CRITICAL,HIGH
+          # Only fail on findings that have a published fix. An unfixed advisory in
+          # a transitive dependency is not something this repo can act on, and
+          # failing the build on it just trains people to ignore the red X.
+          ignore-unfixed: true
           exit-code: 1

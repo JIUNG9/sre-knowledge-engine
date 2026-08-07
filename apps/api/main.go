@@ -12,8 +12,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"go.uber.org/zap"
 
-	"github.com/junegu/aegis/api/config"
-	"github.com/junegu/aegis/api/routes"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/config"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/routes"
 )
 
 const banner = `

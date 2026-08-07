@@ -72,10 +72,9 @@ def test_exception_in_tool_marks_error(memory_exporter) -> None:
     class ToolBoom(Exception):
         pass
 
-    with pytest.raises(ToolBoom):
-        with trace_mcp_tool("prom_query", scope="read") as tool:
-            tool.set_target("prom://query")
-            raise ToolBoom("upstream 500")
+    with pytest.raises(ToolBoom), trace_mcp_tool("prom_query", scope="read") as tool:
+        tool.set_target("prom://query")
+        raise ToolBoom("upstream 500")
 
     span = memory_exporter.get_finished_spans()[0]
     attrs = dict(span.attributes or {})
@@ -85,9 +84,8 @@ def test_exception_in_tool_marks_error(memory_exporter) -> None:
 
 
 def test_invalid_scope_raises(memory_exporter) -> None:
-    with pytest.raises(ValueError):
-        with trace_mcp_tool("x", scope="oops"):  # type: ignore[arg-type]
-            pass
+    with pytest.raises(ValueError), trace_mcp_tool("x", scope="oops"):  # type: ignore[arg-type]
+        pass
 
 
 def test_custom_outcome_is_preserved(memory_exporter) -> None:

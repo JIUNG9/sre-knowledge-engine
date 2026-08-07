@@ -36,7 +36,10 @@ CHECKS: list[Check] = [
     Check("aegis-api health",       "http://localhost:8000/health"),
     Check("aegis-web root",          "http://localhost:3000"),
     Check("signoz UI",               "http://localhost:3301", expect_substr="SigNoz"),
-    Check("otel demo shop",          "http://localhost:8080"),
+    # The "otel demo shop" check on :8080 is gone with the astronomy-shop service.
+    # telemetrygen replaces it and has no HTTP surface — it pushes OTLP and exits.
+    # Telemetry arrival is verified through SigNoz above, which is the thing that
+    # actually matters: data reaching the backend Aegis reads from.
     Check("confluence mock health",  "http://localhost:8090/healthz", expect_json_key="status"),
     Check("confluence content list", "http://localhost:8090/rest/api/content?limit=100", expect_json_key="results"),
     Check("localstack health",       "http://localhost:4566/_localstack/health", expect_json_key="services"),

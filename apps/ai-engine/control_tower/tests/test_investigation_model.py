@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
+from pydantic import ValidationError
 
 from control_tower.investigation import (
     Alert,
@@ -54,7 +55,7 @@ def test_alert_accepts_question_only():
 def test_evidence_confidence_clamped():
     ev = Evidence(kind="log", summary="spike", confidence=1.0)
     assert ev.confidence == 1.0
-    with pytest.raises(Exception):
+    with pytest.raises(ValidationError):
         Evidence(kind="log", summary="", confidence=1.5)
 
 
@@ -91,7 +92,7 @@ def test_context_render_has_sections():
         ],
         logs=[
             LogSummary(
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
                 severity="error",
                 service="acme-api",
                 body="boom",

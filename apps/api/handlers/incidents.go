@@ -9,8 +9,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 
-	"github.com/junegu/aegis/api/mock"
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/mock"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // incidentStore provides thread-safe in-memory storage for incidents.

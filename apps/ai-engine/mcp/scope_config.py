@@ -20,7 +20,6 @@ mutating tools the Aegis agent must never be able to invoke.
 
 from dataclasses import dataclass, field
 
-
 DEFAULT_BLOCKED_TOOL_NAMES: list[str] = [
     "terraform_apply",
     "kubectl_delete",

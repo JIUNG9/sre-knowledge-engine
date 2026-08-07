@@ -9,9 +9,9 @@ from pathlib import Path
 import pytest
 
 from guardrails.approval import (
+    ApprovalGate,
     ApprovalRequest,
     ApprovalResult,
-    ApprovalGate,
     LocalCLIApprovalGate,
 )
 from guardrails.audit import AuditLogger

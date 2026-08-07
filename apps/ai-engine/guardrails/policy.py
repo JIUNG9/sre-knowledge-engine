@@ -47,9 +47,10 @@ The loader validates structure; unknown match/effect keys raise
 from __future__ import annotations
 
 import datetime as _dt
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import yaml
 
@@ -161,7 +162,7 @@ class GuardrailsPolicy:
     # ---------------------- loading ----------------------
 
     @classmethod
-    def load(cls, path: str | Path) -> "GuardrailsPolicy":
+    def load(cls, path: str | Path) -> GuardrailsPolicy:
         """Load a policy file from disk."""
         p = Path(path)
         if not p.exists():
@@ -172,7 +173,7 @@ class GuardrailsPolicy:
     @classmethod
     def from_dict(
         cls, data: dict[str, Any], *, source_path: Path | None = None
-    ) -> "GuardrailsPolicy":
+    ) -> GuardrailsPolicy:
         """Compile a raw dict (typically from YAML) into a policy."""
         if not isinstance(data, dict):
             raise PolicyValidationError("policy root must be a mapping")

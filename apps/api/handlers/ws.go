@@ -11,8 +11,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
-	"github.com/junegu/aegis/api/mock"
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/mock"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // WSHub manages active WebSocket connections for log streaming.

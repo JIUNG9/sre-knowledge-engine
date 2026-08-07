@@ -18,11 +18,10 @@ Design notes:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
-
 
 InvestigationMode = Literal["eco", "standard", "deep", "halted"]
 
@@ -47,7 +46,7 @@ class Alert(BaseModel):
     description: str = ""
     labels: dict[str, str] = Field(default_factory=dict)
     fired_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
     question: str | None = None
     source: str | None = None
@@ -270,7 +269,7 @@ class Investigation(BaseModel):
 
     trace_id: str | None = None
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
+        default_factory=lambda: datetime.now(UTC)
     )
     usage: InvestigationUsage = Field(default_factory=InvestigationUsage)
 

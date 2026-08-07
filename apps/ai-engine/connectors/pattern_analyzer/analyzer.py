@@ -12,9 +12,10 @@ pattern_analyzer can be tested and published independently.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Iterable, Iterator, Protocol, runtime_checkable
+from typing import Protocol, runtime_checkable
 
 from .correlation import ServiceCorrelationGraph, service_correlation_graph
 from .message_clustering import MessageCluster, cluster_messages

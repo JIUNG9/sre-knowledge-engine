@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import statistics
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from mcp.scoped_tool import scoped_tool
@@ -110,7 +110,7 @@ def _collect_series(
     lookback_days: int,
 ) -> list[dict[str, Any]] | dict[str, Any]:
     """Return a ``[{date, amount}]`` daily series, or an unavailable dict."""
-    today = datetime.now(timezone.utc).date()
+    today = datetime.now(UTC).date()
     start = today - timedelta(days=lookback_days)
     end = today + timedelta(days=1)
 

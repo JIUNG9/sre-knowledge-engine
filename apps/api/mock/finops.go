@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // awsServices maps AWS services to their approximate monthly cost targets.

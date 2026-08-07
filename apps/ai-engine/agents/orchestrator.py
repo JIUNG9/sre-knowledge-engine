@@ -13,7 +13,7 @@ import json
 import logging
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -568,7 +568,7 @@ class IncidentOrchestrator:
             "proposed_remediation": proposed_remediation,
             "confidence_score": rca.get("confidence_score", 0.75),
             "severity": severity,
-            "investigated_at": datetime.now(timezone.utc).isoformat(),
+            "investigated_at": datetime.now(UTC).isoformat(),
             "token_usage": token_usage,
             "duration_ms": duration_ms,
         }
@@ -706,7 +706,7 @@ class IncidentOrchestrator:
             ],
             "confidence_score": 0.87,
             "severity": severity,
-            "investigated_at": datetime.now(timezone.utc).isoformat(),
+            "investigated_at": datetime.now(UTC).isoformat(),
             "token_usage": {
                 "input_tokens": 0,
                 "output_tokens": 0,
@@ -750,7 +750,7 @@ class IncidentOrchestrator:
             "proposed_remediation": [],
             "confidence_score": 0.0,
             "severity": incident_context.get("severity", "medium"),
-            "investigated_at": datetime.now(timezone.utc).isoformat(),
+            "investigated_at": datetime.now(UTC).isoformat(),
             "token_usage": {
                 "input_tokens": 0,
                 "output_tokens": 0,

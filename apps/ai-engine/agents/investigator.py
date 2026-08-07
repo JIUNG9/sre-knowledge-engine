@@ -12,7 +12,7 @@ Architecture:
     5. Proposes remediation steps with risk assessment
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 
 class IncidentInvestigator:
@@ -109,5 +109,5 @@ class IncidentInvestigator:
             ],
             "confidence_score": 0.87,
             "severity": severity,
-            "investigated_at": datetime.now(timezone.utc).isoformat(),
+            "investigated_at": datetime.now(UTC).isoformat(),
         }

@@ -29,6 +29,7 @@ single trace shows the full decision path.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import time
 from typing import TYPE_CHECKING, Any
@@ -497,10 +498,9 @@ class Executor:
         setter = getattr(span, "set_attribute", None)
         if not callable(setter):
             return
-        try:
+        # Telemetry must never break the executor it is observing.
+        with contextlib.suppress(Exception):  # pragma: no cover
             setter(key, value if isinstance(value, (str, int, float, bool)) else str(value))
-        except Exception:  # pragma: no cover
-            pass
 
 
 # ---------------------------------------------------------------------- #

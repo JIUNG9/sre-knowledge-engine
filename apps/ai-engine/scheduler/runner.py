@@ -23,8 +23,9 @@ from __future__ import annotations
 
 import logging
 import time
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
 
 from .history import JobHistory, JobRunRecord
 
@@ -62,7 +63,7 @@ class JobRunner:
         self.killswitch = killswitch
         self._on_run = on_run
 
-    def wrap(self, job: "Job") -> Callable[[], Awaitable[JobRunRecord]]:
+    def wrap(self, job: Job) -> Callable[[], Awaitable[JobRunRecord]]:
         """Return an async callable APScheduler can register.
 
         The returned coroutine is what APScheduler invokes every tick.
@@ -75,7 +76,7 @@ class JobRunner:
         _run.__name__ = f"scheduled_{job.id}"
         return _run
 
-    async def run_once(self, job: "Job") -> JobRunRecord:
+    async def run_once(self, job: Job) -> JobRunRecord:
         """Run ``job`` immediately, bypassing APScheduler.
 
         Used by the ``POST /api/v1/scheduler/jobs/{id}/run`` endpoint
@@ -88,10 +89,10 @@ class JobRunner:
     # Internals
     # ------------------------------------------------------------------ #
 
-    async def _execute(self, job: "Job") -> JobRunRecord:
+    async def _execute(self, job: Job) -> JobRunRecord:
         """Core safety pipeline: span open -> killswitch -> func -> record."""
         started = time.monotonic()
-        started_at = datetime.now(timezone.utc).isoformat()
+        started_at = datetime.now(UTC).isoformat()
 
         # --- Kill switch check (before opening any span work) ---
         if self._killswitch_active():
@@ -101,7 +102,7 @@ class JobRunner:
             record = JobRunRecord(
                 job_id=job.id,
                 started_at=started_at,
-                finished_at=datetime.now(timezone.utc).isoformat(),
+                finished_at=datetime.now(UTC).isoformat(),
                 duration_ms=(time.monotonic() - started) * 1000.0,
                 outcome="skipped",
                 error=None,
@@ -128,7 +129,7 @@ class JobRunner:
             err_text = repr(exc)
             logger.exception("scheduler: job %s failed", job.id)
 
-        finished = datetime.now(timezone.utc).isoformat()
+        finished = datetime.now(UTC).isoformat()
         duration_ms = (time.monotonic() - started) * 1000.0
 
         record = JobRunRecord(
@@ -168,7 +169,7 @@ class JobRunner:
             )
             return False
 
-    def _emit_span(self, job: "Job", record: JobRunRecord) -> None:
+    def _emit_span(self, job: Job, record: JobRunRecord) -> None:
         """Best-effort OTel span emission.
 
         OTel is an optional dep at runtime — if the import or tracer
@@ -223,7 +224,7 @@ class JobRunner:
 
 
 async def run_with_safety(
-    job: "Job",
+    job: Job,
     *,
     history: JobHistory,
     killswitch: Any | None = None,

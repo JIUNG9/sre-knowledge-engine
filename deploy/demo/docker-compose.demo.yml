@@ -35,7 +35,16 @@ services:
   # ═══════════════════════════════════════════════════════════
   signoz-zookeeper:
     <<: *demo-common
-    image: bitnami/zookeeper:3.7.1
+    # Was bitnami/zookeeper:3.7.1, which now 404s — Bitnami pulled its legacy tags
+    # from Docker Hub, so a pin that worked when this was written stopped resolving.
+    # bitnamilegacy is their archive namespace and is a genuine drop-in: same
+    # ALLOW_ANONYMOUS_LOGIN / ZOO_AUTOPURGE_INTERVAL contract, same
+    # /bitnami/zookeeper data path.
+    #
+    # It is an archive, so it won't get patches. The forward path is ClickHouse
+    # Keeper, which SigNoz supports and which drops ZooKeeper from the stack
+    # entirely — worth doing, but it's a stack change, not a build fix.
+    image: bitnamilegacy/zookeeper:3.7.1
     container_name: aegis-demo-zookeeper
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
@@ -59,11 +68,27 @@ services:
         hard: 262144
     volumes:
       - signoz-clickhouse:/var/lib/clickhouse
+      # Binds to 0.0.0.0 instead of the default `::`. Without this nothing is bound
+      # at all on an IPv6-less Docker network. See the comments in the file.
+      - ./clickhouse/listen.xml:/etc/clickhouse-server/config.d/listen.xml:ro
+      # Defines the cluster named "cluster" plus zookeeper and the shard/replica
+      # macros. SigNoz's migrator uses ON CLUSTER DDL and fails without it.
+      - ./clickhouse/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      # 127.0.0.1, not localhost. /etc/hosts in this image maps localhost to ::1
+      # only, so once ClickHouse is IPv4-only (above) a check against localhost gets
+      # "Connection refused" while the server is perfectly healthy — verified by
+      # netstat showing 0.0.0.0:8123 LISTEN and localhost still refusing.
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8123/ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+      # Without start_period the check gets interval x retries = 50s total, and
+      # ClickHouse doesn't finish starting in 50s on a CI runner sharing a box with
+      # eight other containers. It was killed at 51s with only "Processing
+      # configuration file" in its log — still booting, not broken. Failures during
+      # start_period don't count against retries.
+      start_period: 120s
     deploy:
       resources:
         limits:
@@ -107,6 +132,28 @@ services:
         limits:
           memory: 256M
 
+  # SigNoz keeps its ClickHouse schema in a separate migrator, and this compose file
+  # never ran it. Without it the databases signoz_traces / signoz_logs / signoz_metrics
+  # don't exist, so the collector crash-loops on startup:
+  #   code: 81, message: Database signoz_logs does not exist
+  # Runs to completion, then the collector starts. Version matches the collector.
+  signoz-schema-migrator:
+    <<: *demo-common
+    image: signoz/signoz-schema-migrator:0.88.24
+    container_name: aegis-demo-schema-migrator
+    # No --up flag on 0.88.24; that's a newer SigNoz argument. `sync --help` on this
+    # tag accepts only dsn, cluster-name, replication, verbose and the two sort
+    # feature flags.
+    command: ["sync", "--dsn=tcp://signoz-clickhouse:9000"]
+    depends_on:
+      signoz-clickhouse:
+        condition: service_healthy
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
   signoz-otel-collector:
     <<: *demo-common
     image: signoz/signoz-otel-collector:0.88.24
@@ -123,30 +170,76 @@ services:
     depends_on:
       signoz-clickhouse:
         condition: service_healthy
+      signoz-schema-migrator:
+        condition: service_completed_successfully
     deploy:
       resources:
         limits:
           memory: 512M
 
   # ═══════════════════════════════════════════════════════════
-  #  OpenTelemetry Demo (astronomy-shop — synthetic traces/logs/metrics)
+  #  Synthetic telemetry generator (traces + metrics + logs -> collector)
   # ═══════════════════════════════════════════════════════════
-  otel-demo:
+  #  Was `otel/opentelemetry-demo:1.11.1`, which does not exist — the
+  #  OpenTelemetry demo has never shipped as a single all-in-one image; it is a
+  #  ~15-service compose project, and `otel/demo` publishes one tag per service
+  #  (latest-frontend, latest-payment, ...). The pull failed with "repository does
+  #  not exist", so `docker compose up` aborted and this workflow could never have
+  #  passed. See deploy/demo/README.md.
+  #
+  #  telemetrygen is the collector-contrib project's own tool for exactly this
+  #  job: emit OTLP traces/metrics/logs at a fixed rate. What the demo actually
+  #  needs is data flowing into SigNoz so Aegis has something to reason about —
+  #  not an astronomy shop.
+  #  One service per signal, and no shell wrapper. The image is distroless — it has
+  #  no /bin/sh — so an `entrypoint: ["/bin/sh","-c"]` loop dies with
+  #  `stat /bin/sh: no such file or directory`. `--duration inf` makes the loop
+  #  unnecessary anyway.
+  otel-telemetrygen-traces: &telemetrygen
     <<: *demo-common
-    image: otel/opentelemetry-demo:1.11.1
-    container_name: aegis-demo-otel-app
-    ports:
-      - "8080:8080"   # Astronomy-shop frontend proxy
-    environment:
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://signoz-otel-collector:4317
-      - OTEL_SERVICE_NAME=astronomy-shop
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=demo,deployment.environment=demo
+    image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.158.0
+    container_name: aegis-demo-telemetrygen-traces
+    command:
+      - traces
+      - --otlp-endpoint=signoz-otel-collector:4317
+      - --otlp-insecure
+      - --duration=inf
+      - --rate=5
+      - --otlp-attributes=service.name="astronomy-shop"
+      - --otlp-attributes=service.namespace="demo"
+      - --otlp-attributes=deployment.environment="demo"
     depends_on:
       - signoz-otel-collector
     deploy:
       resources:
         limits:
-          memory: 1024M
+          memory: 256M
+
+  otel-telemetrygen-metrics:
+    <<: *telemetrygen
+    container_name: aegis-demo-telemetrygen-metrics
+    command:
+      - metrics
+      - --otlp-endpoint=signoz-otel-collector:4317
+      - --otlp-insecure
+      - --duration=inf
+      - --rate=5
+      - --otlp-attributes=service.name="astronomy-shop"
+      - --otlp-attributes=service.namespace="demo"
+      - --otlp-attributes=deployment.environment="demo"
+
+  otel-telemetrygen-logs:
+    <<: *telemetrygen
+    container_name: aegis-demo-telemetrygen-logs
+    command:
+      - logs
+      - --otlp-endpoint=signoz-otel-collector:4317
+      - --otlp-insecure
+      - --duration=inf
+      - --rate=5
+      - --otlp-attributes=service.name="astronomy-shop"
+      - --otlp-attributes=service.namespace="demo"
+      - --otlp-attributes=deployment.environment="demo"
 
   # ═══════════════════════════════════════════════════════════
   #  LocalStack (AWS mocks: S3, EC2, CloudWatch Logs, IAM)
@@ -170,6 +263,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      # Same 50s ceiling as ClickHouse had. LocalStack with PERSISTENCE=1 and six
+      # services to bring up is the other slow starter here; give it room before
+      # the retry budget starts counting.
+      start_period: 90s
     deploy:
       resources:
         limits:
@@ -186,11 +283,13 @@ services:
     container_name: aegis-demo-confluence
     ports:
       - "8090:8090"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8090/healthz"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # No healthcheck override here on purpose. This service's own Dockerfile already
+    # declares one using python's urllib, which is the right call because the base is
+    # python:3.12-slim and that image has no curl. The override this replaced ran
+    # `curl -f http://localhost:8090/healthz`, so it failed every time regardless of
+    # the app's state — uvicorn logged "Application startup complete" and compose
+    # still reported the container unhealthy, which took aegis-api down with it via
+    # depends_on. Verified: `docker run --rm python:3.12-slim which curl` finds nothing.
     deploy:
       resources:
         limits:
@@ -308,7 +407,6 @@ services:
       NEXT_PUBLIC_API_URL: "http://localhost:8000"
       NEXT_PUBLIC_DEMO_MODE: "true"
       NEXT_PUBLIC_SIGNOZ_URL: "http://localhost:3301"
-      NEXT_PUBLIC_OTEL_DEMO_URL: "http://localhost:8080"
     depends_on:
       - aegis-api
     deploy:

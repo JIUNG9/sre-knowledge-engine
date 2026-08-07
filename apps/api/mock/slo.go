@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // GenerateMockSLOs returns 10 realistic SLOs across 6 services with varied statuses.

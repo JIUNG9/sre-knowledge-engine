@@ -13,8 +13,9 @@ not themselves LLM calls — they're side-effectful actions the LLM requested.
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Iterator, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     from opentelemetry.trace import Span
@@ -35,13 +36,13 @@ ATTR_TOOL_APPROVAL_REQUIRED = "aegis.mcp.tool.approval_required"
 class MCPSpanHandle:
     """Handle returned by ``trace_mcp_tool`` for recording outcome + metadata."""
 
-    def __init__(self, otel_span: "Span | None", scope: Scope) -> None:
+    def __init__(self, otel_span: Span | None, scope: Scope) -> None:
         self._span = otel_span
         self._scope = scope
         self._outcome: str | None = None
 
     @property
-    def span(self) -> "Span | None":
+    def span(self) -> Span | None:
         return self._span
 
     @property

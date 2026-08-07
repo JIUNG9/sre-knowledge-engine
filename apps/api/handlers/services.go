@@ -3,8 +3,8 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/junegu/aegis/api/mock"
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/mock"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // serviceStore holds the in-memory service catalog (loaded once from mock generator).

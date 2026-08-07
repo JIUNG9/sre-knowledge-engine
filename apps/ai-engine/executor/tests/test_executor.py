@@ -16,7 +16,6 @@ from executor.executor import Executor
 from executor.result import ExecutionResult
 from executor.tests.conftest import FakeAction, make_decision
 
-
 # --------------------------------------------------------------------------- #
 # Happy paths
 # --------------------------------------------------------------------------- #

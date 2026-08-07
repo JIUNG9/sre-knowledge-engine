@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import json
 import sys
-from typing import Optional
 
 import typer
 
@@ -28,8 +27,8 @@ CONFIRM_TOKEN = "PANIC"
 
 
 def _build_switch(
-    redis_url: Optional[str],
-    backend: Optional[str],
+    redis_url: str | None,
+    backend: str | None,
 ) -> KillSwitch:
     """Construct a :class:`KillSwitch` honoring CLI overrides."""
     base = KillSwitchConfig()
@@ -48,13 +47,13 @@ def _build_switch(
 
 
 def panic_command(
-    operator: Optional[str] = typer.Option(
+    operator: str | None = typer.Option(
         None,
         "--operator",
         "-o",
         help="Who is tripping the switch (recorded in audit log).",
     ),
-    reason: Optional[str] = typer.Option(
+    reason: str | None = typer.Option(
         None,
         "--reason",
         "-r",
@@ -71,17 +70,17 @@ def panic_command(
         "--revoke-aws",
         help="Also attach a Deny-all inline policy to the configured AWS role.",
     ),
-    aws_role_arn: Optional[str] = typer.Option(
+    aws_role_arn: str | None = typer.Option(
         None,
         "--aws-role-arn",
         help="IAM role ARN to revoke. Defaults to config.aws_role_arn.",
     ),
-    redis_url: Optional[str] = typer.Option(
+    redis_url: str | None = typer.Option(
         None,
         "--redis-url",
         help="Override AEGIS_KILLSWITCH_REDIS_URL.",
     ),
-    backend: Optional[str] = typer.Option(
+    backend: str | None = typer.Option(
         None,
         "--backend",
         help="Force 'redis' or 'file' backend.",
@@ -160,8 +159,8 @@ def panic_command(
 
 
 def status_command(
-    redis_url: Optional[str] = typer.Option(None, "--redis-url"),
-    backend: Optional[str] = typer.Option(None, "--backend"),
+    redis_url: str | None = typer.Option(None, "--redis-url"),
+    backend: str | None = typer.Option(None, "--backend"),
     as_json: bool = typer.Option(
         False, "--json", help="Emit JSON instead of a human-readable summary."
     ),
@@ -187,15 +186,15 @@ def status_command(
 
 
 def release_command(
-    operator: Optional[str] = typer.Option(
+    operator: str | None = typer.Option(
         None,
         "--operator",
         "-o",
         help="Who is releasing the switch (audit log).",
     ),
     force: bool = typer.Option(False, "--force", "-f"),
-    redis_url: Optional[str] = typer.Option(None, "--redis-url"),
-    backend: Optional[str] = typer.Option(None, "--backend"),
+    redis_url: str | None = typer.Option(None, "--redis-url"),
+    backend: str | None = typer.Option(None, "--backend"),
 ) -> None:
     """Release the kill switch so the agent can resume."""
     switch = _build_switch(redis_url, backend)

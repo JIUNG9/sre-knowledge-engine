@@ -1,0 +1,64 @@
+"""Pydantic models for the Layer 1.6 invalidation engine."""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+InvalidationReason = Literal[
+    "value_change",
+    "first_observation",
+    "consumer_init",
+]
+
+
+class InvalidationRecord(BaseModel):
+    """Audit record for one invalidation decision.
+
+    The engine writes one of these per :class:`StateChangeEvent`
+    handled — even when no pages were affected — so the JSONL log is a
+    complete history of "what did the consumer see, and what did the
+    engine do about it?". That's the replay surface for incident review.
+    """
+
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
+    artifact_id: str = Field(description="The changed artifact_id.")
+    affected_slugs: list[str] = Field(
+        default_factory=list,
+        description="Wiki page slugs marked pending_revalidation.",
+    )
+    reason: InvalidationReason = Field(
+        description=(
+            "Why this invalidation fired. 'value_change' for normal "
+            "transitions, 'first_observation' when the consumer just "
+            "started, 'consumer_init' for a manual rebuild."
+        )
+    )
+    old_value: str | None = None
+    new_value: str | None = None
+    shadow_mode: bool = Field(
+        default=False,
+        description=(
+            "When True, the engine logged this record without mutating "
+            "any wiki pages. Useful for canary rollouts."
+        ),
+    )
+    truncated: bool = Field(
+        default=False,
+        description=(
+            "True when the per-event fanout cap dropped some dependents. "
+            "The dropped tail is recovered by the daily reconciliation "
+            "pass (design doc §7)."
+        ),
+    )
+    total_dependents: int | None = Field(
+        default=None,
+        description=(
+            "Total number of dependent slugs the index returned, before "
+            "applying the fanout cap. None when the cap did not engage."
+        ),
+    )

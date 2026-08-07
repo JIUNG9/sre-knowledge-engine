@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/junegu/aegis/api/integrations"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/integrations"
 )
 
 // Adapter implements integrations.Adapter for SigNoz.

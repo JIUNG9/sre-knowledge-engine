@@ -20,9 +20,10 @@ from __future__ import annotations
 import math
 import statistics
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
-from typing import Iterable, Protocol, runtime_checkable
+from datetime import UTC, datetime, timedelta
+from typing import Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -97,8 +98,8 @@ class Burst:
 def _as_utc(dt: datetime) -> datetime:
     """Coerce naive datetime to UTC; convert aware datetimes to UTC."""
     if dt.tzinfo is None:
-        return dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
+        return dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
 
 
 def _iter_timestamps(events: Iterable[_HasTimestamp]) -> Iterable[datetime]:

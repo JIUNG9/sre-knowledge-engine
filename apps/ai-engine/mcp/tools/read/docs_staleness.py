@@ -13,7 +13,6 @@ from reconciliation.drift import score_staleness
 
 from . import _docs_runtime as runtime
 
-
 INPUT_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {

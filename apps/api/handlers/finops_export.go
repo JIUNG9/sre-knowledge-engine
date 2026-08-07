@@ -9,8 +9,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/junegu/aegis/api/internal/excel"
-	"github.com/junegu/aegis/api/models"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/internal/excel"
+	"github.com/JIUNG9/sre-knowledge-engine/apps/api/models"
 )
 
 // Export-format constants. Anything else returns 400.

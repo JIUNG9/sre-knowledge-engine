@@ -24,11 +24,11 @@ callable under an existing tool name raises ``ValueError``.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Literal
+from typing import Literal
 
 from mcp.scope_config import MCPScopeConfig
-
 
 Scope = Literal["read", "write", "blocked"]
 

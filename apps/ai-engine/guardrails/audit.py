@@ -16,7 +16,7 @@ import json
 import os
 import threading
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -65,7 +65,7 @@ class AuditLogger:
         self,
         path: str | Path,
         *,
-        clock: "callable[[], datetime] | None" = None,
+        clock: callable[[], datetime] | None = None,
     ) -> None:
         self._path = Path(path)
         self._clock = clock or _utc_now
@@ -158,4 +158,4 @@ class AuditLogger:
 
 
 def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)

@@ -13,7 +13,7 @@ Remediation categories:
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import anthropic
@@ -202,7 +202,7 @@ class RemediationPlan:
         self.estimated_recovery_time = estimated_recovery_time
         self.rollback_plan = rollback_plan
         self.post_incident_actions = post_incident_actions or []
-        self.created_at = datetime.now(timezone.utc).isoformat()
+        self.created_at = datetime.now(UTC).isoformat()
 
     def to_dict(self) -> dict[str, Any]:
         return {

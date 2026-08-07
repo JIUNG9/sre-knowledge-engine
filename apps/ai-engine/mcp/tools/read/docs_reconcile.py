@@ -12,7 +12,6 @@ from mcp.scoped_tool import scoped_tool
 
 from . import _docs_runtime as runtime
 
-
 INPUT_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {

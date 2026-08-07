@@ -19,6 +19,7 @@ Design notes:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -57,7 +58,7 @@ class Scheduler:
             max_per_job=self.config.max_history
         )
         self.runner = JobRunner(self.history, killswitch=killswitch)
-        self._jobs: dict[str, "Job"] = {}
+        self._jobs: dict[str, Job] = {}
         self._impl: Any | None = None  # APScheduler AsyncIOScheduler
         self._started = False
 
@@ -121,7 +122,7 @@ class Scheduler:
         self._started = False
         logger.info("scheduler: stopped")
 
-    def add_job(self, job: "Job") -> None:
+    def add_job(self, job: Job) -> None:
         """Register a :class:`Job` with the scheduler.
 
         Adding a job after :meth:`start` is allowed and will register
@@ -149,10 +150,9 @@ class Scheduler:
         """
         self._jobs.pop(job_id, None)
         if self._impl is not None:
-            try:
+            # The job may already be gone; removal is idempotent by contract.
+            with contextlib.suppress(Exception):
                 self._impl.remove_job(job_id)
-            except Exception:  # job may already be gone
-                pass
 
     def list_jobs(self) -> list[dict[str, Any]]:
         """Snapshot every registered job for the API.
@@ -180,7 +180,7 @@ class Scheduler:
             )
         return out
 
-    def get_job(self, job_id: str) -> "Job | None":
+    def get_job(self, job_id: str) -> Job | None:
         """Look up a registered job by id, or None if not present."""
         return self._jobs.get(job_id)
 
@@ -225,7 +225,7 @@ class Scheduler:
     def _register_with_apscheduler(
         self,
         scheduler: Any,
-        job: "Job",
+        job: Job,
         IntervalTriggerCls: Any,
     ) -> None:
         """Hand a wrapped job to APScheduler with an IntervalTrigger.

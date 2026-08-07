@@ -6,9 +6,8 @@ cost management.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
-
 
 # Claude model pricing (per million tokens, USD)
 MODEL_PRICING: dict[str, dict[str, float]] = {
@@ -96,7 +95,7 @@ class TokenTracker:
         record = InvestigationUsageRecord(
             investigation_id=investigation_id,
             model=model,
-            started_at=datetime.now(timezone.utc).isoformat(),
+            started_at=datetime.now(UTC).isoformat(),
         )
         self._active[investigation_id] = record
 
@@ -138,7 +137,7 @@ class TokenTracker:
         if record is None:
             return None
 
-        record.completed_at = datetime.now(timezone.utc).isoformat()
+        record.completed_at = datetime.now(UTC).isoformat()
         record.usage.estimated_cost_usd = self.estimate_cost(
             model=record.model,
             input_tokens=record.usage.input_tokens,

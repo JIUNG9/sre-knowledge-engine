@@ -31,7 +31,7 @@ from __future__ import annotations
 import copy
 import logging
 from collections.abc import Iterable, Iterator
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from proxy.config import PIIProxyConfig
 from proxy.detector import PIIDetector
@@ -90,7 +90,7 @@ class AnthropicProxy:
 
     def __init__(
         self,
-        client: "anthropic.Anthropic",
+        client: anthropic.Anthropic,
         config: PIIProxyConfig | None = None,
         detector: PIIDetector | None = None,
         mapper: PlaceholderMapper | None = None,
@@ -159,10 +159,13 @@ class AnthropicProxy:
         return redacted
 
     def _redact_content_block(self, scope_id: str, block: Any) -> Any:
-        if isinstance(block, dict):
-            if block.get("type") == "text" and isinstance(block.get("text"), str):
-                block = dict(block)
-                block["text"] = self._redact_str(scope_id, block["text"])
+        if (
+            isinstance(block, dict)
+            and block.get("type") == "text"
+            and isinstance(block.get("text"), str)
+        ):
+            block = dict(block)
+            block["text"] = self._redact_str(scope_id, block["text"])
         return block
 
     def _redact_str(self, scope_id: str, text: str) -> str:

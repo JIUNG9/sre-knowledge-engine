@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 logger = logging.getLogger("aegis.killswitch.aws")
@@ -90,7 +90,7 @@ def revoke_aws_session(
             ) from exc
         iam_client = boto3.client("iam")
 
-    now_iso = datetime.now(timezone.utc).isoformat()
+    now_iso = datetime.now(UTC).isoformat()
     policy_doc = _build_policy_document(now_iso)
 
     logger.critical(

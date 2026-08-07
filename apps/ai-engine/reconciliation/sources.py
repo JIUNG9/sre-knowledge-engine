@@ -21,9 +21,10 @@ from __future__ import annotations
 import logging
 import re
 from abc import ABC, abstractmethod
-from datetime import datetime, timezone
+from collections.abc import Iterable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 from .models import Doc, SourceName
 
@@ -128,8 +129,8 @@ def _age_days(ts: datetime | None) -> int | None:
     if ts is None:
         return None
     if ts.tzinfo is None:
-        ts = ts.replace(tzinfo=timezone.utc)
-    delta = datetime.now(timezone.utc) - ts
+        ts = ts.replace(tzinfo=UTC)
+    delta = datetime.now(UTC) - ts
     return max(delta.days, 0)
 
 
@@ -237,7 +238,7 @@ def _ts_from_stat(path: Path) -> datetime | None:
         stat = path.stat()
     except OSError:
         return None
-    return datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)
+    return datetime.fromtimestamp(stat.st_mtime, tz=UTC)
 
 
 def _normalise_tags(raw: Any) -> list[str]:
@@ -347,8 +348,7 @@ class GitHubWikiSource(DocSource):
     def _iter_files(self) -> Iterable[Path]:
         if not self.wiki_root.exists():
             return []
-        for path in self.wiki_root.glob("*.md"):
-            yield path
+        yield from self.wiki_root.glob("*.md")
 
     def list(self) -> list[str]:
         return [p.name for p in self._iter_files()]

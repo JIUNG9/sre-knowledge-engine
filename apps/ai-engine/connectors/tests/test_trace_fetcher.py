@@ -10,7 +10,6 @@ import pytest
 from connectors.signoz_client import SigNozClient
 from connectors.trace_fetcher import TraceFetcher
 
-
 pytestmark = pytest.mark.asyncio
 
 

@@ -25,7 +25,6 @@ from typing import Any
 
 from .base import Wrapper, WrapperError, safe_token
 
-
 # Pure-read prefixes — any verb whose canonical first token starts with
 # one of these is treated as read-only.
 _READ_PREFIXES: tuple[str, ...] = (

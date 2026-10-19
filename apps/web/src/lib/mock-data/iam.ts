@@ -55,7 +55,7 @@ export interface AccessMatrixEntry {
 export const mockIAMRoles: IAMRole[] = [
   {
     id: "r1",
-    account: "nexus",
+    account: "hub",
     accountId: "123456789012",
     roleName: "keycloak-sre-developer-role",
     type: "user",
@@ -67,9 +67,9 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r2",
-    account: "shared",
+    account: "shared-services",
     accountId: "111122223333",
-    roleName: "connectorder-s3-irsa",
+    roleName: "acme-corp-s3-irsa",
     type: "service",
     lastUsed: "2026-04-10T08:15:00Z",
     usage30d: 8420,
@@ -79,7 +79,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r3",
-    account: "nexus",
+    account: "hub",
     accountId: "123456789012",
     roleName: "admin-full-access",
     type: "user",
@@ -91,7 +91,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r4",
-    account: "shared",
+    account: "shared-services",
     accountId: "111122223333",
     roleName: "eks-node-role",
     type: "service",
@@ -103,7 +103,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r5",
-    account: "shared",
+    account: "shared-services",
     accountId: "111122223333",
     roleName: "lambda-execution-role",
     type: "service",
@@ -115,7 +115,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r6",
-    account: "nexus",
+    account: "hub",
     accountId: "123456789012",
     roleName: "cross-account-argocd",
     type: "cross-account",
@@ -127,9 +127,9 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r7",
-    account: "nowwaiting",
+    account: "prod-a",
     accountId: "987654321098",
-    roleName: "nw-api-gateway-role",
+    roleName: "prod-a-api-gateway-role",
     type: "service",
     lastUsed: "2026-04-10T08:55:00Z",
     usage30d: 12400,
@@ -139,9 +139,9 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r8",
-    account: "dodopoint",
+    account: "prod-b",
     accountId: "000000000000",
-    roleName: "dp-admin-legacy",
+    roleName: "prod-b-admin-legacy",
     type: "user",
     lastUsed: "2026-02-14T10:00:00Z",
     usage30d: 0,
@@ -151,7 +151,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r9",
-    account: "nexus",
+    account: "hub",
     accountId: "123456789012",
     roleName: "signoz-collector-role",
     type: "service",
@@ -163,7 +163,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r10",
-    account: "shared",
+    account: "shared-services",
     accountId: "111122223333",
     roleName: "rds-migration-role",
     type: "service",
@@ -175,7 +175,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r11",
-    account: "nexus",
+    account: "hub",
     accountId: "123456789012",
     roleName: "github-actions-runner",
     type: "service",
@@ -187,9 +187,9 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r12",
-    account: "nowwaiting",
+    account: "prod-a",
     accountId: "987654321098",
-    roleName: "nw-eso-secrets-role",
+    roleName: "prod-a-eso-secrets-role",
     type: "service",
     lastUsed: "2026-04-10T07:20:00Z",
     usage30d: 6800,
@@ -199,7 +199,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r13",
-    account: "shared",
+    account: "shared-services",
     accountId: "111122223333",
     roleName: "circleci-deploy-role",
     type: "service",
@@ -211,9 +211,9 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r14",
-    account: "dodopoint",
+    account: "prod-b",
     accountId: "000000000000",
-    roleName: "dp-readonly-audit",
+    roleName: "prod-b-readonly-audit",
     type: "user",
     lastUsed: "2026-04-05T11:00:00Z",
     usage30d: 45,
@@ -223,7 +223,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r15",
-    account: "nexus",
+    account: "hub",
     accountId: "123456789012",
     roleName: "transit-gateway-role",
     type: "cross-account",
@@ -235,9 +235,9 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r16",
-    account: "nowwaiting",
+    account: "prod-a",
     accountId: "987654321098",
-    roleName: "nw-cloudfront-role",
+    roleName: "prod-a-cloudfront-role",
     type: "service",
     lastUsed: "2026-04-10T09:05:00Z",
     usage30d: 3400,
@@ -247,7 +247,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r17",
-    account: "shared",
+    account: "shared-services",
     accountId: "111122223333",
     roleName: "terraform-state-role",
     type: "service",
@@ -259,7 +259,7 @@ export const mockIAMRoles: IAMRole[] = [
   },
   {
     id: "r18",
-    account: "nexus",
+    account: "hub",
     accountId: "123456789012",
     roleName: "keycloak-admin-sso",
     type: "user",
@@ -277,7 +277,7 @@ export const mockLeastPrivilegeRecommendations: LeastPrivilegeRecommendation[] =
   {
     id: "lp1",
     roleName: "admin-full-access",
-    account: "nexus",
+    account: "hub",
     currentPermissions: 312,
     usedPermissions: 23,
     unusedPermissions: [
@@ -293,13 +293,13 @@ export const mockLeastPrivilegeRecommendations: LeastPrivilegeRecommendation[] =
       "organizations:*",
     ],
     recommendation:
-      "Remove administrative wildcard permissions. Scope to specific S3 buckets used (aegis-config, nexus-artifacts). Replace ec2:* with ec2:Describe* only. Remove all IAM write permissions — use a separate break-glass role instead.",
+      "Remove administrative wildcard permissions. Scope to specific S3 buckets used (aegis-config, hub-artifacts). Replace ec2:* with ec2:Describe* only. Remove all IAM write permissions — use a separate break-glass role instead.",
     severity: "critical",
   },
   {
     id: "lp2",
     roleName: "cross-account-argocd",
-    account: "nexus",
+    account: "hub",
     currentPermissions: 64,
     usedPermissions: 31,
     unusedPermissions: [
@@ -317,8 +317,8 @@ export const mockLeastPrivilegeRecommendations: LeastPrivilegeRecommendation[] =
   },
   {
     id: "lp3",
-    roleName: "dp-admin-legacy",
-    account: "dodopoint",
+    roleName: "prod-b-admin-legacy",
+    account: "prod-b",
     currentPermissions: 186,
     usedPermissions: 0,
     unusedPermissions: [
@@ -331,13 +331,13 @@ export const mockLeastPrivilegeRecommendations: LeastPrivilegeRecommendation[] =
       "dynamodb:*",
     ],
     recommendation:
-      "This role has not been used in 55 days. The dodopoint account is disconnected. Recommend immediate deletion or quarantine of this role to eliminate dormant attack surface.",
+      "This role has not been used in 55 days. The prod-b account is disconnected. Recommend immediate deletion or quarantine of this role to eliminate dormant attack surface.",
     severity: "critical",
   },
   {
     id: "lp4",
     roleName: "circleci-deploy-role",
-    account: "shared",
+    account: "shared-services",
     currentPermissions: 78,
     usedPermissions: 19,
     unusedPermissions: [
@@ -355,7 +355,7 @@ export const mockLeastPrivilegeRecommendations: LeastPrivilegeRecommendation[] =
   {
     id: "lp5",
     roleName: "transit-gateway-role",
-    account: "nexus",
+    account: "hub",
     currentPermissions: 52,
     usedPermissions: 18,
     unusedPermissions: [
@@ -372,7 +372,7 @@ export const mockLeastPrivilegeRecommendations: LeastPrivilegeRecommendation[] =
   {
     id: "lp6",
     roleName: "keycloak-admin-sso",
-    account: "nexus",
+    account: "hub",
     currentPermissions: 96,
     usedPermissions: 24,
     unusedPermissions: [
@@ -394,7 +394,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct1",
     timestamp: "2026-04-10T09:12:34Z",
-    account: "nexus",
+    account: "hub",
     role: "admin-full-access",
     action: "iam:CreateAccessKey",
     resource: "arn:aws:iam::123456789012:user/deploy-bot",
@@ -406,7 +406,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct2",
     timestamp: "2026-04-10T09:10:12Z",
-    account: "shared",
+    account: "shared-services",
     role: "eks-node-role",
     action: "ec2:DescribeInstances",
     resource: "arn:aws:ec2:ap-northeast-2:111122223333:instance/*",
@@ -417,10 +417,10 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct3",
     timestamp: "2026-04-10T09:08:45Z",
-    account: "nexus",
+    account: "hub",
     role: "cross-account-argocd",
     action: "eks:DescribeCluster",
-    resource: "arn:aws:eks:ap-northeast-2:123456789012:cluster/nexus-cluster",
+    resource: "arn:aws:eks:ap-northeast-2:123456789012:cluster/hub-cluster",
     sourceIp: "10.0.2.10",
     readWrite: "read",
     anomaly: false,
@@ -428,10 +428,10 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct4",
     timestamp: "2026-04-10T09:05:23Z",
-    account: "nexus",
+    account: "hub",
     role: "admin-full-access",
     action: "s3:PutBucketPolicy",
-    resource: "arn:aws:s3:::nexus-artifacts",
+    resource: "arn:aws:s3:::hub-artifacts",
     sourceIp: "203.0.113.42",
     readWrite: "write",
     anomaly: true,
@@ -440,10 +440,10 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct5",
     timestamp: "2026-04-10T09:02:11Z",
-    account: "shared",
-    role: "connectorder-s3-irsa",
+    account: "shared-services",
+    role: "acme-corp-s3-irsa",
     action: "s3:GetObject",
-    resource: "arn:aws:s3:::connectorder-data/orders/2026-04-10.parquet",
+    resource: "arn:aws:s3:::acme-corp-data/orders/2026-04-10.parquet",
     sourceIp: "10.0.3.22",
     readWrite: "read",
     anomaly: false,
@@ -451,8 +451,8 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct6",
     timestamp: "2026-04-10T08:58:07Z",
-    account: "nowwaiting",
-    role: "nw-api-gateway-role",
+    account: "prod-a",
+    role: "prod-a-api-gateway-role",
     action: "execute-api:Invoke",
     resource: "arn:aws:execute-api:ap-northeast-2:987654321098:*/prod/GET/health",
     sourceIp: "10.0.4.15",
@@ -462,7 +462,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct7",
     timestamp: "2026-04-10T08:55:33Z",
-    account: "nexus",
+    account: "hub",
     role: "signoz-collector-role",
     action: "logs:PutLogEvents",
     resource: "arn:aws:logs:ap-northeast-2:123456789012:log-group:/signoz/traces",
@@ -473,10 +473,10 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct8",
     timestamp: "2026-04-10T08:52:19Z",
-    account: "shared",
+    account: "shared-services",
     role: "circleci-deploy-role",
     action: "ecr:PutImage",
-    resource: "arn:aws:ecr:ap-northeast-2:111122223333:repository/connectorder-api",
+    resource: "arn:aws:ecr:ap-northeast-2:111122223333:repository/acme-corp-api",
     sourceIp: "35.192.0.100",
     readWrite: "write",
     anomaly: false,
@@ -484,7 +484,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct9",
     timestamp: "2026-04-10T08:48:44Z",
-    account: "nexus",
+    account: "hub",
     role: "github-actions-runner",
     action: "sts:AssumeRole",
     resource: "arn:aws:iam::111122223333:role/cross-account-deploy",
@@ -495,7 +495,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct10",
     timestamp: "2026-04-10T08:45:02Z",
-    account: "shared",
+    account: "shared-services",
     role: "rds-migration-role",
     action: "rds:ModifyDBInstance",
     resource: "arn:aws:rds:ap-northeast-2:111122223333:db:shared-pg16",
@@ -507,10 +507,10 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct11",
     timestamp: "2026-04-10T08:40:15Z",
-    account: "nowwaiting",
-    role: "nw-eso-secrets-role",
+    account: "prod-a",
+    role: "prod-a-eso-secrets-role",
     action: "secretsmanager:GetSecretValue",
-    resource: "arn:aws:secretsmanager:ap-northeast-2:987654321098:secret:nw/db-credentials",
+    resource: "arn:aws:secretsmanager:ap-northeast-2:987654321098:secret:prod-a/db-credentials",
     sourceIp: "10.0.4.8",
     readWrite: "read",
     anomaly: false,
@@ -518,10 +518,10 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct12",
     timestamp: "2026-04-10T08:35:28Z",
-    account: "nexus",
+    account: "hub",
     role: "keycloak-sre-developer-role",
     action: "s3:ListBucket",
-    resource: "arn:aws:s3:::nexus-config",
+    resource: "arn:aws:s3:::hub-config",
     sourceIp: "10.0.1.12",
     readWrite: "read",
     anomaly: false,
@@ -529,8 +529,8 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct13",
     timestamp: "2026-04-10T08:30:51Z",
-    account: "dodopoint",
-    role: "dp-admin-legacy",
+    account: "prod-b",
+    role: "prod-b-admin-legacy",
     action: "sts:GetCallerIdentity",
     resource: "*",
     sourceIp: "198.51.100.77",
@@ -541,7 +541,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct14",
     timestamp: "2026-04-10T08:25:09Z",
-    account: "shared",
+    account: "shared-services",
     role: "terraform-state-role",
     action: "s3:GetObject",
     resource: "arn:aws:s3:::terraform-state-shared/env/prod/terraform.tfstate",
@@ -552,7 +552,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct15",
     timestamp: "2026-04-10T08:20:44Z",
-    account: "nexus",
+    account: "hub",
     role: "transit-gateway-role",
     action: "ec2:DescribeTransitGatewayAttachments",
     resource: "arn:aws:ec2:ap-northeast-2:123456789012:transit-gateway/*",
@@ -563,7 +563,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct16",
     timestamp: "2026-04-10T08:15:22Z",
-    account: "shared",
+    account: "shared-services",
     role: "lambda-execution-role",
     action: "lambda:InvokeFunction",
     resource: "arn:aws:lambda:ap-northeast-2:111122223333:function:order-processor",
@@ -574,7 +574,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct17",
     timestamp: "2026-04-10T08:10:08Z",
-    account: "nexus",
+    account: "hub",
     role: "keycloak-admin-sso",
     action: "secretsmanager:GetSecretValue",
     resource: "arn:aws:secretsmanager:ap-northeast-2:123456789012:secret:keycloak/admin-credentials",
@@ -585,8 +585,8 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct18",
     timestamp: "2026-04-10T08:05:37Z",
-    account: "nowwaiting",
-    role: "nw-cloudfront-role",
+    account: "prod-a",
+    role: "prod-a-cloudfront-role",
     action: "cloudfront:GetDistribution",
     resource: "arn:aws:cloudfront::987654321098:distribution/E1234ABCDEF",
     sourceIp: "10.0.4.25",
@@ -596,7 +596,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct19",
     timestamp: "2026-04-10T08:00:19Z",
-    account: "shared",
+    account: "shared-services",
     role: "circleci-deploy-role",
     action: "ec2:RunInstances",
     resource: "arn:aws:ec2:ap-northeast-2:111122223333:instance/*",
@@ -608,7 +608,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct20",
     timestamp: "2026-04-10T07:55:42Z",
-    account: "nexus",
+    account: "hub",
     role: "github-actions-runner",
     action: "ecr:GetAuthorizationToken",
     resource: "*",
@@ -619,10 +619,10 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct21",
     timestamp: "2026-04-10T07:50:11Z",
-    account: "shared",
+    account: "shared-services",
     role: "eks-node-role",
     action: "ecr:BatchGetImage",
-    resource: "arn:aws:ecr:ap-northeast-2:111122223333:repository/connectorder-api",
+    resource: "arn:aws:ecr:ap-northeast-2:111122223333:repository/acme-corp-api",
     sourceIp: "10.0.1.45",
     readWrite: "read",
     anomaly: false,
@@ -630,7 +630,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct22",
     timestamp: "2026-04-10T07:45:33Z",
-    account: "nexus",
+    account: "hub",
     role: "admin-full-access",
     action: "iam:AttachRolePolicy",
     resource: "arn:aws:iam::123456789012:role/new-service-role",
@@ -642,10 +642,10 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct23",
     timestamp: "2026-04-10T07:40:07Z",
-    account: "nowwaiting",
-    role: "nw-api-gateway-role",
+    account: "prod-a",
+    role: "prod-a-api-gateway-role",
     action: "dynamodb:Query",
-    resource: "arn:aws:dynamodb:ap-northeast-2:987654321098:table/nw-sessions",
+    resource: "arn:aws:dynamodb:ap-northeast-2:987654321098:table/prod-a-sessions",
     sourceIp: "10.0.4.15",
     readWrite: "read",
     anomaly: false,
@@ -653,10 +653,10 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct24",
     timestamp: "2026-04-10T07:35:55Z",
-    account: "shared",
-    role: "connectorder-s3-irsa",
+    account: "shared-services",
+    role: "acme-corp-s3-irsa",
     action: "s3:PutObject",
-    resource: "arn:aws:s3:::connectorder-data/exports/daily-report.csv",
+    resource: "arn:aws:s3:::acme-corp-data/exports/daily-report.csv",
     sourceIp: "10.0.3.22",
     readWrite: "write",
     anomaly: false,
@@ -664,7 +664,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
   {
     id: "ct25",
     timestamp: "2026-04-10T07:30:28Z",
-    account: "nexus",
+    account: "hub",
     role: "signoz-collector-role",
     action: "xray:PutTraceSegments",
     resource: "*",
@@ -679,7 +679,7 @@ export const mockCloudTrailEvents: CloudTrailEvent[] = [
 export const mockAccessMatrix: AccessMatrixEntry[] = [
   {
     roleName: "admin-full-access",
-    account: "nexus",
+    account: "hub",
     s3: "overprivileged",
     rds: "overprivileged",
     eks: "overprivileged",
@@ -689,7 +689,7 @@ export const mockAccessMatrix: AccessMatrixEntry[] = [
   },
   {
     roleName: "cross-account-argocd",
-    account: "nexus",
+    account: "hub",
     s3: "overprivileged",
     rds: "none",
     eks: "full",
@@ -699,7 +699,7 @@ export const mockAccessMatrix: AccessMatrixEntry[] = [
   },
   {
     roleName: "eks-node-role",
-    account: "shared",
+    account: "shared-services",
     s3: "read",
     rds: "none",
     eks: "full",
@@ -708,8 +708,8 @@ export const mockAccessMatrix: AccessMatrixEntry[] = [
     secretsManager: "none",
   },
   {
-    roleName: "connectorder-s3-irsa",
-    account: "shared",
+    roleName: "acme-corp-s3-irsa",
+    account: "shared-services",
     s3: "full",
     rds: "none",
     eks: "none",
@@ -719,7 +719,7 @@ export const mockAccessMatrix: AccessMatrixEntry[] = [
   },
   {
     roleName: "lambda-execution-role",
-    account: "shared",
+    account: "shared-services",
     s3: "read",
     rds: "read",
     eks: "none",
@@ -728,8 +728,8 @@ export const mockAccessMatrix: AccessMatrixEntry[] = [
     secretsManager: "read",
   },
   {
-    roleName: "dp-admin-legacy",
-    account: "dodopoint",
+    roleName: "prod-b-admin-legacy",
+    account: "prod-b",
     s3: "overprivileged",
     rds: "overprivileged",
     eks: "overprivileged",
@@ -739,7 +739,7 @@ export const mockAccessMatrix: AccessMatrixEntry[] = [
   },
   {
     roleName: "circleci-deploy-role",
-    account: "shared",
+    account: "shared-services",
     s3: "full",
     rds: "overprivileged",
     eks: "full",
@@ -749,7 +749,7 @@ export const mockAccessMatrix: AccessMatrixEntry[] = [
   },
   {
     roleName: "keycloak-admin-sso",
-    account: "nexus",
+    account: "hub",
     s3: "read",
     rds: "full",
     eks: "none",
@@ -759,7 +759,7 @@ export const mockAccessMatrix: AccessMatrixEntry[] = [
   },
   {
     roleName: "transit-gateway-role",
-    account: "nexus",
+    account: "hub",
     s3: "none",
     rds: "none",
     eks: "none",
@@ -769,7 +769,7 @@ export const mockAccessMatrix: AccessMatrixEntry[] = [
   },
   {
     roleName: "github-actions-runner",
-    account: "nexus",
+    account: "hub",
     s3: "full",
     rds: "none",
     eks: "full",

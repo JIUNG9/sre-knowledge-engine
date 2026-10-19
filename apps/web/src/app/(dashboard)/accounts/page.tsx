@@ -80,12 +80,6 @@ const providerConfig: Record<
     bgColor: "bg-[#0078D4]/10",
     borderColor: "border-[#0078D4]/30",
   },
-  ncloud: {
-    label: "NCloud",
-    color: "#03CF5D",
-    bgColor: "bg-[#03CF5D]/10",
-    borderColor: "border-[#03CF5D]/30",
-  },
   custom: {
     label: "Custom",
     color: "#A855F7",
@@ -127,7 +121,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     email: "june.gu@acme-corp.com",
     role: "Admin",
     initials: "JG",
-    accountAccess: ["nexus", "shared", "nowwaiting", "dodopoint"],
+    accountAccess: ["hub", "shared-services", "prod-a", "prod-b"],
     lastActive: "2026-04-11T09:30:00Z",
   },
   {
@@ -136,7 +130,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     email: "sh.park@acme-corp.com",
     role: "Admin",
     initials: "SP",
-    accountAccess: ["nexus", "shared", "nowwaiting"],
+    accountAccess: ["hub", "shared-services", "prod-a"],
     lastActive: "2026-04-11T08:15:00Z",
   },
   {
@@ -145,7 +139,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     email: "mj.kim@acme-corp.com",
     role: "Member",
     initials: "MK",
-    accountAccess: ["nexus", "shared"],
+    accountAccess: ["hub", "shared-services"],
     lastActive: "2026-04-10T17:22:00Z",
   },
   {
@@ -154,7 +148,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     email: "yj.lee@acme-corp.com",
     role: "Member",
     initials: "YL",
-    accountAccess: ["nowwaiting", "dodopoint"],
+    accountAccess: ["prod-a", "prod-b"],
     lastActive: "2026-04-10T14:00:00Z",
   },
   {
@@ -163,7 +157,7 @@ const TEAM_MEMBERS: TeamMember[] = [
     email: "dh.choi@acme-corp.com",
     role: "Viewer",
     initials: "DC",
-    accountAccess: ["nexus"],
+    accountAccess: ["hub"],
     lastActive: "2026-04-09T11:45:00Z",
   },
 ]
@@ -306,7 +300,6 @@ function CloudAccountsTab() {
                     <SelectItem value="aws">AWS</SelectItem>
                     <SelectItem value="gcp">GCP</SelectItem>
                     <SelectItem value="azure">Azure</SelectItem>
-                    <SelectItem value="ncloud">NCloud</SelectItem>
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>

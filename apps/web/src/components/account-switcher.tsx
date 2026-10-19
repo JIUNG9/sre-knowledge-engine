@@ -22,14 +22,12 @@ const providerLabels: Record<AccountProvider, string> = {
   aws: "AWS",
   gcp: "GCP",
   azure: "AZ",
-  ncloud: "NC",
 }
 
 const providerColors: Record<AccountProvider, string> = {
   aws: "bg-orange-500/20 text-orange-400 border-orange-500/30",
   gcp: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   azure: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-  ncloud: "bg-green-500/20 text-green-400 border-green-500/30",
 }
 
 function ProviderBadge({ provider }: { provider: AccountProvider }) {

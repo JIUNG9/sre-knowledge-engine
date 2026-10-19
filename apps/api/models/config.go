@@ -31,7 +31,7 @@ type CloudAccount struct {
 	ID             string    `json:"id"`
 	Name           string    `json:"name"`
 	Alias          string    `json:"alias"`
-	Provider       string    `json:"provider"` // aws, gcp, azure, ncloud, custom
+	Provider       string    `json:"provider"` // aws, gcp, azure, custom
 	AccountID      string    `json:"account_id"`
 	Region         string    `json:"region"`
 	Role           string    `json:"role"` // hub, spoke, standalone

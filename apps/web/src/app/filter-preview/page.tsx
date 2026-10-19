@@ -12,10 +12,10 @@ const t = {
 };
 
 const accounts = [
-  { id: "nx", name: "nexus", provider: "AWS", role: "Hub" },
-  { id: "shared", name: "shared", provider: "AWS", role: "Spoke" },
-  { id: "nw", name: "prod-a", provider: "AWS", role: "Spoke" },
-  { id: "dp", name: "prod-b", provider: "AWS", role: "Spoke" },
+  { id: "hub", name: "hub", provider: "AWS", role: "Hub" },
+  { id: "shared-services", name: "shared-services", provider: "AWS", role: "Spoke" },
+  { id: "prod-a", name: "prod-a", provider: "AWS", role: "Spoke" },
+  { id: "prod-b", name: "prod-b", provider: "AWS", role: "Spoke" },
 ];
 
 /* ================================================================
@@ -272,7 +272,7 @@ export default function FilterPreviewPage() {
           <ul className="mt-3 space-y-2" style={{ color: t.muted, fontSize: 14 }}>
             <li>• <b style={{ color: t.text }}>Most discoverable</b> — accounts are visible chips, not hidden in a dropdown</li>
             <li>• <b style={{ color: t.text }}>One-click filtering</b> — no dropdown menu to open, just click the account chip</li>
-            <li>• <b style={{ color: t.text }}>Shows all accounts at once</b> — you see nexus, shared, nw, dp without opening anything</li>
+            <li>• <b style={{ color: t.text }}>Shows all accounts at once</b> — you see hub, shared-services, prod-a, prod-b without opening anything</li>
             <li>• <b style={{ color: t.text }}>Grafana-style</b> — similar to how Grafana handles label/variable filters at dashboard top</li>
             <li>• Works consistently on ALL pages (FinOps, Security, IAM, Deployments, SLO, etc.)</li>
           </ul>

@@ -35,7 +35,6 @@ const providers = [
   { value: "aws", label: "AWS", icon: "aws" },
   { value: "gcp", label: "GCP", icon: "gcp" },
   { value: "azure", label: "Azure", icon: "azure" },
-  { value: "ncloud", label: "a regional cloud", icon: "ncloud" },
   { value: "custom", label: "Custom", icon: "custom" },
 ] as const
 
@@ -56,7 +55,6 @@ function ProviderIcon({ provider }: { provider: string }) {
     aws: "AWS",
     gcp: "GCP",
     azure: "AZ",
-    ncloud: "NC",
     custom: "C",
   }
   return (
@@ -140,7 +138,7 @@ export default function CloudAccountsPage() {
           Connect Cloud Accounts
         </h2>
         <p className="text-sm text-muted-foreground">
-          Add your AWS, GCP, Azure, or a regional cloud accounts. Aegis will monitor
+          Add your AWS, GCP, or Azure accounts. Aegis will monitor
           resources, costs, and security posture across all connected accounts.
         </p>
       </div>
@@ -256,7 +254,7 @@ export default function CloudAccountsPage() {
                 </Label>
                 <Input
                   id="account-name"
-                  placeholder="e.g., nexus"
+                  placeholder="e.g., hub"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                 />
@@ -270,7 +268,7 @@ export default function CloudAccountsPage() {
                 </Label>
                 <Input
                   id="account-alias"
-                  placeholder="e.g., nx"
+                  placeholder="e.g., hub"
                   value={formAlias}
                   onChange={(e) => setFormAlias(e.target.value)}
                 />

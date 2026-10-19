@@ -36,7 +36,7 @@ function OptionA() {
           <Target size={22} style={{ color: t.accent }} />
           <span style={{ color: t.text, fontSize: 20, fontWeight: 700 }}>Team Targets</span>
           <span className="rounded-lg px-3 py-1" style={{ background: t.surface, color: t.muted, fontSize: 13 }}>
-            nexus account
+            hub account
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ function OptionB() {
             <div>
               <label style={{ color: t.muted, fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Account</label>
               <div className="mt-1 flex items-center gap-2 rounded-lg px-3 py-2.5" style={{ background: t.surface, border: `1px solid ${t.border}` }}>
-                <span style={{ color: t.text, fontSize: 14 }}>nexus (hub)</span>
+                <span style={{ color: t.text, fontSize: 14 }}>hub</span>
                 <ChevronDown size={14} style={{ color: t.muted, marginLeft: "auto" }} />
               </div>
             </div>

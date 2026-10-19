@@ -226,7 +226,7 @@ Plugin architecture under `packages/integrations/`:
 | Observability | SigNoz (primary), Datadog, Prometheus, Grafana, CloudWatch |
 | Incident | PagerDuty, Opsgenie, Slack, Microsoft Teams |
 | Ticketing | JIRA, Linear, GitHub Issues |
-| Cloud | AWS, GCP, Azure, a regional cloud (a regional cloud) |
+| Cloud | AWS, GCP, Azure |
 | Cost | OpenCost, Kubecost, AWS Cost Explorer |
 | Security | Trivy, Snyk, Grype |
 | CI/CD | GitHub Actions, CircleCI, ArgoCD |
@@ -283,6 +283,6 @@ MIT. See [LICENSE](LICENSE). Fork it, self-host it, point your own LLM Wiki Engi
 
 <div align="center">
 
-Built by [June Gu](https://github.com/JIUNG9) — SRE at my employer, ex-e-commerce.
+Built by June Gu, Site Reliability Engineer · https://github.com/JIUNG9
 
 </div>

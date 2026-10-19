@@ -4,7 +4,7 @@ import { create } from "zustand"
 
 export interface CloudAccount {
   id: string
-  provider: "aws" | "gcp" | "azure" | "ncloud" | "custom"
+  provider: "aws" | "gcp" | "azure" | "custom"
   name: string
   alias: string
   accountId: string

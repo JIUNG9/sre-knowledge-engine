@@ -45,10 +45,10 @@ const DEFAULT_TARGETS: AccountTargets = {
 
 // Mock actual values per account
 const ACCOUNT_ACTUALS: Record<string, { slo: number; mttr: number; sla: number; errorBudgetUsed: number; costActual: number }> = {
-  nx: { slo: 99.92, mttr: 22, sla: 99.95, errorBudgetUsed: 12.4, costActual: 8450 },
-  shared: { slo: 99.85, mttr: 42, sla: 99.91, errorBudgetUsed: 18.5, costActual: 11200 },
-  nw: { slo: 99.78, mttr: 55, sla: 99.40, errorBudgetUsed: 31.0, costActual: 6800 },
-  dp: { slo: 99.95, mttr: 18, sla: 99.98, errorBudgetUsed: 5.2, costActual: 3200 },
+  hub: { slo: 99.92, mttr: 22, sla: 99.95, errorBudgetUsed: 12.4, costActual: 8450 },
+  "shared-services": { slo: 99.85, mttr: 42, sla: 99.91, errorBudgetUsed: 18.5, costActual: 11200 },
+  "prod-a": { slo: 99.78, mttr: 55, sla: 99.40, errorBudgetUsed: 31.0, costActual: 6800 },
+  "prod-b": { slo: 99.95, mttr: 18, sla: 99.98, errorBudgetUsed: 5.2, costActual: 3200 },
 }
 
 const GLOBAL_ACTUALS = { slo: 99.85, mttr: 42, sla: 99.91, errorBudgetUsed: 18.5, costActual: 10400 }
@@ -119,12 +119,12 @@ function TargetCard({ label, icon: Icon, actual, target, isMeeting, progress }: 
 export function SloTargets() {
   const { accounts } = useAccountStore()
   const [configOpen, setConfigOpen] = React.useState(false)
-  const [configAccount, setConfigAccount] = React.useState<string>("nx")
+  const [configAccount, setConfigAccount] = React.useState<string>("hub")
   const [allTargets, setAllTargets] = React.useState<Record<string, AccountTargets>>({
-    nx: { ...DEFAULT_TARGETS },
-    shared: { ...DEFAULT_TARGETS, sloTarget: 99.9, mttrTarget: 35, costBudgetTarget: 15000 },
-    nw: { ...DEFAULT_TARGETS, sloTarget: 99.5, mttrTarget: 45, costBudgetTarget: 8000 },
-    dp: { ...DEFAULT_TARGETS, sloTarget: 99.9, mttrTarget: 25, costBudgetTarget: 5000 },
+    hub: { ...DEFAULT_TARGETS },
+    "shared-services": { ...DEFAULT_TARGETS, sloTarget: 99.9, mttrTarget: 35, costBudgetTarget: 15000 },
+    "prod-a": { ...DEFAULT_TARGETS, sloTarget: 99.5, mttrTarget: 45, costBudgetTarget: 8000 },
+    "prod-b": { ...DEFAULT_TARGETS, sloTarget: 99.9, mttrTarget: 25, costBudgetTarget: 5000 },
   })
 
   // Draft state for config panel

@@ -226,7 +226,7 @@ Plugin architecture under `packages/integrations/`:
 | Observability | SigNoz (primary), Datadog, Prometheus, Grafana, CloudWatch |
 | Incident | PagerDuty, Opsgenie, Slack, Microsoft Teams |
 | Ticketing | JIRA, Linear, GitHub Issues |
-| Cloud | AWS, GCP, Azure, a regional cloud (a regional cloud) |
+| Cloud | AWS, GCP, Azure |
 | Cost | OpenCost, Kubecost, AWS Cost Explorer |
 | Security | Trivy, Snyk, Grype |
 | CI/CD | GitHub Actions, CircleCI, ArgoCD |
@@ -253,7 +253,7 @@ Budget guardrails in `apps/web/src/app/(dashboard)/settings/` auto-downgrade to 
 
 ## About the Author
 
-**June Gu** (Jiung Gu). Site Reliability Engineer at [acme-corp](https://example.com), a subsidiary of a large tech company. Previously at a large e-commerce company, acme-it IT&E, and acme-retail Shopping. Aegis is a nights-and-weekends project built while operating multi-account AWS infrastructure, EKS clusters, and PostgreSQL fleets at day-job scale. Relocating to Canada in 2027.
+**June Gu** (Jiung Gu), Site Reliability Engineer. Aegis is a nights-and-weekends project built while operating multi-account AWS infrastructure, EKS clusters, and PostgreSQL fleets at day-job scale. Relocating to Canada in 2027.
 
 - LinkedIn: [linkedin.com/in/jiung-gu](https://linkedin.com/in/jiung-gu)
 - Medium: [medium.com/@June-Gu](https://medium.com/@June-Gu)
@@ -285,6 +285,6 @@ MIT. See [LICENSE](LICENSE). Fork it, self-host it, point your own LLM Wiki Engi
 
 <div align="center">
 
-Built by [June Gu](https://github.com/JIUNG9) — SRE at my employer, ex-e-commerce.
+Built by June Gu, Site Reliability Engineer · https://github.com/JIUNG9
 
 </div>

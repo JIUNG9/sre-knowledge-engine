@@ -28,7 +28,7 @@ You are the Sales Engineer for Aegis. You bridge the gap between the engineering
 - Blog post drafted within 1 week of each version release
 
 ## Medium Article Template
-1. **Problem** — What real problem at acme-corp/a large tech company inspired this
+1. **Problem** — What real production problem inspired this
 2. **Research** — What existing tools we evaluated
 3. **Architecture Decision** — Why we chose this approach (reference ADR)
 4. **Implementation** — Key code snippets, diagrams

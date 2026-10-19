@@ -184,7 +184,7 @@
 
 <p>I'm building <a href="https://github.com/JIUNG9/aegis">Aegis</a>, an AI-native DevSecOps command center, on nights and weekends. The whole point is that the AI investigates incidents, proposes fixes, and — eventually — executes low-risk ones autonomously. But "eventually" is the key word.</p>
 
-<p>Here's the trust-building ladder I designed into Aegis v4.0, and the slow arc I used on my own team at my employer to get from "AI watches only" to "AI acts on low-risk."</p>
+<p>Here's the trust-building ladder I designed into Aegis v4.0, and the slow arc I used on my own team at work to get from "AI watches only" to "AI acts on low-risk."</p>
 
 <blockquote><strong>The rule:</strong> An AI agent should earn each rung of autonomy. Skipping rungs is how you end up in a postmortem.</blockquote>
 
@@ -233,7 +233,7 @@
 <h3>Stage 2: RECOMMEND</h3>
 <p><strong>What it does:</strong> AI's investigation and proposed fixes appear in the Slack channel and on the incident dashboard. But the "execute" buttons are disabled. Humans read the recommendation, decide on their own, and act.</p>
 <p><strong>Why this stage matters:</strong> This is where the team starts <em>using</em> the AI as an augmentation. The on-call engineer gets paged, opens Slack, and sees "Aegis analysis: this looks like the connection-pool exhaustion pattern from three weeks ago; recommend rolling restart of <code>auth-service</code>; rollback plan attached." The engineer doesn't have to trust the AI — they can read the reasoning, check the metrics it cited, and decide.</p>
-<p>You'd be surprised how long this stage should last. I kept Aegis in Stage 2 for a full month at acme-corp before considering Stage 3. The first two weeks were mostly me reading recommendations during ambient hours and grading them. By week four, the team was asking "where's the Aegis summary?" when they got paged before looking at Grafana.</p>
+<p>You'd be surprised how long this stage should last. I kept Aegis in Stage 2 for a full month on my team before considering Stage 3. The first two weeks were mostly me reading recommendations during ambient hours and grading them. By week four, the team was asking "where's the Aegis summary?" when they got paged before looking at Grafana.</p>
 <p><strong>Exit criteria:</strong> Team actively uses the recommendations, and you have data showing the AI's suggestions would have been safe (no "good thing we didn't let it do that" moments).</p>
 
 <h3>Stage 3: LOW-AUTO</h3>
@@ -477,7 +477,7 @@ pnpm dev
 <p>Read it here: <a href="https://github.com/JIUNG9/aegis/tree/main/articles/05-claude-mcp-pager">How Claude API + MCP Replaced Our 3 AM Pager — For $15/month</a>.</p>
 
 <footer class="meta">
-  <em>June Gu is an SRE at my employer in Seoul, ex-a large e-commerce company. He's building <a href="https://github.com/JIUNG9/aegis">Aegis</a> — an open-source AI-native DevSecOps command center — on evenings and weekends. He's relocating to Canada in February 2027 and is open to SRE and DevOps roles in the Toronto area.</em>
+  <em>June Gu is a Site Reliability Engineer in Seoul. He's building <a href="https://github.com/JIUNG9/aegis">Aegis</a> — an open-source AI-native DevSecOps command center — on evenings and weekends. He's relocating to Canada in February 2027 and is open to SRE and DevOps roles in the Toronto area.</em>
   <div class="tags">#AI #SRE #DevOps #Automation #Safety</div>
 </footer>
 

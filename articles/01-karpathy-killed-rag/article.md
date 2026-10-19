@@ -6,7 +6,7 @@
 
 ---
 
-I'm an SRE. Our team runs a multi-account AWS estate in a hub-spoke topology, dozens of PostgreSQL instances mid-migration from PG 13 to 16, and an EKS 1.33 fleet that ArgoCD ApplicationSets deploy into from a single GitOps repo. Before this role I ran a million daily transactions on AWS ECS Fargate at a NYSE-listed commerce platform. This is my on-call rotation. My 3 AM pager. So when I say our AI agent started lying to us, I mean it lied to *me* at 3 AM, and I wrote this because I don't want it to happen to you.
+I'm an SRE. Our team runs a multi-account AWS estate in a hub-spoke topology, dozens of PostgreSQL instances mid-migration from PG 13 to 16, and an EKS 1.33 fleet that ArgoCD ApplicationSets deploy into from a single GitOps repo. Before this role I ran a million daily transactions on AWS ECS Fargate at a large commerce platform. This is my on-call rotation. My 3 AM pager. So when I say our AI agent started lying to us, I mean it lied to *me* at 3 AM, and I wrote this because I don't want it to happen to you.
 
 This is the story of how I built a knowledge layer that doesn't rot — based on a pattern Andrej Karpathy sketched in a tweet — and the open-source implementation you can clone tonight.
 
@@ -216,6 +216,6 @@ If you run this and it helps, tell me. If it doesn't, tell me louder — I will 
 
 ---
 
-*Written by June Gu. Site Reliability Engineer at my employer. Previously a large e-commerce company, acme-it IT&E, acme-retail Shopping. Targeting a Canadian relocation February 2027. Find me on [LinkedIn](https://www.linkedin.com/in/jiung-gu).*
+*Written by June Gu, a Site Reliability Engineer. Targeting a Canadian relocation February 2027. Find me on [LinkedIn](https://www.linkedin.com/in/jiung-gu).*
 
 **Tags:** AI, RAG, SRE, Knowledge Management, LLM, DevOps, Open Source

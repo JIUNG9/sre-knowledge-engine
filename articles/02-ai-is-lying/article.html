@@ -265,7 +265,7 @@
 <p class="subtitle">How we built a document reconciliation engine that catches stale runbooks before Claude follows them off a cliff.</p>
 
 <div class="byline">
-  <span>By <strong>June Gu</strong> &middot; SRE at acme-corp (a large tech company subsidiary) &middot; ex-e-commerce</span>
+  <span>By <strong>June Gu</strong> &middot; Site Reliability Engineer</span>
   <span class="tag">~12 min read</span>
 </div>
 
@@ -287,7 +287,7 @@
 
 <blockquote><p>The most dangerous documentation is not the wrong kind. It is the wrong kind that an LLM confidently retrieves.</p></blockquote>
 
-<p>This article is about what we built to stop that from happening again — at <a href="https://www.example.com/">my employer</a>, across four AWS accounts, 49 PostgreSQL instances, and a knowledge surface area that spans Confluence, three GitHub repos, Google Docs, and pinned Slack threads older than most of our services.</p>
+<p>This article is about what we built to stop that from happening again — at my day job, across four AWS accounts, 49 PostgreSQL instances, and a knowledge surface area that spans Confluence, three GitHub repos, Google Docs, and pinned Slack threads older than most of our services.</p>
 
 <p>We called it the document reconciliation engine. It ships inside <a href="https://github.com/JIUNG9/aegis">Aegis</a>, the open-source DevSecOps command center I'm building as I prepare for my Canada relocation in Feb 2027. The Layer 1 Obsidian-backed wiki is live in the repo today. The Layer 5 MCP reconciliation tools are on the roadmap — I'll mark what's built vs. planned as we go.</p>
 
@@ -490,7 +490,7 @@ DEFAULT_RULES: dict[str, StalenessRule] = {
     ),
 }</code></pre>
 
-<p>The thresholds are opinions I hold after three years of SRE work at a large e-commerce company and now acme-corp:</p>
+<p>The thresholds are opinions I hold after three years of SRE work at e-commerce scale and the time since at my current job:</p>
 
 <ul>
 <li><strong>Confluence pages go stale fast.</strong> Nobody curates them. 90 days and they need review.</li>
@@ -624,7 +624,7 @@ poetry run aegis-wiki reconcile</code></pre>
 
 <p>Next article: <strong>"I Built a Self-Maintaining SRE Knowledge Base — It Finds Stale Docs Automatically"</strong> — the Obsidian vault side of this story, showing how <code>signoz_sync.py</code> and <code>confluence_sync.py</code> turn resolved incidents into runbook pages, how the <code>overview.md</code> stays living, and why I'm auto-publishing a sanitized version of all this to <a href="https://github.com/JIUNG9/aegis-wiki"><code>github.com/JIUNG9/aegis-wiki</code></a> as a portable portfolio.</p>
 
-<p class="footer-note">June Gu is an SRE at my employer and previously at a large e-commerce company. He's building Aegis in public as he prepares to relocate to Canada in February 2027.</p>
+<p class="footer-note">June Gu is a Site Reliability Engineer. He's building Aegis in public as he prepares to relocate to Canada in February 2027.</p>
 
 <div class="tags">
   <span>AI</span><span>DevOps</span><span>Documentation</span><span>MCP</span><span>SRE</span>

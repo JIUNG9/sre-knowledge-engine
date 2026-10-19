@@ -9,7 +9,7 @@ post-validation, Slack approval gates, and SOC2-compliant audit logging.
 
 The framing is the trust-building arc: "don't let an AI agent touch production
 on day one." Mixes the Conf42 SRE 2026 safety-first pattern with a week-by-week
-story of rolling this out on a real team at my employer.
+story of rolling this out on a real production team.
 
 ## Files
 

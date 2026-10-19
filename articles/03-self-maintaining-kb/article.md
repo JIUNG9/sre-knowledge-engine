@@ -18,7 +18,7 @@ This article walks through how the self-maintaining vault works — the director
 
 ## Why runbooks rot
 
-Let me describe the pattern at almost every company I've worked at, including [a large e-commerce company](https://www.acme-retail.jobs/), [acme-it IT&E](https://www.acme-it-itne.com/), and [my employer](https://www.example.com/).
+Let me describe the pattern at almost every company I've worked at.
 
 1. An incident happens.
 2. Someone writes a runbook during the post-mortem.
@@ -455,6 +455,6 @@ The series as a whole is documenting how I'm building [Aegis](https://github.com
 
 ---
 
-*June Gu is an SRE at my employer and previously at a large e-commerce company. He's building Aegis in public as he prepares to relocate to Canada in February 2027. The sanitized public vault lives at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki).*
+*June Gu is a Site Reliability Engineer. He's building Aegis in public as he prepares to relocate to Canada in February 2027. The sanitized public vault lives at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki).*
 
 **Tags**: Obsidian, Knowledge Management, AI, SRE, Open Source, Career

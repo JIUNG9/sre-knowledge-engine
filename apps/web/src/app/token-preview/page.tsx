@@ -84,7 +84,7 @@ function OptionA() {
           </div>
           <div className="flex items-center justify-between rounded-lg px-4 py-3" style={{ background: t.card, border: `1px solid ${t.border}` }}>
             <div>
-              <div style={{ color: t.text, fontSize: 14 }}>Investigate incident INC-042</div>
+              <div style={{ color: t.text, fontSize: 14 }}>Investigate incident INC-4242</div>
               <div style={{ color: t.muted, fontSize: 12 }}>~15K tokens · {modes[mode].model}</div>
             </div>
             <div className="flex items-center gap-3">

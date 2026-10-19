@@ -285,8 +285,8 @@ llm_router:
   provider: hybrid            # regex + Presidio
   mapping_ttl_seconds: 3600
   custom_patterns:
-    - '\bprod-[a-z0-9-]+\.acme-corp\.internal\b'
-    - '\bnaver_[a-z]+_prod\b'</code></pre>
+    - '\bprod-[a-z0-9-]+\.example\.internal\b'
+    - '\bacme_[a-z]+_prod\b'</code></pre>
 
 <p>Article #9 in this series has the full walkthrough of what the proxy does and doesn't catch. For a Tier C deployment, it is treated as a <em>secondary</em> defense — the primary defense is that sensitive data should never reach the cloud backend at all. The proxy catches the times that assumption fails.</p>
 
@@ -419,7 +419,7 @@ flowchart TB
 
 <hr/>
 
-<p class="byline"><em>Written by June Gu. Site Reliability Engineer at my employer. Previously a large e-commerce company, acme-it IT&amp;E, acme-retail Shopping. Targeting a Canadian relocation February 2027. Find me on <a href="https://www.linkedin.com/in/jiung-gu" target="_blank" rel="noopener">LinkedIn</a>.</em></p>
+<p class="byline"><em>Written by June Gu, a Site Reliability Engineer. Targeting a Canadian relocation February 2027. Find me on <a href="https://www.linkedin.com/in/jiung-gu" target="_blank" rel="noopener">LinkedIn</a>.</em></p>
 
 <p><strong>Try it:</strong></p>
 <ul>

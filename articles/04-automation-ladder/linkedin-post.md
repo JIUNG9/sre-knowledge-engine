@@ -38,7 +38,7 @@ This matches how I think about trust generally. You do not give a new hire prod 
 
 It is the opposite of the "agentic" pitch that is everywhere right now. Slower to ship. Easier to defend at 3 AM.
 
-I work SRE at my employer, ex-a large e-commerce company. Relocating to Canada in 2027.
+I work as an SRE. Relocating to Canada in 2027.
 
 Full article: <medium-link-placeholder>
 

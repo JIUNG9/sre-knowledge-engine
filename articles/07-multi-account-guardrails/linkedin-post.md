@@ -42,7 +42,7 @@ Aegis is designed the other way. The agent gets read-only by default. Write acti
 
 Quality in infrastructure is the absence of surprises. Aegis encodes that.
 
-I work SRE at my employer. Relocating to Canada in 2027. Hiring managers: happy to walk through this pattern in detail.
+I work as an SRE. Relocating to Canada in 2027. Hiring managers: happy to walk through this pattern in detail.
 
 Full article: <medium-link-placeholder>
 

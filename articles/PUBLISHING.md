@@ -59,15 +59,18 @@ Run through this for every single article before hitting publish on Medium. Do n
 - [ ] Every link is clicked and returns 200
 - [ ] Images are embedded with alt text
 - [ ] Screenshots use the dark theme and the large-component density (consistent visual brand)
-- [ ] Author byline at the bottom: "June Gu — SRE at my employer, ex-e-commerce. [LinkedIn] [GitHub] [Aegis]."
+- [ ] Author byline at the bottom, role only, no employer names: "June Gu is a Site Reliability Engineer. [LinkedIn] [GitHub] [Aegis]."
 
 ### Sanitization grep
 
-Run this exact grep against the article before publish. Zero matches required.
+The patterns live in a local file outside the repo, not here. Keep your real AWS account IDs, internal incident ids, hostnames, realm names and employer names in `~/.config/aegis/leak-patterns.txt`, one extended regex per line. Never commit that file and never paste its contents into this repo.
 
 ```
-grep -iE "444444444444|222222222222|111111111111|333333333333|inc-042|inc-067|inc-071|prod-a|prod-b|/acme-corp/|realms/acme-corp" article.md
+mkdir -p ~/.config/aegis && touch ~/.config/aegis/leak-patterns.txt   # once; then fill it in
+grep -iEf ~/.config/aegis/leak-patterns.txt article.md
 ```
+
+Zero matches required. Two gotchas: a blank line in the patterns file matches every line, so keep it free of empty lines; and if the file is missing grep exits 2 with an error instead of printing nothing, which is not a pass.
 
 Also check for:
 

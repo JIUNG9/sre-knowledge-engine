@@ -201,7 +201,7 @@ Content-Type: application/json
   "system": "You are an SRE analyst...",
   "messages": [
     {"role": "user", "content": "Investigate this alert.\n\n2026-04-18 09:13:42 ERROR
-      user=kim.jiho@example.com ip=203.0.113.42 host=prod-db-01.example.com
+      user=kim.jiho@acme-corp.example ip=203.0.113.42 host=prod-db-01.example.internal
       db=acme_orders_prod msg=\"failed login after 5 attempts\""}
   ]
 }</code></pre>
@@ -259,7 +259,7 @@ flowchart LR
 
 <ol>
 <li><strong>Detector</strong> — scans every outbound message for PII and secrets. Regex for the obvious stuff, optionally Microsoft Presidio for the harder stuff (names, organization-specific patterns).</li>
-<li><strong>Mapper</strong> — deterministic placeholder generator. <code>kim.jiho@example.com</code> becomes <code>&lt;USER_1&gt;</code>. Same input in the same request gets the same placeholder, so downstream reasoning still works. Different requests get independent mappings, so nothing leaks across.</li>
+<li><strong>Mapper</strong> — deterministic placeholder generator. <code>kim.jiho@acme-corp.example</code> becomes <code>&lt;USER_1&gt;</code>. Same input in the same request gets the same placeholder, so downstream reasoning still works. Different requests get independent mappings, so nothing leaks across.</li>
 <li><strong>Proxy</strong> — a thin wrapper around <code>anthropic.Anthropic</code> that runs detector + mapper before <code>messages.create(...)</code> and reverses the substitutions on the response.</li>
 <li><strong>Config</strong> — Pydantic settings. On by default, <code>enabled=False</code> gives you a passthrough.</li>
 </ol>
@@ -296,7 +296,7 @@ PATTERNS = {
 <p>Two rules:</p>
 
 <ol>
-<li><strong>Deterministic within a request.</strong> If <code>kim.jiho@example.com</code> appears three times in the same prompt, all three become <code>&lt;USER_1&gt;</code>. Claude can still reason about "this user did X and then Y and then Z" because the placeholder is stable.</li>
+<li><strong>Deterministic within a request.</strong> If <code>kim.jiho@acme-corp.example</code> appears three times in the same prompt, all three become <code>&lt;USER_1&gt;</code>. Claude can still reason about "this user did X and then Y and then Z" because the placeholder is stable.</li>
 <li><strong>Independent across requests.</strong> If two different users investigate two different incidents, their <code>&lt;USER_1&gt;</code>s refer to different people. This is enforced by scoping the map to a per-request context, not a singleton.</li>
 </ol>
 
@@ -497,7 +497,7 @@ resp = client.messages.create(
 
 <hr/>
 
-<p class="byline"><em>Written by June Gu. Site Reliability Engineer at my employer. Previously a large e-commerce company, acme-it IT&amp;E, acme-retail Shopping. Targeting a Canadian relocation February 2027. Find me on <a href="https://www.linkedin.com/in/jiung-gu" target="_blank" rel="noopener">LinkedIn</a>.</em></p>
+<p class="byline"><em>Written by June Gu, a Site Reliability Engineer. Targeting a Canadian relocation February 2027. Find me on <a href="https://www.linkedin.com/in/jiung-gu" target="_blank" rel="noopener">LinkedIn</a>.</em></p>
 
 <p><strong>Try it:</strong></p>
 <ul>

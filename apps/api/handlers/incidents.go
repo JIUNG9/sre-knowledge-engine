@@ -20,13 +20,13 @@ var incidentStore = struct {
 	counter int
 }{
 	data:    mock.Incidents(),
-	counter: 10, // start after mock INC-010
+	counter: 1010, // start after mock INC-1010
 }
 
 // nextIncidentID generates the next sequential incident ID.
 func nextIncidentID() string {
 	incidentStore.counter++
-	return fmt.Sprintf("INC-%03d", incidentStore.counter)
+	return fmt.Sprintf("INC-%04d", incidentStore.counter)
 }
 
 // ListIncidents returns incidents with optional filters for status, severity, service, and assignee.

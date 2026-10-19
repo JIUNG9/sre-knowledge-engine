@@ -8,7 +8,7 @@ Three variants. Pick one. Each targets 1,300 characters. No emojis. CTA to Mediu
 
 **Eighty percent of our auth-service incidents cluster between Monday 09:00 and 11:00 KST. I did not know this until the pattern analyzer told me.**
 
-The SigNoz connector in Aegis aggregates resolved-incident timestamps by hour of week. On my own data the pattern was obvious once plotted: Monday morning traffic spike, overnight batch jobs still holding database connections, connection pool exhaustion at the exact moment load returns.
+The SigNoz connector in Aegis aggregates resolved-incident timestamps by hour of week. On my own data the pattern was obvious once charted: Monday morning traffic spike, overnight batch jobs still holding database connections, connection pool exhaustion at the exact moment load returns.
 
 The analyzer surfaces three pattern classes:
 
@@ -38,7 +38,7 @@ The fix was boring: a Python module that aggregates resolved incidents by hour o
 
 The lesson is not "build an analyzer." The lesson is that SRE work is full of latent patterns your intuition will miss because you only see each individual incident, never the population.
 
-I run SRE at my employer. Aegis is my side project that turns day-job lessons into open source. Relocating to Canada in 2027.
+I run SRE in production by day. Aegis is my side project that turns day-job lessons into open source. Relocating to Canada in 2027.
 
 Full article: <medium-link-placeholder>
 

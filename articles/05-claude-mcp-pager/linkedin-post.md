@@ -40,7 +40,7 @@ Aegis does the investigation before I reach my laptop. When my phone buzzes, the
 
 The cost is fifteen dollars a month. It runs on Claude Sonnet with prompt caching, SigNoz for observability, and an Obsidian vault for knowledge. Full stack is open source at github.com/JIUNG9/aegis.
 
-I run SRE at my employer by day. Aegis is the evenings-and-weekends project that started because I was tired of being behind when the pager went off.
+I run SRE by day. Aegis is the evenings-and-weekends project that started because I was tired of being behind when the pager went off.
 
 Relocating to Canada in 2027. Open to conversations with Canadian SRE teams.
 

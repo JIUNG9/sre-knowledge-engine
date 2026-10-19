@@ -2,7 +2,7 @@
 
 ### How 6 months of SigNoz data exposed a predictable incident pattern — and how we turned pre-positioning into ~$3K/month in savings
 
-*By June Gu — SRE at my employer, ex-e-commerce. Building [Aegis](https://github.com/JIUNG9/aegis), an open-source AI-Native DevSecOps Command Center.*
+*By June Gu — Site Reliability Engineer. Building [Aegis](https://github.com/JIUNG9/aegis), an open-source AI-Native DevSecOps Command Center.*
 
 ---
 
@@ -12,7 +12,7 @@ We looked at 6 months of incident data. **80% of them clustered on Monday 9-11 A
 
 It wasn't random. It wasn't bad luck. It wasn't the "Monday curse" that every SRE team jokes about. It was **predictable**, **measurable**, and — as it turns out — **preventable** if you stop treating incidents as independent events and start treating them as a time series.
 
-This is the story of how I spent a weekend querying our SigNoz backend, plotted incidents by hour-of-week, and realized that our on-call rotation wasn't being tested by entropy. It was being tested by a cron job.
+This is the story of how I spent a weekend querying our SigNoz backend, charted incidents by hour-of-week, and realized that our on-call rotation wasn't being tested by entropy. It was being tested by a cron job.
 
 > "If your incidents cluster, they're not incidents. They're a schedule nobody wrote down."
 
@@ -20,7 +20,7 @@ This is the story of how I spent a weekend querying our SigNoz backend, plotted 
 
 ## Part 1: The informal observation
 
-At my employer, I run SRE across 5 AWS accounts in a hub-spoke topology. Roughly 49 PostgreSQL instances, EKS 1.33 across three spoke accounts, SigNoz as the observability backend, ArgoCD for GitOps. Standard big-enough-to-hurt stack.
+At my day job, I run SRE across 5 AWS accounts in a hub-spoke topology. Roughly 49 PostgreSQL instances, EKS 1.33 across three spoke accounts, SigNoz as the observability backend, ArgoCD for GitOps. Standard big-enough-to-hurt stack.
 
 Every SRE team has that moment where someone says: "Why does stuff always break on Monday?" For us it was in a weekly sync around six months in. Two of us had been on-call back-to-back, and we'd both been paged at exactly the same time on Monday morning — 9:17 AM in one case, 9:42 AM in the other.
 
@@ -250,7 +250,7 @@ spec:
 
 Some patterns aren't fixable with pre-positioning. Pattern B (batch job write amplification) is structural — the materialized views are genuinely expensive. The analyzer's output for Pattern B becomes a **Jira ticket**, not an action. "Here's a recurring cost hotspot. Consider splitting or re-scheduling."
 
-At a large e-commerce company, handling 1M+ daily commerce transactions, we learned this the hard way: not every recurring problem should be automated away. Some of them are telling you that your architecture needs a redesign, and the worst thing you can do is paper over the signal.
+At a previous job, handling 1M+ daily commerce transactions, we learned this the hard way: not every recurring problem should be automated away. Some of them are telling you that your architecture needs a redesign, and the worst thing you can do is paper over the signal.
 
 ---
 
@@ -393,4 +393,4 @@ If you run an SRE team and want to compare notes on time-of-week patterns in you
 
 **Tags:** SRE, Observability, AI, Pattern Recognition, DevOps, FinOps
 
-*Written by June Gu. SRE at my employer, previously at a large e-commerce company handling observability and SRE for 1M+ daily commerce transactions. Relocating to Canada in early 2027 and building Aegis as an open-source portfolio piece. Follow for more on AI-native DevSecOps.*
+*Written by June Gu, a Site Reliability Engineer; previously ran observability and SRE for 1M+ daily commerce transactions. Relocating to Canada in early 2027 and building Aegis as an open-source portfolio piece. Follow for more on AI-native DevSecOps.*

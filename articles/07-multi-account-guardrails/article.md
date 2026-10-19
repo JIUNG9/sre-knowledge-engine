@@ -2,7 +2,7 @@
 
 ### How to let an AI act in a hub-spoke AWS topology without letting it torch production
 
-*By June Gu — SRE at my employer, ex-e-commerce. Building [Aegis](https://github.com/JIUNG9/aegis), an open-source AI-Native DevSecOps Command Center.*
+*By June Gu — Site Reliability Engineer. Building [Aegis](https://github.com/JIUNG9/aegis), an open-source AI-Native DevSecOps Command Center.*
 
 ---
 
@@ -12,7 +12,7 @@
 
 Especially when you have 4 AWS accounts in a hub-spoke topology, Transit Gateway between them, and an AI that can — if you let it — kubectl-scale, s3-copy, or modify an IAM policy that's trusted by every account downstream.
 
-I work in a setup like that. At my employer, our production AWS footprint spans several accounts wired through Transit Gateway. Before we let Aegis do anything autonomously, we had to answer a question every AI-in-production team eventually faces:
+I work in a setup like that. At my day job, our production AWS footprint spans several accounts wired through Transit Gateway. Before we let Aegis do anything autonomously, we had to answer a question every AI-in-production team eventually faces:
 
 > "Which actions can the AI take on its own? Which require a human? Which should never be automated, ever?"
 
@@ -554,4 +554,4 @@ If you're running AI agents in production across multiple AWS accounts, I'd love
 
 **Tags:** AI, Security, AWS, SRE, DevSecOps, Compliance
 
-*Written by June Gu. SRE at my employer, previously at a large e-commerce company handling observability and SRE for 1M+ daily commerce transactions. Relocating to Canada in early 2027 and building Aegis as an open-source portfolio piece. Follow for more on AI-native DevSecOps.*
+*Written by June Gu, a Site Reliability Engineer; previously ran observability and SRE for 1M+ daily commerce transactions. Relocating to Canada in early 2027 and building Aegis as an open-source portfolio piece. Follow for more on AI-native DevSecOps.*

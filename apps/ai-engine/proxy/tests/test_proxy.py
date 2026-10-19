@@ -220,11 +220,11 @@ def test_custom_patterns_redacted() -> None:
     proxy.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=16,
-        messages=[{"role": "user", "content": "See INC-0042"}],
+        messages=[{"role": "user", "content": "See INC-4242"}],
     )
     sent = fake.messages.received_kwargs
     assert sent is not None
-    assert "INC-0042" not in sent["messages"][0]["content"]
+    assert "INC-4242" not in sent["messages"][0]["content"]
     assert "<CUSTOM_1>" in sent["messages"][0]["content"]
 
 

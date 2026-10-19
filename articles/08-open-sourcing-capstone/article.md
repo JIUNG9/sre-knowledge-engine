@@ -7,7 +7,7 @@
 
 The other seven articles in this series are technical. This one is not.
 
-I'm an SRE at acme-corp, a subsidiary of a large tech company, working out of Seoul. Before acme-corp I spent three years at a large e-commerce company on cloud platforms and SRE. Before that, acme-it IT&E on platform and cloud. Before that, acme-retail Shopping on backend and cloud. I studied computer and information systems security at Tongmyong University, spent three years in the Republic of Korea military, and finished a second B.Eng in computer science at Kumoh National Institute.
+I'm an SRE working out of Seoul. Before my current job I spent three years on cloud platforms and SRE at a large e-commerce company. Before that, a short stint on platform and cloud at an IT services firm, and before that, backend and cloud work at a retailer. I studied computer and information systems security at Tongmyong University, spent three years in the Republic of Korea military, and finished a second B.Eng in computer science at Kumoh National Institute.
 
 
 
@@ -26,25 +26,25 @@ Here is what my five years in industry actually look like, told by the systems I
 timeline
     title June Gu — Engineering Timeline
     2018-2021 : Republic of Korea : Military service (mandatory)
-    2021-2022 : acme-retail Shopping    : Spring Cloud Gateway : OAuth2 + AWS Cognito : Resilience4j circuit breakers
-    2022      : acme-it IT&E      : Monolith to microservices : 300% throughput : Redis token blacklist : Blue-green on CodePipeline
-    2022-2025 : a large e-commerce company (NYSE CPNG) : 1M+ daily txns on ECS/Lambda : 10K updates/sec Kafka + Redis Streams : 60% MTTD reduction : Multi-region Terraform
-    2026-now  : acme-corp (a large tech company) : Multi-account EKS : ArgoCD ApplicationSets : SigNoz observability : 49 Postgres mid-migration PG 13 to 16
+    2021-2022 : Retail backend    : Spring Cloud Gateway : OAuth2 + AWS Cognito : Resilience4j circuit breakers
+    2022      : IT services       : Monolith to microservices : 300% throughput : Redis token blacklist : Blue-green on CodePipeline
+    2022-2025 : E-commerce platform : 1M+ daily txns on ECS/Lambda : 10K updates/sec Kafka + Redis Streams : 60% MTTD reduction : Multi-region Terraform
+    2026-now  : Current SRE role  : Multi-account EKS : ArgoCD ApplicationSets : SigNoz observability : 49 Postgres mid-migration PG 13 to 16
 ```
 
-### acme-retail Shopping — Backend + Cloud (Mar 2021 to Mar 2022)
+### Retail — Backend + Cloud (Mar 2021 to Mar 2022)
 
 First real engineering job out of university. The team was migrating from a monolith to Spring Cloud Gateway microservices with OAuth2 and AWS Cognito for RBAC. My contributions were small but concrete: helped wire Resilience4j Circuit Breaker and Bulkhead patterns into the gateway, added CloudWatch and ELK dashboards so we could actually see what was happening. The lesson I took away was that observability is not a feature you add later. If you ship a service without logs and metrics, you have shipped a black box.
 
-### acme-it IT&E — Platform + Cloud (Apr 2022 to Sep 2022)
+### IT services — Platform + Cloud (Apr 2022 to Sep 2022)
 
 Short stint, big impact. We had an inherited monolith and a sprint budget to split it. I led a chunk of the monolith-to-microservices migration, which netted roughly a 300% throughput increase once contention on a shared database connection pool and session store went away. The interesting technical bit was a Redis-backed JWT blacklist — O(1) revocation lookups — which let us log users out globally during a credential rotation without bouncing pods. I also packaged some of our reusable DevOps scaffolding into shared libraries, cutting duplicated CI/CD boilerplate by about 30%.
 
 > **Lesson I keep returning to: the most impactful platform work is the work that removes the need for other engineers to think about platform.**
 
-### a large e-commerce company — Cloud Platforms & SRE (Oct 2022 to Nov 2025)
+### Large-scale e-commerce — Cloud Platforms & SRE (Oct 2022 to Nov 2025)
 
-a large e-commerce company is the "Amazon of Korea" — NYSE-listed, ~$30B revenue, the dominant domestic e-commerce platform. I spent three years on teams responsible for the cloud platforms underneath production commerce.
+This was a big e-commerce company with real production scale. I spent three years on teams responsible for the cloud platforms underneath production commerce.
 
 The numbers that matter:
 
@@ -54,11 +54,11 @@ The numbers that matter:
 - **60% reduction in MTTD** after standing up a Prometheus and Grafana stack with proper SLIs, SLOs, and alerting that stopped paging on symptoms
 - **Multi-region Terraform** with GitHub Actions and AWS CodeDeploy as the deployment substrate
 
-a large e-commerce company is where I learned that scale is not a number, it is a discipline. A single badly-written cron job can take down a region. A single `terraform apply` without a plan review can delete an environment. Every control you build has to assume the worst version of yourself will eventually operate it at 3 AM.
+That job is where I learned that scale is not a number, it is a discipline. A single badly-written cron job can take down a region. A single `terraform apply` without a plan review can delete an environment. Every control you build has to assume the worst version of yourself will eventually operate it at 3 AM.
 
-### my employer — SRE (Jan 2026 to now)
+### Current role — SRE (Jan 2026 to now)
 
-acme-corp is a subsidiary of a large tech company, Korea's largest internet company — a large tech company is often called "the Google of Korea." a large tech company acquired acme-corp in 2024 and we have been systematically modernizing the stack ever since.
+My current team runs a production platform that's in the middle of a steady stack modernization.
 
 What I work with day-to-day:
 
@@ -69,7 +69,7 @@ What I work with day-to-day:
 - **External Secrets Operator**, Keycloak for OIDC SSO, SigNoz for observability, GitHub Actions Runner Controller for CI compute
 - **Spring Boot microservices** on the application side (gateway, auth, user, SSE, admin, integration) with a React + Vite + Zustand frontend
 
-The work is real SRE: error budgets, on-call rotation, post-mortems, capacity planning, platform toil reduction. Everything I write about in the other seven articles of this series is anchored in systems I touch every day at acme-corp.
+The work is real SRE: error budgets, on-call rotation, post-mortems, capacity planning, platform toil reduction. Everything I write about in the other seven articles of this series is anchored in systems I touch every day at work.
 
 ---
 
@@ -85,8 +85,8 @@ flowchart LR
     E[Offer]
 
     A --> B
-    B -->|'never heard of a large e-commerce company'| F[Pass]
-    B -->|'what is acme-corp'| F
+    B -->|'never heard of these companies'| F[Pass]
+    B -->|'cannot map the titles'| F
     B -->|'5 years SRE + OSS proof'| C
     C --> D --> E
 ```

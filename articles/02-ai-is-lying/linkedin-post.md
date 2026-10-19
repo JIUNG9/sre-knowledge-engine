@@ -39,7 +39,7 @@ The AI agent that answers "how do we respond to this alert" treats all of it as 
 
 Aegis Layer 5 is a set of MCP tools that reconcile these sources into a single source of truth. Confluence sync with staleness rules. GitHub scan with orphan detection. Incident coverage gaps. A lint pass that flags contradictions for human review.
 
-At my employer I have been the on-call engineer woken up by a runbook that referenced a deprecated service. That incident is why this layer exists.
+At my day job I have been the on-call engineer woken up by a runbook that referenced a deprecated service. That incident is why this layer exists.
 
 Full article: <medium-link-placeholder>
 

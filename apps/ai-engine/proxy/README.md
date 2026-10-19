@@ -68,7 +68,7 @@ client = AnthropicProxy(anthropic.Anthropic(), config)
 client.messages.create(
     model="claude-sonnet-4-6",
     max_tokens=256,
-    messages=[{"role": "user", "content": "investigate INC-0042"}],
+    messages=[{"role": "user", "content": "investigate INC-4242"}],
 )
 ```
 

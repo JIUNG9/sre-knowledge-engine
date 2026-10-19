@@ -55,14 +55,14 @@
 
 <h1>Production Guardrails for AI Agents — The Risk Tier System Across 4 AWS Accounts</h1>
 <p class="subtitle">How to let an AI act in a hub-spoke AWS topology without letting it torch production</p>
-<p class="byline">By June Gu — SRE at my employer, ex-e-commerce. Building <a href="https://github.com/JIUNG9/aegis">Aegis</a>, an open-source AI-Native DevSecOps Command Center.</p>
+<p class="byline">By June Gu — Site Reliability Engineer. Building <a href="https://github.com/JIUNG9/aegis">Aegis</a>, an open-source AI-Native DevSecOps Command Center.</p>
 
 <hr />
 
 <h2>The hook</h2>
 <p><strong>AI agents without guardrails are a production incident waiting to happen.</strong></p>
 <p>Especially when you have 4 AWS accounts in a hub-spoke topology, Transit Gateway between them, and an AI that can — if you let it — kubectl-scale, s3-copy, or modify an IAM policy that's trusted by every account downstream.</p>
-<p>I work in a setup like that. At my employer, our production AWS footprint spans several accounts wired through Transit Gateway. Before we let Aegis do anything autonomously, we had to answer a question every AI-in-production team eventually faces:</p>
+<p>I work in a setup like that. At my day job, our production AWS footprint spans several accounts wired through Transit Gateway. Before we let Aegis do anything autonomously, we had to answer a question every AI-in-production team eventually faces:</p>
 <blockquote>"Which actions can the AI take on its own? Which require a human? Which should never be automated, ever?"</blockquote>
 <p>This article is my answer — the <strong>risk tier system</strong> that Aegis Layer 4 enforces, and why we designed it this way. It's what Aegis will ship as Layer 4 (Guardrails), coming in the v4.0 roadmap. Code references below point at planned files; the design is locked, the code is landing.</p>
 <blockquote>"The speed of an AI agent is its biggest feature and its biggest liability. Guardrails are how you keep the feature and remove the liability."</blockquote>

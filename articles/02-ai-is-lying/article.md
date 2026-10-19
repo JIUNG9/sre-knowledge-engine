@@ -26,7 +26,7 @@ Confidence won. The AI was lying with a straight face.
 
 > The most dangerous documentation is not the wrong kind. It is the wrong kind that an LLM confidently retrieves.
 
-This article is about what we built to stop that from happening again — at [my employer](https://www.example.com/), across four AWS accounts, 49 PostgreSQL instances, and a knowledge surface area that spans Confluence, three GitHub repos, Google Docs, and pinned Slack threads older than most of our services.
+This article is about what we built to stop that from happening again — at my day job, across four AWS accounts, 49 PostgreSQL instances, and a knowledge surface area that spans Confluence, three GitHub repos, Google Docs, and pinned Slack threads older than most of our services.
 
 
 ---
@@ -237,7 +237,7 @@ DEFAULT_RULES: dict[str, StalenessRule] = {
 }
 ```
 
-The thresholds are opinions I hold after three years of SRE work at a large e-commerce company and now acme-corp:
+The thresholds are opinions I hold after three years of SRE work at e-commerce scale and the time since at my current job:
 
 - **Confluence pages go stale fast.** Nobody curates them. 90 days and they need review.
 - **GitHub runbooks stale faster** — 60 days. If the team isn't editing them, the system has drifted.

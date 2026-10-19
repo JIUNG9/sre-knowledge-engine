@@ -17,7 +17,7 @@ Content-Type: application/json
   "system": "You are an SRE analyst...",
   "messages": [
     {"role": "user", "content": "Investigate this alert.\n\n2026-04-18 09:13:42 ERROR
-      user=kim.jiho@example.com ip=203.0.113.42 host=prod-db-01.example.com
+      user=kim.jiho@acme-corp.example ip=203.0.113.42 host=prod-db-01.example.internal
       db=acme_orders_prod msg=\"failed login after 5 attempts\""}
   ]
 }
@@ -76,7 +76,7 @@ The mental model is simple — stick a proxy between the agent and Anthropic, sc
 Four moving parts:
 
 1. **Detector** — scans every outbound message for PII and secrets. Regex for the obvious stuff, optionally Microsoft Presidio for the harder stuff (names, organization-specific patterns).
-2. **Mapper** — deterministic placeholder generator. `kim.jiho@example.com` becomes `<USER_1>`. Same input in the same request gets the same placeholder, so downstream reasoning still works. Different requests get independent mappings, so nothing leaks across.
+2. **Mapper** — deterministic placeholder generator. `kim.jiho@acme-corp.example` becomes `<USER_1>`. Same input in the same request gets the same placeholder, so downstream reasoning still works. Different requests get independent mappings, so nothing leaks across.
 3. **Proxy** — a thin wrapper around `anthropic.Anthropic` that runs detector + mapper before `messages.create(...)` and reverses the substitutions on the response.
 4. **Config** — Pydantic settings. On by default, `enabled=False` gives you a passthrough.
 
@@ -113,7 +113,7 @@ The detector emits a list of **spans** — `(start, end, category, original_text
 
 Two rules:
 
-1. **Deterministic within a request.** If `kim.jiho@example.com` appears three times in the same prompt, all three become `<USER_1>`. Claude can still reason about "this user did X and then Y and then Z" because the placeholder is stable.
+1. **Deterministic within a request.** If `kim.jiho@acme-corp.example` appears three times in the same prompt, all three become `<USER_1>`. Claude can still reason about "this user did X and then Y and then Z" because the placeholder is stable.
 2. **Independent across requests.** If two different users investigate two different incidents, their `<USER_1>`s refer to different people. This is enforced by scoping the map to a per-request context, not a singleton.
 
 ```python
@@ -308,7 +308,7 @@ Upcoming pieces in the Layer 0 arc:
 > If your AI agent reads production data, the moment its data *and* the LLM API live in different jurisdictions, you have a compliance problem — and you cannot solve it with a checklist. Solve it with code that runs on every call, every time, whether anyone remembers to run it or not.
 
 — June Gu
-Site Reliability Engineer, my employer
+Site Reliability Engineer
 Building Aegis OSS
 
 **Try it:**

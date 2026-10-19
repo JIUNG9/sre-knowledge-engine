@@ -17,7 +17,7 @@ This article walks through how the self-maintaining vault works — the director
 
 ## Why runbooks rot
 
-Let me describe the pattern at almost every company I've worked at, including [a large e-commerce company](https://www.acme-retail.jobs/), [acme-it IT&E](https://www.acme-it-itne.com/), and [my employer](https://www.example.com/).
+Let me describe the pattern at almost every company I've worked at.
 
 1. An incident happens.
 2. Someone writes a runbook during the post-mortem.

@@ -285,7 +285,7 @@ llm_router:
   provider: hybrid            # regex + Presidio
   mapping_ttl_seconds: 3600
   custom_patterns:
-    - '\bprod-[a-z0-9-]+\.acme-corp\.internal\b'
+    - '\bprod-[a-z0-9-]+\.example\.internal\b'
     - '\bacme_[a-z]+_prod\b'</code></pre>
 
 <p>Article #9 in this series has the full walkthrough of what the proxy does and doesn't catch. For a Tier C deployment, it is treated as a <em>secondary</em> defense — the primary defense is that sensitive data should never reach the cloud backend at all. The proxy catches the times that assumption fails.</p>

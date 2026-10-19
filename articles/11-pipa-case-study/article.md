@@ -99,7 +99,7 @@ pii_proxy:
   provider: hybrid            # regex + Presidio
   mapping_ttl_seconds: 3600
   custom_patterns:
-    - '\bprod-[a-z0-9-]+\.acme-corp\.internal\b'
+    - '\bprod-[a-z0-9-]+\.example\.internal\b'
     - '\bacme_[a-z]+_prod\b'
 ```
 
@@ -240,7 +240,7 @@ Meanwhile, the engineering roadmap continues with Layers 2–5: the SigNoz conne
 > **If your AI agent reads production data and you operate in a regulated jurisdiction, the question is not "should I deploy defensively" — it's "have I shipped the defense, or am I hoping my users will remember to be careful." Only the first answer survives a regulator's email.**
 
 — June Gu
-Site Reliability Engineer, my employer
+Site Reliability Engineer
 Building Aegis OSS
 
 **Try it:**

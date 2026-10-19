@@ -15,7 +15,7 @@ func ptr(t time.Time) *time.Time { return &t }
 func Incidents() []models.Incident {
 	return []models.Incident{
 		{
-			ID:          "INC-001",
+			ID:          "INC-1001",
 			Title:       "Payment service high error rate",
 			Description: "Payment service returning 500 errors at 15% rate, affecting checkout flow. Downstream Stripe webhook handler timing out under load.",
 			Severity:    models.SeverityCritical,
@@ -23,11 +23,11 @@ func Incidents() []models.Incident {
 			Service:     "payment-service",
 			Assignee:    "oncall-sre",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-001", IncidentID: "INC-001", Type: models.TimelineEventAlertFired, Actor: "signoz", Message: "Alert fired: payment_error_rate > 10% for 5m", Metadata: map[string]string{"alert_name": "PaymentHighErrorRate", "threshold": "10%", "current": "15.3%"}, Timestamp: now.Add(-3*time.Hour - 30*time.Minute)},
-				{ID: "TL-002", IncidentID: "INC-001", Type: models.TimelineEventAcknowledged, Actor: "oncall-sre", Message: "Acknowledged by on-call SRE", Timestamp: now.Add(-3*time.Hour - 25*time.Minute)},
-				{ID: "TL-003", IncidentID: "INC-001", Type: models.TimelineEventStatusChange, Actor: "oncall-sre", Message: "Status changed to investigating", Metadata: map[string]string{"from": "open", "to": "investigating"}, Timestamp: now.Add(-3*time.Hour - 24*time.Minute)},
-				{ID: "TL-004", IncidentID: "INC-001", Type: models.TimelineEventNoteAdded, Actor: "oncall-sre", Message: "Stripe webhook handler shows connection pool exhaustion. Scaling up replicas while investigating root cause.", Timestamp: now.Add(-3 * time.Hour)},
-				{ID: "TL-005", IncidentID: "INC-001", Type: models.TimelineEventEscalated, Actor: "oncall-sre", Message: "Escalated to payment team lead — potential data consistency issue", Timestamp: now.Add(-2*time.Hour - 30*time.Minute)},
+				{ID: "TL-001", IncidentID: "INC-1001", Type: models.TimelineEventAlertFired, Actor: "signoz", Message: "Alert fired: payment_error_rate > 10% for 5m", Metadata: map[string]string{"alert_name": "PaymentHighErrorRate", "threshold": "10%", "current": "15.3%"}, Timestamp: now.Add(-3*time.Hour - 30*time.Minute)},
+				{ID: "TL-002", IncidentID: "INC-1001", Type: models.TimelineEventAcknowledged, Actor: "oncall-sre", Message: "Acknowledged by on-call SRE", Timestamp: now.Add(-3*time.Hour - 25*time.Minute)},
+				{ID: "TL-003", IncidentID: "INC-1001", Type: models.TimelineEventStatusChange, Actor: "oncall-sre", Message: "Status changed to investigating", Metadata: map[string]string{"from": "open", "to": "investigating"}, Timestamp: now.Add(-3*time.Hour - 24*time.Minute)},
+				{ID: "TL-004", IncidentID: "INC-1001", Type: models.TimelineEventNoteAdded, Actor: "oncall-sre", Message: "Stripe webhook handler shows connection pool exhaustion. Scaling up replicas while investigating root cause.", Timestamp: now.Add(-3 * time.Hour)},
+				{ID: "TL-005", IncidentID: "INC-1001", Type: models.TimelineEventEscalated, Actor: "oncall-sre", Message: "Escalated to payment team lead — potential data consistency issue", Timestamp: now.Add(-2*time.Hour - 30*time.Minute)},
 			},
 			RelatedAlerts: []string{"ALT-001", "ALT-002"},
 			CreatedAt:     now.Add(-3*time.Hour - 30*time.Minute),
@@ -35,7 +35,7 @@ func Incidents() []models.Incident {
 			Duration:      12600, // 3.5 hours ongoing
 		},
 		{
-			ID:          "INC-002",
+			ID:          "INC-1002",
 			Title:       "Elevated latency on user-service /api/v1/profile",
 			Description: "P99 latency increased from 200ms to 1.2s on profile endpoint. Correlated with new deployment v2.14.0 containing N+1 query regression.",
 			Severity:    models.SeverityHigh,
@@ -43,10 +43,10 @@ func Incidents() []models.Incident {
 			Service:     "user-service",
 			Assignee:    "backend-team",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-006", IncidentID: "INC-002", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: user_service_latency_p99 > 1s for 10m", Metadata: map[string]string{"alert_name": "HighLatency", "endpoint": "/api/v1/profile"}, Timestamp: now.Add(-2 * time.Hour)},
-				{ID: "TL-007", IncidentID: "INC-002", Type: models.TimelineEventAcknowledged, Actor: "backend-team", Message: "Acknowledged by backend team", Timestamp: now.Add(-1*time.Hour - 50*time.Minute)},
-				{ID: "TL-008", IncidentID: "INC-002", Type: models.TimelineEventStatusChange, Actor: "backend-team", Message: "Status changed to identified — N+1 query found in profile endpoint", Metadata: map[string]string{"from": "investigating", "to": "identified"}, Timestamp: now.Add(-1*time.Hour - 20*time.Minute)},
-				{ID: "TL-009", IncidentID: "INC-002", Type: models.TimelineEventNoteAdded, Actor: "backend-team", Message: "Root cause: v2.14.0 introduced eager loading of user preferences without batching. Fix PR #1847 submitted.", Timestamp: now.Add(-1 * time.Hour)},
+				{ID: "TL-006", IncidentID: "INC-1002", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: user_service_latency_p99 > 1s for 10m", Metadata: map[string]string{"alert_name": "HighLatency", "endpoint": "/api/v1/profile"}, Timestamp: now.Add(-2 * time.Hour)},
+				{ID: "TL-007", IncidentID: "INC-1002", Type: models.TimelineEventAcknowledged, Actor: "backend-team", Message: "Acknowledged by backend team", Timestamp: now.Add(-1*time.Hour - 50*time.Minute)},
+				{ID: "TL-008", IncidentID: "INC-1002", Type: models.TimelineEventStatusChange, Actor: "backend-team", Message: "Status changed to identified — N+1 query found in profile endpoint", Metadata: map[string]string{"from": "investigating", "to": "identified"}, Timestamp: now.Add(-1*time.Hour - 20*time.Minute)},
+				{ID: "TL-009", IncidentID: "INC-1002", Type: models.TimelineEventNoteAdded, Actor: "backend-team", Message: "Root cause: v2.14.0 introduced eager loading of user preferences without batching. Fix PR #1847 submitted.", Timestamp: now.Add(-1 * time.Hour)},
 			},
 			RelatedAlerts: []string{"ALT-003"},
 			RootCause:     "N+1 query regression in v2.14.0 profile endpoint eager loading user preferences without batching.",
@@ -55,7 +55,7 @@ func Incidents() []models.Incident {
 			Duration:      7200, // 2 hours ongoing
 		},
 		{
-			ID:          "INC-003",
+			ID:          "INC-1003",
 			Title:       "Kubernetes node NotReady in prod-us-east-1",
 			Description: "Node i-0abc123 entered NotReady state due to kubelet OOM. Workloads rescheduled automatically by cluster autoscaler.",
 			Severity:    models.SeverityMedium,
@@ -63,11 +63,11 @@ func Incidents() []models.Incident {
 			Service:     "infrastructure",
 			Assignee:    "platform-team",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-010", IncidentID: "INC-003", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: KubeNodeNotReady for node i-0abc123", Timestamp: now.Add(-22 * time.Hour)},
-				{ID: "TL-011", IncidentID: "INC-003", Type: models.TimelineEventAcknowledged, Actor: "platform-team", Message: "Acknowledged by platform team", Timestamp: now.Add(-21*time.Hour - 45*time.Minute)},
-				{ID: "TL-012", IncidentID: "INC-003", Type: models.TimelineEventStatusChange, Actor: "platform-team", Message: "Status changed to investigating", Metadata: map[string]string{"from": "open", "to": "investigating"}, Timestamp: now.Add(-21*time.Hour - 40*time.Minute)},
-				{ID: "TL-013", IncidentID: "INC-003", Type: models.TimelineEventNoteAdded, Actor: "platform-team", Message: "Kubelet OOM caused by logging sidecar memory leak. Updated sidecar to v2.3.1.", Timestamp: now.Add(-20*time.Hour - 15*time.Minute)},
-				{ID: "TL-014", IncidentID: "INC-003", Type: models.TimelineEventResolved, Actor: "platform-team", Message: "Node recovered after sidecar update. All pods healthy.", Timestamp: now.Add(-19*time.Hour - 15*time.Minute)},
+				{ID: "TL-010", IncidentID: "INC-1003", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: KubeNodeNotReady for node i-0abc123", Timestamp: now.Add(-22 * time.Hour)},
+				{ID: "TL-011", IncidentID: "INC-1003", Type: models.TimelineEventAcknowledged, Actor: "platform-team", Message: "Acknowledged by platform team", Timestamp: now.Add(-21*time.Hour - 45*time.Minute)},
+				{ID: "TL-012", IncidentID: "INC-1003", Type: models.TimelineEventStatusChange, Actor: "platform-team", Message: "Status changed to investigating", Metadata: map[string]string{"from": "open", "to": "investigating"}, Timestamp: now.Add(-21*time.Hour - 40*time.Minute)},
+				{ID: "TL-013", IncidentID: "INC-1003", Type: models.TimelineEventNoteAdded, Actor: "platform-team", Message: "Kubelet OOM caused by logging sidecar memory leak. Updated sidecar to v2.3.1.", Timestamp: now.Add(-20*time.Hour - 15*time.Minute)},
+				{ID: "TL-014", IncidentID: "INC-1003", Type: models.TimelineEventResolved, Actor: "platform-team", Message: "Node recovered after sidecar update. All pods healthy.", Timestamp: now.Add(-19*time.Hour - 15*time.Minute)},
 			},
 			RelatedAlerts: []string{"ALT-004", "ALT-005"},
 			RootCause:     "Memory leak in logging sidecar container consuming 4Gi. Fixed by updating sidecar image to v2.3.1.",
@@ -78,7 +78,7 @@ func Incidents() []models.Incident {
 			Duration:      9900, // ~2h 45m
 		},
 		{
-			ID:          "INC-004",
+			ID:          "INC-1004",
 			Title:       "Certificate expiry warning for api.aegis.dev",
 			Description: "TLS certificate for api.aegis.dev expires in 7 days. cert-manager renewal job failed due to DNS challenge timeout.",
 			Severity:    models.SeverityLow,
@@ -86,10 +86,10 @@ func Incidents() []models.Incident {
 			Service:     "gateway",
 			Assignee:    "infra-oncall",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-015", IncidentID: "INC-004", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: CertExpiryWarning — api.aegis.dev expires in 7 days", Timestamp: now.Add(-6 * time.Hour)},
-				{ID: "TL-016", IncidentID: "INC-004", Type: models.TimelineEventAcknowledged, Actor: "infra-oncall", Message: "Acknowledged. Checking cert-manager logs.", Timestamp: now.Add(-5*time.Hour - 30*time.Minute)},
-				{ID: "TL-017", IncidentID: "INC-004", Type: models.TimelineEventNoteAdded, Actor: "infra-oncall", Message: "DNS challenge failing due to Route53 IAM role permissions change. Manual renewal triggered, monitoring.", Timestamp: now.Add(-5 * time.Hour)},
-				{ID: "TL-018", IncidentID: "INC-004", Type: models.TimelineEventStatusChange, Actor: "infra-oncall", Message: "Status changed to monitoring — manual cert issued, fixing IAM role", Metadata: map[string]string{"from": "investigating", "to": "monitoring"}, Timestamp: now.Add(-4*time.Hour - 30*time.Minute)},
+				{ID: "TL-015", IncidentID: "INC-1004", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: CertExpiryWarning — api.aegis.dev expires in 7 days", Timestamp: now.Add(-6 * time.Hour)},
+				{ID: "TL-016", IncidentID: "INC-1004", Type: models.TimelineEventAcknowledged, Actor: "infra-oncall", Message: "Acknowledged. Checking cert-manager logs.", Timestamp: now.Add(-5*time.Hour - 30*time.Minute)},
+				{ID: "TL-017", IncidentID: "INC-1004", Type: models.TimelineEventNoteAdded, Actor: "infra-oncall", Message: "DNS challenge failing due to Route53 IAM role permissions change. Manual renewal triggered, monitoring.", Timestamp: now.Add(-5 * time.Hour)},
+				{ID: "TL-018", IncidentID: "INC-1004", Type: models.TimelineEventStatusChange, Actor: "infra-oncall", Message: "Status changed to monitoring — manual cert issued, fixing IAM role", Metadata: map[string]string{"from": "investigating", "to": "monitoring"}, Timestamp: now.Add(-4*time.Hour - 30*time.Minute)},
 			},
 			RelatedAlerts: []string{"ALT-006"},
 			CreatedAt:     now.Add(-6 * time.Hour),
@@ -97,7 +97,7 @@ func Incidents() []models.Incident {
 			Duration:      21600, // 6 hours ongoing
 		},
 		{
-			ID:          "INC-005",
+			ID:          "INC-1005",
 			Title:       "Database connection pool exhaustion on order-service",
 			Description: "order-service Aurora PostgreSQL connection pool saturated at 100%. New requests queuing, causing cascading timeouts in checkout flow.",
 			Severity:    models.SeverityCritical,
@@ -105,12 +105,12 @@ func Incidents() []models.Incident {
 			Service:     "order-service",
 			Assignee:    "dba-oncall",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-019", IncidentID: "INC-005", Type: models.TimelineEventAlertFired, Actor: "cloudwatch", Message: "Alert fired: RDS connection count > 95% of max_connections", Metadata: map[string]string{"db_instance": "prod-orders-primary", "connections": "195/200"}, Timestamp: now.Add(-26 * time.Hour)},
-				{ID: "TL-020", IncidentID: "INC-005", Type: models.TimelineEventAcknowledged, Actor: "dba-oncall", Message: "Acknowledged by DBA on-call", Timestamp: now.Add(-25*time.Hour - 50*time.Minute)},
-				{ID: "TL-021", IncidentID: "INC-005", Type: models.TimelineEventStatusChange, Actor: "dba-oncall", Message: "Status changed to investigating", Metadata: map[string]string{"from": "open", "to": "investigating"}, Timestamp: now.Add(-25*time.Hour - 48*time.Minute)},
-				{ID: "TL-022", IncidentID: "INC-005", Type: models.TimelineEventNoteAdded, Actor: "dba-oncall", Message: "Long-running queries from batch job holding connections. Killed 40 idle sessions. Increased max_connections to 300.", Timestamp: now.Add(-25 * time.Hour)},
-				{ID: "TL-023", IncidentID: "INC-005", Type: models.TimelineEventStatusChange, Actor: "dba-oncall", Message: "Status changed to identified — batch job missing connection timeout", Metadata: map[string]string{"from": "investigating", "to": "identified"}, Timestamp: now.Add(-24*time.Hour - 30*time.Minute)},
-				{ID: "TL-024", IncidentID: "INC-005", Type: models.TimelineEventResolved, Actor: "dba-oncall", Message: "Batch job patched with connection timeout. Pool usage stable at 45%.", Timestamp: now.Add(-24 * time.Hour)},
+				{ID: "TL-019", IncidentID: "INC-1005", Type: models.TimelineEventAlertFired, Actor: "cloudwatch", Message: "Alert fired: RDS connection count > 95% of max_connections", Metadata: map[string]string{"db_instance": "prod-orders-primary", "connections": "195/200"}, Timestamp: now.Add(-26 * time.Hour)},
+				{ID: "TL-020", IncidentID: "INC-1005", Type: models.TimelineEventAcknowledged, Actor: "dba-oncall", Message: "Acknowledged by DBA on-call", Timestamp: now.Add(-25*time.Hour - 50*time.Minute)},
+				{ID: "TL-021", IncidentID: "INC-1005", Type: models.TimelineEventStatusChange, Actor: "dba-oncall", Message: "Status changed to investigating", Metadata: map[string]string{"from": "open", "to": "investigating"}, Timestamp: now.Add(-25*time.Hour - 48*time.Minute)},
+				{ID: "TL-022", IncidentID: "INC-1005", Type: models.TimelineEventNoteAdded, Actor: "dba-oncall", Message: "Long-running queries from batch job holding connections. Killed 40 idle sessions. Increased max_connections to 300.", Timestamp: now.Add(-25 * time.Hour)},
+				{ID: "TL-023", IncidentID: "INC-1005", Type: models.TimelineEventStatusChange, Actor: "dba-oncall", Message: "Status changed to identified — batch job missing connection timeout", Metadata: map[string]string{"from": "investigating", "to": "identified"}, Timestamp: now.Add(-24*time.Hour - 30*time.Minute)},
+				{ID: "TL-024", IncidentID: "INC-1005", Type: models.TimelineEventResolved, Actor: "dba-oncall", Message: "Batch job patched with connection timeout. Pool usage stable at 45%.", Timestamp: now.Add(-24 * time.Hour)},
 			},
 			RelatedAlerts: []string{"ALT-007", "ALT-008"},
 			RootCause:     "Batch reconciliation job missing connection timeout, leaking connections during long-running queries.",
@@ -121,7 +121,7 @@ func Incidents() []models.Incident {
 			Duration:      7200, // 2 hours
 		},
 		{
-			ID:          "INC-006",
+			ID:          "INC-1006",
 			Title:       "Redis cluster failover in prod-ap-northeast-1",
 			Description: "ElastiCache Redis primary node failed health checks. Automatic failover promoted replica. Brief (12s) connection drops observed across session-dependent services.",
 			Severity:    models.SeverityHigh,
@@ -129,10 +129,10 @@ func Incidents() []models.Incident {
 			Service:     "cache-layer",
 			Assignee:    "platform-team",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-025", IncidentID: "INC-006", Type: models.TimelineEventAlertFired, Actor: "cloudwatch", Message: "Alert fired: ElastiCache primary node health check failure", Timestamp: now.Add(-48 * time.Hour)},
-				{ID: "TL-026", IncidentID: "INC-006", Type: models.TimelineEventAcknowledged, Actor: "platform-team", Message: "Auto-failover triggered. Acknowledged.", Timestamp: now.Add(-47*time.Hour - 55*time.Minute)},
-				{ID: "TL-027", IncidentID: "INC-006", Type: models.TimelineEventNoteAdded, Actor: "platform-team", Message: "Failover completed in 12s. Session service reconnected. Verifying data consistency.", Timestamp: now.Add(-47*time.Hour - 40*time.Minute)},
-				{ID: "TL-028", IncidentID: "INC-006", Type: models.TimelineEventResolved, Actor: "platform-team", Message: "All services reconnected. No data loss detected. Root cause: network partition on primary AZ.", Timestamp: now.Add(-47 * time.Hour)},
+				{ID: "TL-025", IncidentID: "INC-1006", Type: models.TimelineEventAlertFired, Actor: "cloudwatch", Message: "Alert fired: ElastiCache primary node health check failure", Timestamp: now.Add(-48 * time.Hour)},
+				{ID: "TL-026", IncidentID: "INC-1006", Type: models.TimelineEventAcknowledged, Actor: "platform-team", Message: "Auto-failover triggered. Acknowledged.", Timestamp: now.Add(-47*time.Hour - 55*time.Minute)},
+				{ID: "TL-027", IncidentID: "INC-1006", Type: models.TimelineEventNoteAdded, Actor: "platform-team", Message: "Failover completed in 12s. Session service reconnected. Verifying data consistency.", Timestamp: now.Add(-47*time.Hour - 40*time.Minute)},
+				{ID: "TL-028", IncidentID: "INC-1006", Type: models.TimelineEventResolved, Actor: "platform-team", Message: "All services reconnected. No data loss detected. Root cause: network partition on primary AZ.", Timestamp: now.Add(-47 * time.Hour)},
 			},
 			RelatedAlerts: []string{"ALT-009"},
 			RootCause:     "Transient network partition in ap-northeast-1a AZ caused primary node to fail health checks.",
@@ -143,7 +143,7 @@ func Incidents() []models.Incident {
 			Duration:      3600, // 1 hour
 		},
 		{
-			ID:          "INC-007",
+			ID:          "INC-1007",
 			Title:       "CI/CD pipeline failures across all repositories",
 			Description: "GitHub Actions Runner Controller (ARC) pods in CrashLoopBackOff. All CI jobs queuing with no available runners.",
 			Severity:    models.SeverityHigh,
@@ -151,8 +151,8 @@ func Incidents() []models.Incident {
 			Service:     "ci-cd",
 			Assignee:    "",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-029", IncidentID: "INC-007", Type: models.TimelineEventAlertFired, Actor: "signoz", Message: "Alert fired: GitHub Actions queue depth > 50 for 15m", Metadata: map[string]string{"queue_depth": "67", "pending_jobs": "67"}, Timestamp: now.Add(-30 * time.Minute)},
-				{ID: "TL-030", IncidentID: "INC-007", Type: models.TimelineEventNoteAdded, Actor: "signoz", Message: "ARC controller pods in CrashLoopBackOff. OOMKilled with 512Mi limit.", Timestamp: now.Add(-25 * time.Minute)},
+				{ID: "TL-029", IncidentID: "INC-1007", Type: models.TimelineEventAlertFired, Actor: "signoz", Message: "Alert fired: GitHub Actions queue depth > 50 for 15m", Metadata: map[string]string{"queue_depth": "67", "pending_jobs": "67"}, Timestamp: now.Add(-30 * time.Minute)},
+				{ID: "TL-030", IncidentID: "INC-1007", Type: models.TimelineEventNoteAdded, Actor: "signoz", Message: "ARC controller pods in CrashLoopBackOff. OOMKilled with 512Mi limit.", Timestamp: now.Add(-25 * time.Minute)},
 			},
 			RelatedAlerts: []string{"ALT-010", "ALT-011"},
 			CreatedAt:     now.Add(-30 * time.Minute),
@@ -160,7 +160,7 @@ func Incidents() []models.Incident {
 			Duration:      1800, // 30 min ongoing
 		},
 		{
-			ID:          "INC-008",
+			ID:          "INC-1008",
 			Title:       "Kafka consumer lag spike on event-processor",
 			Description: "Consumer group event-processor-prod showing 500K+ lag on order-events topic. Event processing delayed by ~8 minutes.",
 			Severity:    models.SeverityMedium,
@@ -168,9 +168,9 @@ func Incidents() []models.Incident {
 			Service:     "event-processor",
 			Assignee:    "backend-team",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-031", IncidentID: "INC-008", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: kafka_consumer_lag > 100000 for consumer group event-processor-prod", Metadata: map[string]string{"topic": "order-events", "lag": "523847"}, Timestamp: now.Add(-1*time.Hour - 15*time.Minute)},
-				{ID: "TL-032", IncidentID: "INC-008", Type: models.TimelineEventAcknowledged, Actor: "backend-team", Message: "Acknowledged. Checking consumer health.", Timestamp: now.Add(-1*time.Hour - 5*time.Minute)},
-				{ID: "TL-033", IncidentID: "INC-008", Type: models.TimelineEventStatusChange, Actor: "backend-team", Message: "Status changed to investigating — consumer throughput dropped after deployment", Metadata: map[string]string{"from": "open", "to": "investigating"}, Timestamp: now.Add(-55 * time.Minute)},
+				{ID: "TL-031", IncidentID: "INC-1008", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: kafka_consumer_lag > 100000 for consumer group event-processor-prod", Metadata: map[string]string{"topic": "order-events", "lag": "523847"}, Timestamp: now.Add(-1*time.Hour - 15*time.Minute)},
+				{ID: "TL-032", IncidentID: "INC-1008", Type: models.TimelineEventAcknowledged, Actor: "backend-team", Message: "Acknowledged. Checking consumer health.", Timestamp: now.Add(-1*time.Hour - 5*time.Minute)},
+				{ID: "TL-033", IncidentID: "INC-1008", Type: models.TimelineEventStatusChange, Actor: "backend-team", Message: "Status changed to investigating — consumer throughput dropped after deployment", Metadata: map[string]string{"from": "open", "to": "investigating"}, Timestamp: now.Add(-55 * time.Minute)},
 			},
 			RelatedAlerts: []string{"ALT-012"},
 			CreatedAt:     now.Add(-1*time.Hour - 15*time.Minute),
@@ -178,7 +178,7 @@ func Incidents() []models.Incident {
 			Duration:      4500, // 1h 15m ongoing
 		},
 		{
-			ID:          "INC-009",
+			ID:          "INC-1009",
 			Title:       "S3 bucket policy misconfiguration blocking uploads",
 			Description: "Integration service unable to upload documents to s3://prod-documents. AccessDenied errors after IAM policy rotation.",
 			Severity:    models.SeverityMedium,
@@ -186,10 +186,10 @@ func Incidents() []models.Incident {
 			Service:     "integration-service",
 			Assignee:    "infra-oncall",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-034", IncidentID: "INC-009", Type: models.TimelineEventAlertFired, Actor: "cloudwatch", Message: "Alert fired: S3 PutObject errors > 100/min for prod-documents bucket", Timestamp: now.Add(-10 * time.Hour)},
-				{ID: "TL-035", IncidentID: "INC-009", Type: models.TimelineEventAcknowledged, Actor: "infra-oncall", Message: "Acknowledged. Correlating with recent Terraform changes.", Timestamp: now.Add(-9*time.Hour - 45*time.Minute)},
-				{ID: "TL-036", IncidentID: "INC-009", Type: models.TimelineEventNoteAdded, Actor: "infra-oncall", Message: "IAM policy rotation removed s3:PutObject from integration-service role. Terraform state drift detected.", Timestamp: now.Add(-9*time.Hour - 20*time.Minute)},
-				{ID: "TL-037", IncidentID: "INC-009", Type: models.TimelineEventResolved, Actor: "infra-oncall", Message: "Fixed IAM policy and applied via Terraform. Uploads resumed.", Timestamp: now.Add(-8*time.Hour - 45*time.Minute)},
+				{ID: "TL-034", IncidentID: "INC-1009", Type: models.TimelineEventAlertFired, Actor: "cloudwatch", Message: "Alert fired: S3 PutObject errors > 100/min for prod-documents bucket", Timestamp: now.Add(-10 * time.Hour)},
+				{ID: "TL-035", IncidentID: "INC-1009", Type: models.TimelineEventAcknowledged, Actor: "infra-oncall", Message: "Acknowledged. Correlating with recent Terraform changes.", Timestamp: now.Add(-9*time.Hour - 45*time.Minute)},
+				{ID: "TL-036", IncidentID: "INC-1009", Type: models.TimelineEventNoteAdded, Actor: "infra-oncall", Message: "IAM policy rotation removed s3:PutObject from integration-service role. Terraform state drift detected.", Timestamp: now.Add(-9*time.Hour - 20*time.Minute)},
+				{ID: "TL-037", IncidentID: "INC-1009", Type: models.TimelineEventResolved, Actor: "infra-oncall", Message: "Fixed IAM policy and applied via Terraform. Uploads resumed.", Timestamp: now.Add(-8*time.Hour - 45*time.Minute)},
 			},
 			RelatedAlerts: []string{"ALT-013"},
 			RootCause:     "IAM policy rotation script removed s3:PutObject permission from integration-service role. Terraform state out of sync.",
@@ -200,7 +200,7 @@ func Incidents() []models.Incident {
 			Duration:      4500, // 1h 15m
 		},
 		{
-			ID:          "INC-010",
+			ID:          "INC-1010",
 			Title:       "DNS resolution failures for internal services",
 			Description: "CoreDNS pods experiencing high memory pressure. Intermittent NXDOMAIN responses for *.svc.cluster.local queries.",
 			Severity:    models.SeverityCritical,
@@ -208,11 +208,11 @@ func Incidents() []models.Incident {
 			Service:     "infrastructure",
 			Assignee:    "platform-team",
 			Timeline: []models.TimelineEvent{
-				{ID: "TL-038", IncidentID: "INC-010", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: CoreDNS error rate > 5% — NXDOMAIN responses for internal queries", Timestamp: now.Add(-72 * time.Hour)},
-				{ID: "TL-039", IncidentID: "INC-010", Type: models.TimelineEventAcknowledged, Actor: "platform-team", Message: "Acknowledged. Multiple services reporting DNS failures.", Timestamp: now.Add(-71*time.Hour - 50*time.Minute)},
-				{ID: "TL-040", IncidentID: "INC-010", Type: models.TimelineEventEscalated, Actor: "platform-team", Message: "Escalated to SEV1 — widespread impact across all services", Timestamp: now.Add(-71*time.Hour - 45*time.Minute)},
-				{ID: "TL-041", IncidentID: "INC-010", Type: models.TimelineEventNoteAdded, Actor: "platform-team", Message: "CoreDNS cache plugin consuming 2Gi memory. Increased memory limit and scaled to 5 replicas.", Timestamp: now.Add(-71 * time.Hour)},
-				{ID: "TL-042", IncidentID: "INC-010", Type: models.TimelineEventResolved, Actor: "platform-team", Message: "DNS resolution stable. CoreDNS cache TTL reduced from 300s to 30s, memory limits increased to 1Gi per pod.", Timestamp: now.Add(-70*time.Hour - 15*time.Minute)},
+				{ID: "TL-038", IncidentID: "INC-1010", Type: models.TimelineEventAlertFired, Actor: "prometheus", Message: "Alert fired: CoreDNS error rate > 5% — NXDOMAIN responses for internal queries", Timestamp: now.Add(-72 * time.Hour)},
+				{ID: "TL-039", IncidentID: "INC-1010", Type: models.TimelineEventAcknowledged, Actor: "platform-team", Message: "Acknowledged. Multiple services reporting DNS failures.", Timestamp: now.Add(-71*time.Hour - 50*time.Minute)},
+				{ID: "TL-040", IncidentID: "INC-1010", Type: models.TimelineEventEscalated, Actor: "platform-team", Message: "Escalated to SEV1 — widespread impact across all services", Timestamp: now.Add(-71*time.Hour - 45*time.Minute)},
+				{ID: "TL-041", IncidentID: "INC-1010", Type: models.TimelineEventNoteAdded, Actor: "platform-team", Message: "CoreDNS cache plugin consuming 2Gi memory. Increased memory limit and scaled to 5 replicas.", Timestamp: now.Add(-71 * time.Hour)},
+				{ID: "TL-042", IncidentID: "INC-1010", Type: models.TimelineEventResolved, Actor: "platform-team", Message: "DNS resolution stable. CoreDNS cache TTL reduced from 300s to 30s, memory limits increased to 1Gi per pod.", Timestamp: now.Add(-70*time.Hour - 15*time.Minute)},
 			},
 			RelatedAlerts: []string{"ALT-014", "ALT-015", "ALT-016"},
 			RootCause:     "CoreDNS cache plugin default configuration caused unbounded memory growth under high query volume.",

@@ -26,7 +26,7 @@ GitHub: github.com/JIUNG9/aegis
 
 **I turned my SRE work into a self-maintaining public portfolio. Same tool does both.**
 
-The vault at github.com/JIUNG9/aegis-wiki is a live Obsidian directory of SRE entities, concepts, incidents, and runbooks from four years of operating production at my employer and a large e-commerce company. The engine at github.com/JIUNG9/aegis reads sources once, synthesizes them into pages, and publishes the result.
+The vault at github.com/JIUNG9/aegis-wiki is a live Obsidian directory of SRE entities, concepts, incidents, and runbooks from four years of operating production systems. The engine at github.com/JIUNG9/aegis reads sources once, synthesizes them into pages, and publishes the result.
 
 Why build it this way? Two reasons.
 

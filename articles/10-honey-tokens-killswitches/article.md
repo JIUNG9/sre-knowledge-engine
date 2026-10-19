@@ -260,7 +260,7 @@ That is the Layer 0 thesis.
 > **The cheapest time to catch a leak is before it leaves the laptop. The second cheapest time is a millisecond later, when a honey token trips. The third cheapest is while it is still happening, with a panic command. Any deployment of an AI agent over production data should have all three.**
 
 — June Gu
-Site Reliability Engineer, Placen (NAVER Corporation)
+Site Reliability Engineer
 Building Aegis OSS
 
 **Try it:**

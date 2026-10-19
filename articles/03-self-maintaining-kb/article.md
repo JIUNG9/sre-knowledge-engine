@@ -18,7 +18,7 @@ This article walks through how the self-maintaining vault works — the director
 
 ## Why runbooks rot
 
-Let me describe the pattern at almost every company I've worked at, including [Coupang](https://www.coupang.jobs/), [Hyundai IT&E](https://www.hyundai-itne.com/), and [Placen (a NAVER Corporation subsidiary)](https://www.navercorp.com/).
+Let me describe the pattern at almost every company I've worked at.
 
 1. An incident happens.
 2. Someone writes a runbook during the post-mortem.
@@ -455,6 +455,6 @@ The series as a whole is documenting how I'm building [Aegis](https://github.com
 
 ---
 
-*June Gu is an SRE at Placen (a NAVER Corporation subsidiary) and previously at Coupang. He's building Aegis in public as he prepares to relocate to Canada in February 2027. The sanitized public vault lives at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki).*
+*June Gu is a Site Reliability Engineer. He's building Aegis in public as he prepares to relocate to Canada in February 2027. The sanitized public vault lives at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki).*
 
 **Tags**: Obsidian, Knowledge Management, AI, SRE, Open Source, Career

@@ -36,7 +36,7 @@ The dirty secret of SRE culture is that our runbooks are written for the version
 
 Here's what's broken about traditional runbooks:
 
-1. **They're too long.** A good auth-service runbook at Placen (a NAVER subsidiary) is 12 pages of markdown. At 3 AM, I'm not reading 12 pages. I'm scrolling past 11 of them to find the one paragraph that applies.
+1. **They're too long.** A good auth-service runbook at my day job is 12 pages of markdown. At 3 AM, I'm not reading 12 pages. I'm scrolling past 11 of them to find the one paragraph that applies.
 2. **They assume you remember context.** "Check the usual DB metrics." Which usual metrics? Which DB? The version I set up in Terraform six months ago, or the one from after the PG 13→16 migration?
 3. **They don't cross-reference recent incidents.** The last three times this exact alert fired, the cause was the same. The runbook doesn't know that. A human had to notice the pattern.
 4. **They're stale.** The runbook was last touched nine months ago. The service has deployed 40 times since then.
@@ -334,6 +334,6 @@ The short version: if you already own your observability stack, adding an AI Con
 
 ---
 
-*June Gu is an SRE at Placen (a NAVER subsidiary) in Seoul, ex-Coupang. He's building [Aegis](https://github.com/JIUNG9/aegis) — an open-source AI-native DevSecOps command center — on evenings and weekends. He's relocating to Canada in February 2027 and is open to SRE and DevOps roles in the Toronto area.*
+*June Gu is a Site Reliability Engineer in Seoul. He's building [Aegis](https://github.com/JIUNG9/aegis) — an open-source AI-native DevSecOps command center — on evenings and weekends. He's relocating to Canada in February 2027 and is open to SRE and DevOps roles in the Toronto area.*
 
 **Tags:** AI, Claude API, MCP, Incident Management, SRE

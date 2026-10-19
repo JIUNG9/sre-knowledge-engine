@@ -128,18 +128,18 @@
 
 <h1>We Found That 80% of Our Incidents Happen on Monday 9 AM</h1>
 <p class="subtitle">How 6 months of SigNoz data exposed a predictable incident pattern — and how we turned pre-positioning into ~$3K/month in savings</p>
-<p class="byline">By June Gu — SRE at Placen (a NAVER subsidiary), Ex-Coupang. Building <a href="https://github.com/JIUNG9/aegis">Aegis</a>, an open-source AI-Native DevSecOps Command Center.</p>
+<p class="byline">By June Gu — Site Reliability Engineer. Building <a href="https://github.com/JIUNG9/aegis">Aegis</a>, an open-source AI-Native DevSecOps Command Center.</p>
 
 <hr />
 
 <h2>The hook</h2>
 <p>We looked at 6 months of incident data. <strong>80% of them clustered on Monday 9-11 AM KST.</strong></p>
 <p>It wasn't random. It wasn't bad luck. It wasn't the "Monday curse" that every SRE team jokes about. It was <strong>predictable</strong>, <strong>measurable</strong>, and — as it turns out — <strong>preventable</strong> if you stop treating incidents as independent events and start treating them as a time series.</p>
-<p>This is the story of how I spent a weekend querying our SigNoz backend, plotted incidents by hour-of-week, and realized that our on-call rotation wasn't being tested by entropy. It was being tested by a cron job.</p>
+<p>This is the story of how I spent a weekend querying our SigNoz backend, charted incidents by hour-of-week, and realized that our on-call rotation wasn't being tested by entropy. It was being tested by a cron job.</p>
 <blockquote>"If your incidents cluster, they're not incidents. They're a schedule nobody wrote down."</blockquote>
 
 <h2>Part 1: The informal observation</h2>
-<p>At Placen (a NAVER subsidiary), I run SRE across 5 AWS accounts in a hub-spoke topology. Roughly 49 PostgreSQL instances, EKS 1.33 across three spoke accounts, SigNoz as the observability backend, ArgoCD for GitOps. Standard big-enough-to-hurt stack.</p>
+<p>At my day job, I run SRE across 5 AWS accounts in a hub-spoke topology. Roughly 49 PostgreSQL instances, EKS 1.33 across three spoke accounts, SigNoz as the observability backend, ArgoCD for GitOps. Standard big-enough-to-hurt stack.</p>
 <p>Every SRE team has that moment where someone says: "Why does stuff always break on Monday?" For us it was in a weekly sync around six months in. Two of us had been on-call back-to-back, and we'd both been paged at exactly the same time on Monday morning — 9:17 AM in one case, 9:42 AM in the other.</p>
 <p>We laughed. Then someone muttered, "Wait, was that actually Monday for both?"</p>
 <p>I opened our Slack channel for alerts and scrolled. The pattern was immediate — visually, by eyeball, I could see clusters of red notifications at the top-left of each weekly block. I took a screenshot. I sent it to the team. We agreed: "Let's prove it or debunk it."</p>
@@ -347,7 +347,7 @@ spec:
 
 <h3>6.3 Structural fixes</h3>
 <p>Some patterns aren't fixable with pre-positioning. Pattern B (batch job write amplification) is structural — the materialized views are genuinely expensive. The analyzer's output for Pattern B becomes a <strong>Jira ticket</strong>, not an action. "Here's a recurring cost hotspot. Consider splitting or re-scheduling."</p>
-<p>At Coupang, handling 1M+ daily commerce transactions, we learned this the hard way: not every recurring problem should be automated away. Some of them are telling you that your architecture needs a redesign, and the worst thing you can do is paper over the signal.</p>
+<p>At a previous job, handling 1M+ daily commerce transactions, we learned this the hard way: not every recurring problem should be automated away. Some of them are telling you that your architecture needs a redesign, and the worst thing you can do is paper over the signal.</p>
 
 <h2>Part 7: Cost savings from pattern-driven scaling</h2>
 <table>

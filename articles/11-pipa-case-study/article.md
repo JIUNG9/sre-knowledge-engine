@@ -99,8 +99,8 @@ pii_proxy:
   provider: hybrid            # regex + Presidio
   mapping_ttl_seconds: 3600
   custom_patterns:
-    - '\bprod-[a-z0-9-]+\.placen\.internal\b'
-    - '\bnaver_[a-z]+_prod\b'
+    - '\bprod-[a-z0-9-]+\.example\.internal\b'
+    - '\bacme_[a-z]+_prod\b'
 ```
 
 Article #9 in this series has the full walkthrough of what the proxy does and doesn't catch. For a Tier C deployment, it is treated as a *secondary* defense — the primary defense is that sensitive data should never reach the cloud backend at all. The proxy catches the times that assumption fails.
@@ -240,7 +240,7 @@ Meanwhile, the engineering roadmap continues with Layers 2–5: the SigNoz conne
 > **If your AI agent reads production data and you operate in a regulated jurisdiction, the question is not "should I deploy defensively" — it's "have I shipped the defense, or am I hoping my users will remember to be careful." Only the first answer survives a regulator's email.**
 
 — June Gu
-Site Reliability Engineer, Placen (NAVER Corporation)
+Site Reliability Engineer
 Building Aegis OSS
 
 **Try it:**

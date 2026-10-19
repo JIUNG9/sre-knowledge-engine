@@ -34,7 +34,7 @@ So I built something different. Aegis is an open-source AI-Native DevSecOps comm
 
 It implements Andrej Karpathy's LLM Wiki pattern: the model reads each source once, writes a canonical page, flags contradictions, tracks staleness. The vault is an Obsidian directory I edit locally and the engine syncs to GitHub automatically.
 
-I run production SRE at Placen (NAVER Corporation) by day — multi-account AWS, EKS, ArgoCD, SigNoz. The operational lessons go directly into Aegis by night. The vault at github.com/JIUNG9/aegis-wiki is both the portfolio and the product.
+I run production SRE by day — multi-account AWS, EKS, ArgoCD, SigNoz. The operational lessons go directly into Aegis by night. The vault at github.com/JIUNG9/aegis-wiki is both the portfolio and the product.
 
 If you are hiring SREs who can build systems and not just operate them, I am open to conversations — relocating to Canada in 2027.
 

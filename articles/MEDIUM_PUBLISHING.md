@@ -62,7 +62,7 @@ Medium does render fenced code blocks. Keep them:
 
 ### 7. No employer-specific names in body copy
 
-Per `docs/OSS_HYGIENE.md`, employer names (Placen / NAVER / Coupang / etc.) stay out of the body. Byline at the bottom can carry them as author credentials.
+Per `docs/OSS_HYGIENE.md`, employer names stay out of the body. The byline stays role-only too: "June Gu is a Site Reliability Engineer." No current or past employer names anywhere in the article.
 
 ### 8. Section structure
 

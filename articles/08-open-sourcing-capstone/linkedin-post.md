@@ -30,7 +30,7 @@ GitHub: github.com/JIUNG9/aegis
 
 ## Variant B — Career
 
-**Four years of SRE work at Coupang and Placen (NAVER Corporation), compiled into a five-layer open-source platform. Today I am publishing it.**
+**Four years of production SRE work, compiled into a five-layer open-source platform. Today I am publishing it.**
 
 Aegis is the side project I would have wanted as a reference when I started SRE work. A Karpathy-style LLM Wiki instead of chunk-based RAG. A SigNoz connector with time-based pattern analysis. A four-stage automation ladder that earns production access. Production guardrails with a SOC2-style audit trail. MCP tools that reconcile Confluence with GitHub with incident history.
 
@@ -54,7 +54,7 @@ Aegis is different on purpose. Every "AI for SRE" product ships chunk-based RAG 
 
 Aegis fixes all three. Karpathy LLM Wiki instead of RAG. Four-stage automation ladder instead of day-one autonomy. A self-maintaining vault that updates from real sources instead of a Confluence graveyard.
 
-Five layers, fifteen dollars a month, fully open source. Built while running SRE at Placen (NAVER Corporation) by day. The wiki it produces is my portfolio at github.com/JIUNG9/aegis-wiki — the engine is at github.com/JIUNG9/aegis.
+Five layers, fifteen dollars a month, fully open source. Built while running SRE in production by day. The wiki it produces is my portfolio at github.com/JIUNG9/aegis-wiki — the engine is at github.com/JIUNG9/aegis.
 
 If the bar for platform engineering is higher than "a Backstage fork," this is my attempt at clearing it.
 

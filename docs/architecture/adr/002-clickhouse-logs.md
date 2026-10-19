@@ -19,7 +19,7 @@ We considered:
 We chose **ClickHouse** as the primary log/metric storage engine.
 
 Key factors:
-- **SigNoz compatibility**: SigNoz (our primary monitoring tool at Placen) uses ClickHouse internally. We can either share the same cluster or use a compatible schema, enabling zero-duplication data ingestion.
+- **SigNoz compatibility**: SigNoz (the primary monitoring tool in the deployment this was designed for) uses ClickHouse internally. We can either share the same cluster or use a compatible schema, enabling zero-duplication data ingestion.
 - **Performance**: ClickHouse processes billions of rows per second for analytical queries. 10-100x faster than Elasticsearch for time-series aggregations.
 - **Compression**: ClickHouse achieves 10-20x compression ratios, significantly reducing storage costs.
 - **SQL interface**: Standard SQL queries (with extensions) are easier to learn than Elasticsearch's DSL.

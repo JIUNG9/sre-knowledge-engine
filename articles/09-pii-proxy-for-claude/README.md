@@ -41,5 +41,5 @@ Additional tags inside the article body: `LLM`, `Compliance`, `Claude`, `Anthrop
 
 - No emojis.
 - No Claude co-author lines.
-- Sanitized — no real Placen/NAVER/Coupang account IDs, hostnames, or incident identifiers.
-- The Korean coworker email example (`kim.jiho@placen.co.kr`) is a synthetic illustration, not a real person.
+- Sanitized — no real employer account IDs, hostnames, or incident identifiers.
+- The Korean coworker email example (`kim.jiho@acme-corp.example`) is a synthetic illustration, not a real person.

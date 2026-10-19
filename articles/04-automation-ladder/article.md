@@ -14,7 +14,7 @@ The problem isn't the AI. The problem is that we gave it full production access 
 
 I'm building [Aegis](https://github.com/JIUNG9/aegis), an AI-native DevSecOps command center, on nights and weekends. The whole point is that the AI investigates incidents, proposes fixes, and — eventually — executes low-risk ones autonomously. But "eventually" is the key word.
 
-Here's the trust-building ladder I designed into Aegis v4.0, and the slow arc I used on my own team at Placen (a NAVER subsidiary) to get from "AI watches only" to "AI acts on low-risk."
+Here's the trust-building ladder I designed into Aegis v4.0, and the slow arc I used on my own team at work to get from "AI watches only" to "AI acts on low-risk."
 
 > **The rule**: An AI agent should earn each rung of autonomy. Skipping rungs is how you end up in a postmortem.
 
@@ -73,7 +73,7 @@ Here's how I structured it in Aegis. This maps directly to the `observation_mode
 
 **Why this stage matters:** This is where the team starts *using* the AI as an augmentation. The on-call engineer gets paged, opens Slack, and sees "Aegis analysis: this looks like the connection-pool exhaustion pattern from three weeks ago; recommend rolling restart of `auth-service`; rollback plan attached." The engineer doesn't have to trust the AI — they can read the reasoning, check the metrics it cited, and decide.
 
-You'd be surprised how long this stage should last. I kept Aegis in Stage 2 for a full month at Placen before considering Stage 3. The first two weeks were mostly me reading recommendations during ambient hours and grading them. By week four, the team was asking "where's the Aegis summary?" when they got paged before looking at Grafana.
+You'd be surprised how long this stage should last. I kept Aegis in Stage 2 for a full month on my team before considering Stage 3. The first two weeks were mostly me reading recommendations during ambient hours and grading them. By week four, the team was asking "where's the Aegis summary?" when they got paged before looking at Grafana.
 
 **Exit criteria:** Team actively uses the recommendations, and you have data showing the AI's suggestions would have been safe (no "good thing we didn't let it do that" moments).
 
@@ -329,6 +329,6 @@ Once you've read all six layer pieces (Safety, Wiki, SigNoz, Control Tower, Guar
 
 ---
 
-*June Gu is an SRE at Placen (a NAVER subsidiary) in Seoul, ex-Coupang. He's building [Aegis](https://github.com/JIUNG9/aegis) — an open-source AI-native DevSecOps command center — on evenings and weekends. He's relocating to Canada in February 2027 and is open to SRE and DevOps roles in the Toronto area.*
+*June Gu is a Site Reliability Engineer in Seoul. He's building [Aegis](https://github.com/JIUNG9/aegis) — an open-source AI-native DevSecOps command center — on evenings and weekends. He's relocating to Canada in February 2027 and is open to SRE and DevOps roles in the Toronto area.*
 
 **Tags:** AI, SRE, DevOps, Automation, Safety

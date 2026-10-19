@@ -10,6 +10,6 @@
 | Jun-Jul 2026 | P2.5 Layer 4 executor — Aegis becomes self-healing | Planned |
 | Jul 2026 | Article #12 — *From Investigator to Operator* (the executor) | Planned |
 | Aug 2026 | Open-source three reusable Terraform modules (VPC hub-spoke, EKS baseline, Aurora Postgres with IAM auth) | Planned |
-| Aug-Sep 2026 | Aegis Tier C deployment at NAVER (PIPA case study, Article #11 publish) | Planned |
+| Aug-Sep 2026 | Aegis Tier C deployment in production (PIPA case study, Article #11 publish) | Planned |
 | Q4 2026 | IELTS General Training (when ready, targeting 7.0+ all bands) | Planned |
 | Feb 2027 | Move to Canada | Target |

@@ -47,5 +47,5 @@ Body tags: `PIPA`, `GDPR`, `Korea`, `LLM`, `DevOps`.
 
 - **Not legal advice.** Article is explicit about this. Engineering writeup, not a compliance opinion.
 - Fine number: 3% of domestic revenue per the final amendment. Early drafts had 10%. Verify at publication time.
-- No specific Placen/NAVER deployment details named. Describes the shape of a Tier C deployment in generic terms that happen to match how I'd deploy it at work — a legitimate OSS-user-case-study framing.
+- No specific employer deployment details named. Describes the shape of a Tier C deployment in generic terms that happen to match how I'd deploy it at work — a legitimate OSS-user-case-study framing.
 - Deliberately avoids making claims I cannot support with repo features.

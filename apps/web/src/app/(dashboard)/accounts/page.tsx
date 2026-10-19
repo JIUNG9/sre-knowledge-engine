@@ -80,12 +80,6 @@ const providerConfig: Record<
     bgColor: "bg-[#0078D4]/10",
     borderColor: "border-[#0078D4]/30",
   },
-  ncloud: {
-    label: "NCloud",
-    color: "#03CF5D",
-    bgColor: "bg-[#03CF5D]/10",
-    borderColor: "border-[#03CF5D]/30",
-  },
   custom: {
     label: "Custom",
     color: "#A855F7",
@@ -306,7 +300,6 @@ function CloudAccountsTab() {
                     <SelectItem value="aws">AWS</SelectItem>
                     <SelectItem value="gcp">GCP</SelectItem>
                     <SelectItem value="azure">Azure</SelectItem>
-                    <SelectItem value="ncloud">NCloud</SelectItem>
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
                 </Select>

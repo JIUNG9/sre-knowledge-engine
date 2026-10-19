@@ -2,7 +2,7 @@
 
 import { create } from "zustand"
 
-export type AccountProvider = "aws" | "gcp" | "azure" | "ncloud"
+export type AccountProvider = "aws" | "gcp" | "azure"
 export type AccountRole = "hub" | "spoke"
 export type AccountStatus = "connected" | "disconnected"
 

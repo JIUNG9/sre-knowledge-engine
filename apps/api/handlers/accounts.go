@@ -60,12 +60,12 @@ func CreateAccount(c *fiber.Ctx) error {
 	}
 
 	validProviders := map[string]bool{
-		"aws": true, "gcp": true, "azure": true, "ncloud": true, "custom": true,
+		"aws": true, "gcp": true, "azure": true, "custom": true,
 	}
 	if !validProviders[req.Provider] {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   "validation_error",
-			"message": "Invalid provider. Must be one of: aws, gcp, azure, ncloud, custom",
+			"message": "Invalid provider. Must be one of: aws, gcp, azure, custom",
 		})
 	}
 

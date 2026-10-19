@@ -35,7 +35,6 @@ const providers = [
   { value: "aws", label: "AWS", icon: "aws" },
   { value: "gcp", label: "GCP", icon: "gcp" },
   { value: "azure", label: "Azure", icon: "azure" },
-  { value: "ncloud", label: "NCloud", icon: "ncloud" },
   { value: "custom", label: "Custom", icon: "custom" },
 ] as const
 
@@ -56,7 +55,6 @@ function ProviderIcon({ provider }: { provider: string }) {
     aws: "AWS",
     gcp: "GCP",
     azure: "AZ",
-    ncloud: "NC",
     custom: "C",
   }
   return (
@@ -140,7 +138,7 @@ export default function CloudAccountsPage() {
           Connect Cloud Accounts
         </h2>
         <p className="text-sm text-muted-foreground">
-          Add your AWS, GCP, Azure, or NCloud accounts. Aegis will monitor
+          Add your AWS, GCP, or Azure accounts. Aegis will monitor
           resources, costs, and security posture across all connected accounts.
         </p>
       </div>

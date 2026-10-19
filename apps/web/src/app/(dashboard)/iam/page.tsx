@@ -110,14 +110,7 @@ function RolesOverviewTab({ accountFilter }: { accountFilter: string | null }) {
   const roles = accountFilter
     ? mockIAMRoles.filter(
         (r) =>
-          r.account ===
-          (accountFilter === "nx"
-            ? "nexus"
-            : accountFilter === "nw"
-              ? "nowwaiting"
-              : accountFilter === "dp"
-                ? "dodopoint"
-                : accountFilter)
+          r.account === accountFilter
       )
     : mockIAMRoles
 
@@ -276,14 +269,7 @@ function LeastPrivilegeTab({
   const recs = accountFilter
     ? mockLeastPrivilegeRecommendations.filter(
         (r) =>
-          r.account ===
-          (accountFilter === "nx"
-            ? "nexus"
-            : accountFilter === "nw"
-              ? "nowwaiting"
-              : accountFilter === "dp"
-                ? "dodopoint"
-                : accountFilter)
+          r.account === accountFilter
       )
     : mockLeastPrivilegeRecommendations
 
@@ -442,14 +428,7 @@ function CloudTrailTab({ accountFilter }: { accountFilter: string | null }) {
   let events: CloudTrailEvent[] = accountFilter
     ? mockCloudTrailEvents.filter(
         (e) =>
-          e.account ===
-          (accountFilter === "nx"
-            ? "nexus"
-            : accountFilter === "nw"
-              ? "nowwaiting"
-              : accountFilter === "dp"
-                ? "dodopoint"
-                : accountFilter)
+          e.account === accountFilter
       )
     : mockCloudTrailEvents
 
@@ -622,14 +601,7 @@ function AccessMatrixTab({
   const matrix = accountFilter
     ? mockAccessMatrix.filter(
         (m) =>
-          m.account ===
-          (accountFilter === "nx"
-            ? "nexus"
-            : accountFilter === "nw"
-              ? "nowwaiting"
-              : accountFilter === "dp"
-                ? "dodopoint"
-                : accountFilter)
+          m.account === accountFilter
       )
     : mockAccessMatrix
 

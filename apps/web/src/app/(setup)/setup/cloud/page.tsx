@@ -256,7 +256,7 @@ export default function CloudAccountsPage() {
                 </Label>
                 <Input
                   id="account-name"
-                  placeholder="e.g., nexus"
+                  placeholder="e.g., hub"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                 />
@@ -270,7 +270,7 @@ export default function CloudAccountsPage() {
                 </Label>
                 <Input
                   id="account-alias"
-                  placeholder="e.g., nx"
+                  placeholder="e.g., hub"
                   value={formAlias}
                   onChange={(e) => setFormAlias(e.target.value)}
                 />

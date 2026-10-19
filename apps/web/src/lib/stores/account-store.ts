@@ -25,9 +25,9 @@ interface AccountState {
 
 const mockAccounts: ServiceAccount[] = [
   {
-    id: "nx",
-    name: "nexus",
-    alias: "nx",
+    id: "hub",
+    name: "hub",
+    alias: "hub",
     provider: "aws",
     accountId: "123456789012",
     region: "ap-northeast-2",
@@ -35,9 +35,9 @@ const mockAccounts: ServiceAccount[] = [
     status: "connected",
   },
   {
-    id: "shared",
-    name: "shared",
-    alias: "shared",
+    id: "shared-services",
+    name: "shared-services",
+    alias: "shared-services",
     provider: "aws",
     accountId: "111122223333",
     region: "ap-northeast-2",
@@ -45,9 +45,9 @@ const mockAccounts: ServiceAccount[] = [
     status: "connected",
   },
   {
-    id: "nw",
-    name: "nowwaiting",
-    alias: "nw",
+    id: "prod-a",
+    name: "prod-a",
+    alias: "prod-a",
     provider: "aws",
     accountId: "987654321098",
     region: "ap-northeast-2",
@@ -55,9 +55,9 @@ const mockAccounts: ServiceAccount[] = [
     status: "connected",
   },
   {
-    id: "dp",
-    name: "dodopoint",
-    alias: "dp",
+    id: "prod-b",
+    name: "prod-b",
+    alias: "prod-b",
     provider: "aws",
     accountId: "000000000000",
     region: "ap-northeast-1",
@@ -74,22 +74,22 @@ export const useAccountStore = create<AccountState>((set) => ({
 
 // Maps each service name to its owning account ID
 export const SERVICE_TO_ACCOUNT: Record<string, string> = {
-  "api-gateway": "nx",
-  "deployment-controller": "nx",
-  "auth-service": "shared",
-  "user-service": "shared",
-  "payment-service": "shared",
-  "notification-service": "shared",
-  "config-service": "nw",
-  "audit-service": "nw",
+  "api-gateway": "hub",
+  "deployment-controller": "hub",
+  "auth-service": "shared-services",
+  "user-service": "shared-services",
+  "payment-service": "shared-services",
+  "notification-service": "shared-services",
+  "config-service": "prod-a",
+  "audit-service": "prod-a",
 }
 
 // Maps account IDs to the list of services in that account
 export const ACCOUNT_SERVICES: Record<string, string[]> = {
-  nx: ["api-gateway", "deployment-controller"],
-  shared: ["auth-service", "user-service", "payment-service", "notification-service"],
-  nw: ["config-service", "audit-service"],
-  dp: [],
+  hub: ["api-gateway", "deployment-controller"],
+  "shared-services": ["auth-service", "user-service", "payment-service", "notification-service"],
+  "prod-a": ["config-service", "audit-service"],
+  "prod-b": [],
 }
 
 // Helper: get services filtered by account (null = all)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strconv"
 	"sync"
 	"time"
 
@@ -336,7 +337,9 @@ func generateFingerprint(labels map[string]string) string {
 
 	var b []byte
 	for _, k := range keys {
-		b = append(b, []byte(k+"="+labels[k]+",")...)
+		// Quote both sides so a label containing "=" or "," can't alias another
+		// label set ({"a":"b=c"} and {"a=b":"c"} must not hash alike).
+		b = append(b, []byte(strconv.Quote(k)+"="+strconv.Quote(labels[k])+",")...)
 	}
 	hash := sha256.Sum256(b)
 	return fmt.Sprintf("%x", hash[:8])

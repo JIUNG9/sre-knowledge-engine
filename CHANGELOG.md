@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Alertmanager webhooks (`/webhooks/prometheus`, `/webhooks/signoz`): the fingerprint derived
+  from labels when Alertmanager sends none could collide for different label sets whose
+  keys or values contain `=`, merging two alerts into one. Keys and values are now quoted
+  before hashing. Derived fingerprints change once on upgrade; the alert store is in memory,
+  so nothing is migrated.
+
+### Added
+
+- Tests for the webhook handlers: field mapping, dedup on fingerprint, resolve and re-fire,
+  derived fingerprints, batch counts and invalid payloads.
+
 ## [1.0.0] - 2026-04-10
 
 ### Production Release

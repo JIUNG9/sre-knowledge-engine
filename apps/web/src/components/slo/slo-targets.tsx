@@ -127,15 +127,19 @@ export function SloTargets() {
     "prod-b": { ...DEFAULT_TARGETS, sloTarget: 99.9, mttrTarget: 25, costBudgetTarget: 5000 },
   })
 
-  // Draft state for config panel
-  const [draft, setDraft] = React.useState<AccountTargets>(allTargets[configAccount] ?? DEFAULT_TARGETS)
-
-  React.useEffect(() => {
-    setDraft(allTargets[configAccount] ?? DEFAULT_TARGETS)
-  }, [configAccount, allTargets])
+  // Draft state for config panel. It holds edits for one account; for any other
+  // account (or after a save) the draft falls back to the saved targets.
+  const [draftEdit, setDraftEdit] = React.useState<{ account: string; values: AccountTargets } | null>(null)
+  const draft =
+    draftEdit?.account === configAccount
+      ? draftEdit.values
+      : (allTargets[configAccount] ?? DEFAULT_TARGETS)
+  const setDraft = (update: (d: AccountTargets) => AccountTargets) =>
+    setDraftEdit({ account: configAccount, values: update(draft) })
 
   function handleSave() {
     setAllTargets((prev) => ({ ...prev, [configAccount]: { ...draft } }))
+    setDraftEdit(null)
     setConfigOpen(false)
   }
 

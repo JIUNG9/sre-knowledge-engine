@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
 import { Globe } from "lucide-react"
@@ -18,23 +17,18 @@ const locales = [
   { code: "ko", label: "KO", name: "한국어" },
 ] as const
 
+function setLocaleCookie(code: string) {
+  document.cookie = `aegis-locale=${code};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`
+}
+
 export function LanguageSwitcher() {
   const locale = useLocale()
   const router = useRouter()
-  const [pendingLocale, setPendingLocale] = React.useState<string | null>(null)
-
   const currentLocale = locales.find((l) => l.code === locale) ?? locales[0]
 
-  React.useEffect(() => {
-    if (pendingLocale) {
-      document.cookie = `aegis-locale=${pendingLocale};path=/;max-age=${60 * 60 * 24 * 365};samesite=lax`
-      router.refresh()
-      setPendingLocale(null)
-    }
-  }, [pendingLocale, router])
-
   function switchLocale(newLocale: string) {
-    setPendingLocale(newLocale)
+    setLocaleCookie(newLocale)
+    router.refresh()
   }
 
   return (

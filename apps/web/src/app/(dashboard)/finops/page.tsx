@@ -19,10 +19,13 @@ export default function FinOpsPage() {
   const { activeAccountId } = useAccountStore()
   const [accountFilter, setAccountFilter] = React.useState<string | null>(activeAccountId)
 
-  // Sync with global sidebar account
-  React.useEffect(() => {
+  // Sync with global sidebar account: adjust state during render when the
+  // store value changes, instead of in an effect (avoids a second render pass).
+  const [syncedAccountId, setSyncedAccountId] = React.useState(activeAccountId)
+  if (syncedAccountId !== activeAccountId) {
+    setSyncedAccountId(activeAccountId)
     setAccountFilter(activeAccountId)
-  }, [activeAccountId])
+  }
 
   const accountLabel = accountFilter ? getAccountName(accountFilter) : "All Accounts"
 

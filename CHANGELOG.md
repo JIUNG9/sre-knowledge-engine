@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Web: the FinOps page, SLO overview, SLO form, SLO targets and language switcher no longer
+  set state inside effects (`react-hooks/set-state-in-effect`). Behavior is unchanged. This
+  clears the way for `eslint-config-next` 16.4.1, which is bumped here.
+
 ### Fixed
 
 - Alertmanager webhooks (`/webhooks/prometheus`, `/webhooks/signoz`): the fingerprint derived

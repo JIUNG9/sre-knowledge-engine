@@ -268,11 +268,14 @@ export function SloOverview() {
     null
   )
 
-  // Sync with global account
-  React.useEffect(() => {
+  // Sync with global account: adjust state during render when the store value
+  // changes, instead of in an effect.
+  const [syncedAccountId, setSyncedAccountId] = React.useState(activeAccountId)
+  if (syncedAccountId !== activeAccountId) {
+    setSyncedAccountId(activeAccountId)
     setAccountFilter(activeAccountId)
     setSelectedService(null)
-  }, [activeAccountId])
+  }
 
   // Apply filters
   let filtered = MOCK_SLOS.filter((slo) => {

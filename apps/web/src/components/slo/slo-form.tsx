@@ -62,11 +62,12 @@ export function SloForm() {
   }, [accountId])
 
   // Sync with global account when dialog opens
-  React.useEffect(() => {
-    if (open && activeAccountId) {
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next)
+    if (next && activeAccountId) {
       setAccountId(activeAccountId)
     }
-  }, [open, activeAccountId])
+  }
 
   const handleAccountChange = (id: string) => {
     setAccountId(id)
@@ -93,7 +94,7 @@ export function SloForm() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button className="gap-2 px-5 py-2.5 font-mono text-sm">

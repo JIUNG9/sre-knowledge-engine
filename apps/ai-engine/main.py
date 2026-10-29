@@ -59,11 +59,20 @@ def _build_executor() -> Executor | None:
     operator has opted into real execution. The default is dry-run on,
     which means kubectl/terraform/aws commands report what they WOULD
     have done without invoking the binaries.
+
+    AEGIS_EXECUTOR_API_TOKEN must be set too. Without it the executor is
+    not attached, so the HTTP routes keep returning 503.
     """
     if os.environ.get("AEGIS_EXECUTOR_ENABLED", "").lower() not in ("1", "true", "yes"):
         return None
     try:
         config = ExecutorConfig.from_env()
+        if not config.api_token:
+            logger.error(
+                "executor not attached: AEGIS_EXECUTOR_ENABLED is set but "
+                "AEGIS_EXECUTOR_API_TOKEN is empty"
+            )
+            return None
         from pathlib import Path
         return Executor(
             config=config,

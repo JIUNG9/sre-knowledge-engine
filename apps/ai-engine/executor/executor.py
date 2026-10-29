@@ -36,6 +36,7 @@ from typing import TYPE_CHECKING, Any
 
 from .audit import AuditLogger, ExecutorAuditRecord
 from .config import ExecutorConfig
+from .grants import Grant, GrantError, GrantStore
 from .result import ExecutionResult
 from .wrappers import AwsCliWrapper, KubectlWrapper, TerraformWrapper, Wrapper
 
@@ -75,11 +76,13 @@ class Executor:
         audit: AuditLogger | None = None,
         wrappers: dict[str, Wrapper] | None = None,
         killswitch_check: Any | None = None,
+        grants: GrantStore | None = None,
     ) -> None:
         self.config = config
         self.audit = audit or AuditLogger(config.audit_log_path)
         self.wrappers: dict[str, Wrapper] = wrappers or self._default_wrappers(config)
         self._killswitch_check = killswitch_check or _default_killswitch_check
+        self.grants = grants or GrantStore(ttl_seconds=config.grant_ttl_seconds)
 
     @staticmethod
     def _default_wrappers(config: ExecutorConfig) -> dict[str, Wrapper]:
@@ -102,6 +105,8 @@ class Executor:
         *,
         investigation_id: str | None = None,
         dry_run: bool | None = None,
+        before_dispatch: Any | None = None,
+        audit_extra: dict[str, Any] | None = None,
     ) -> ExecutionResult:
         """Run ``action`` if every gate clears, else return a refusal.
 
@@ -249,6 +254,22 @@ class Executor:
                     dry_run=effective_dry_run,
                 )
 
+            # ---- Last check from the caller (grant consume) ----
+            # Runs after every other gate so a refusal above leaves the
+            # grant usable.
+            if before_dispatch is not None:
+                hook_reason = before_dispatch()
+                if hook_reason:
+                    self._set_attr(span, ATTR_GATE, "grant")
+                    return self._refuse(
+                        action=action,
+                        decision=decision,
+                        investigation_id=investigation_id,
+                        reason=hook_reason,
+                        span=span,
+                        dry_run=effective_dry_run,
+                    )
+
             # ---- Dispatch ----
             self._set_attr(span, ATTR_GATE, "dispatch")
             return self._dispatch(
@@ -260,11 +281,102 @@ class Executor:
                 tier_name=tier_name,
                 dry_run=effective_dry_run,
                 span=span,
+                audit_extra=audit_extra,
             )
+
+    def issue_grant(self, action: Any, decision: Any) -> Grant:
+        """Record that ``decision`` approved ``action`` and return a grant.
+
+        Call this in-process from the code that ran the real approval gate
+        (Slack, GitHub, CLI). The grant id is what an HTTP caller sends to
+        ``/execute``; the decision itself never crosses the wire.
+
+        Raises:
+            GrantError: the decision would not clear the tier or approval
+                gates, so there's nothing to grant.
+        """
+        tier_name = self._tier_name(decision)
+        if tier_name != "EXECUTE":
+            raise GrantError("not_approved_for_execution")
+        reason = self._approval_shortfall(decision)
+        if reason is not None:
+            raise GrantError(reason)
+        approval = getattr(decision, "approval", None)
+        return self.grants.issue(
+            action,
+            tier=tier_name,
+            approvers=self._approvers(decision),
+            required_approvals=self._required_approvals(decision),
+            backend=str(getattr(approval, "backend", "unknown") or "unknown"),
+        )
+
+    def execute_with_grant(
+        self,
+        action: Any,
+        grant_id: str,
+        *,
+        investigation_id: str | None = None,
+        dry_run: bool | None = None,
+    ) -> ExecutionResult:
+        """Run ``action`` against a server-issued grant.
+
+        A real run uses the grant up, but only once every other gate has
+        passed, so a kill-switch or verb refusal leaves it usable. A dry
+        run only checks it, so the operator can preview and then execute
+        with the same grant.
+        """
+        effective_dry_run = (
+            self.config.dry_run_default if dry_run is None else bool(dry_run)
+        )
+        try:
+            grant = self.grants.peek(grant_id, action)
+        except GrantError as exc:
+            with _span(SPAN_NAME) as span:
+                self._set_attr(span, ATTR_INV_ID, investigation_id or "")
+                self._set_attr(span, ATTR_GATE, "grant")
+                return self._refuse(
+                    action=action,
+                    decision=None,
+                    investigation_id=investigation_id,
+                    reason=exc.reason,
+                    span=span,
+                    dry_run=effective_dry_run,
+                )
+        def consume() -> str | None:
+            if effective_dry_run:
+                return None
+            try:
+                self.grants.consume(grant_id, action)
+            except GrantError as exc:
+                return exc.reason
+            return None
+
+        return self.execute(
+            action,
+            _decision_from_grant(grant),
+            investigation_id=investigation_id,
+            dry_run=effective_dry_run,
+            before_dispatch=consume,
+            audit_extra={
+                "grant": grant.grant_id[:8],
+                "approval_backend": grant.backend,
+            },
+        )
 
     # ------------------------------------------------------------------ #
     # Helpers
     # ------------------------------------------------------------------ #
+
+    def _approval_shortfall(self, decision: Any) -> str | None:
+        """Return the refusal reason gate 3 would give, or None if it passes."""
+        approvers = self._approvers(decision)
+        if not self._is_approved(decision):
+            return "approval_gate_not_satisfied"
+        if len(approvers) < self._required_approvals(decision):
+            return "insufficient_approvals"
+        if self.config.require_two_approvals_for_execute and len(approvers) < 2:
+            return "execute_requires_two_approvals"
+        return None
 
     def _dispatch(
         self,
@@ -277,6 +389,7 @@ class Executor:
         tier_name: str,
         dry_run: bool,
         span: Any,
+        audit_extra: dict[str, Any] | None = None,
     ) -> ExecutionResult:
         verb = self._wrapper_verb(action)
         target = getattr(action, "target", "")
@@ -327,6 +440,7 @@ class Executor:
                     "category": getattr(action, "category", ""),
                     "blast_radius": getattr(action, "blast_radius", 0),
                     "reversible": bool(getattr(action, "reversible", True)),
+                    **(audit_extra or {}),
                 },
             )
         except Exception as exc:  # noqa: BLE001
@@ -460,7 +574,8 @@ class Executor:
         approvers = getattr(approval, "approvers", None) if approval else None
         if approvers is None:
             return ()
-        return tuple(approvers)
+        # The same person approving twice is still one approval.
+        return tuple(dict.fromkeys(approvers))
 
     @staticmethod
     def _required_approvals(decision: Any) -> int:
@@ -547,3 +662,20 @@ def _span(name: str) -> Any:
         return _NoOpSpanContext()
     tracer = trace.get_tracer("aegis.executor", "0.5.0")
     return tracer.start_as_current_span(name)
+
+
+def _decision_from_grant(grant: Grant) -> Any:
+    """Rebuild the decision shape ``execute`` reads, from a stored grant."""
+    from types import SimpleNamespace
+
+    return SimpleNamespace(
+        tier=SimpleNamespace(name=grant.tier),
+        approved=True,
+        approval=SimpleNamespace(
+            approved=True, approvers=grant.approvers, backend=grant.backend, reason=None
+        ),
+        policy=SimpleNamespace(
+            required_approvals=grant.required_approvals, approver_groups=()
+        ),
+        reasons=(f"grant:{grant.grant_id[:8]}",),
+    )

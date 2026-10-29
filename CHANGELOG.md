@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Executor HTTP API (`/api/v1/executor/execute`, `/dry-run`): the request body carried the approval
+  decision, so a caller could assert `approved: true` with any approver names and pass the tier and
+  approval gates. Approvals are now server-side grants: `Executor.issue_grant` runs in-process after
+  the real approval gate, and the body carries only a `grant_id`. A grant is bound to a SHA-256
+  digest of the whole action, expires after 15 minutes (`AEGIS_EXECUTOR_GRANT_TTL_SECONDS`) and is
+  used up by a real run. A body that still sends `decision` gets 422. Nothing issues grants yet,
+  so `/execute` refuses every call until the control tower's approval step is wired to
+  `issue_grant`.
+- Executor routes need `Authorization: Bearer $AEGIS_EXECUTOR_API_TOKEN`. With the executor enabled
+  and no token set, it isn't attached and the routes stay at 503.
+- The approval gate counts distinct approvers; the same name twice counts once.
+- Over HTTP, `dry_run: false` no longer overrides `AEGIS_EXECUTOR_DRY_RUN=1`; the body can only force
+  a preview.
+- `AEGIS_EXECUTOR_DRY_RUN` and `AEGIS_EXECUTOR_REQUIRE_TWO_APPROVALS` turn off only on an explicit
+  `0`/`false`/`no`/`off`. Before, any unrecognised value (`enabled`, `y`) turned them off.
+- A grant is consumed only after every other gate passes, so a kill-switch refusal doesn't use it
+  up. Grant TTL is capped at 3600 seconds. The audit row records the grant prefix and approval
+  backend.
+
+Any deployment with `AEGIS_EXECUTOR_ENABLED=1` was exposed, whatever its dry-run setting: the old body
+accepted `dry_run: false`, so a forged request ran for real. The executor is off by default.
+
 ### Changed
 
 - Web: the FinOps page, SLO overview, SLO form, SLO targets and language switcher no longer
@@ -23,6 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Executor tests for grant binding, expiry, single use under 16 concurrent callers, bearer auth and
+  the rejected client-supplied decision. A `fake_binary` fixture replaces `subprocess.run`; one
+  existing test used to call the real `kubectl` on the developer's current context.
 - Tests for the webhook handlers: field mapping, dedup on fingerprint, resolve and re-fire,
   derived fingerprints, batch counts and invalid payloads.
 

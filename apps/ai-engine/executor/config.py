@@ -14,6 +14,10 @@ knob is **off** unless the operator opts in:
   ``apply``. Required AND ``tier=EXECUTE`` AND >=2 approvals.
 * ``AEGIS_EXECUTOR_AUDIT_LOG`` — JSONL audit path. Defaults to
   ``./aegis-executor-audit.jsonl`` in the working directory.
+* ``AEGIS_EXECUTOR_API_TOKEN`` — bearer token the HTTP routes require.
+  With no token set, the executor is never attached to the API.
+* ``AEGIS_EXECUTOR_GRANT_TTL_SECONDS`` — how long an approval grant stays
+  usable. Default 900 (15 minutes).
 
 The dictionary of allowed verbs is the second-line defence — the wrappers
 already block everything dangerous by hard-coding their verb list, but
@@ -26,12 +30,33 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 
+from .grants import DEFAULT_GRANT_TTL_SECONDS
+
 
 def _env_bool(name: str, default: bool) -> bool:
     raw = os.environ.get(name)
     if raw is None:
         return default
     return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_safety_flag(name: str) -> bool:
+    """A flag that is on by default and protects something.
+
+    Only an explicit "0" / "false" / "no" / "off" turns it off. A typo
+    such as ``enabled`` or ``y`` keeps it on.
+    """
+    raw = os.environ.get(name)
+    if raw is None:
+        return True
+    return raw.strip().lower() not in {"0", "false", "no", "off"}
+
+
+def _env_int(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if raw in (None, ""):
+        return default
+    return int(raw)
 
 
 def _env_str(name: str, default: str) -> str:
@@ -70,6 +95,9 @@ class ExecutorConfig:
         require_two_approvals_for_execute: Floor on ``EXECUTE``-tier
             actions. Defaults to True; the executor refuses execution
             with fewer than two approvals when ``True``.
+        api_token: Bearer token for the HTTP routes. Empty means the API
+            stays on the default 503 dependency.
+        grant_ttl_seconds: Lifetime of an approval grant.
     """
 
     enabled: bool = False
@@ -80,21 +108,27 @@ class ExecutorConfig:
     terraform_apply_allowed: bool = False
     audit_log_path: str = "./aegis-executor-audit.jsonl"
     require_two_approvals_for_execute: bool = True
+    api_token: str = field(default="", repr=False)
+    grant_ttl_seconds: int = DEFAULT_GRANT_TTL_SECONDS
 
     @classmethod
     def from_env(cls) -> ExecutorConfig:
         """Build an :class:`ExecutorConfig` from ``AEGIS_EXECUTOR_*`` env."""
         return cls(
             enabled=_env_bool("AEGIS_EXECUTOR_ENABLED", False),
-            dry_run_default=_env_bool("AEGIS_EXECUTOR_DRY_RUN", True),
+            dry_run_default=_env_safety_flag("AEGIS_EXECUTOR_DRY_RUN"),
             terraform_apply_allowed=_env_bool(
                 "AEGIS_EXECUTOR_TF_APPLY_ALLOWED", False
             ),
             audit_log_path=_env_str(
                 "AEGIS_EXECUTOR_AUDIT_LOG", "./aegis-executor-audit.jsonl"
             ),
-            require_two_approvals_for_execute=_env_bool(
-                "AEGIS_EXECUTOR_REQUIRE_TWO_APPROVALS", True
+            require_two_approvals_for_execute=_env_safety_flag(
+                "AEGIS_EXECUTOR_REQUIRE_TWO_APPROVALS"
+            ),
+            api_token=_env_str("AEGIS_EXECUTOR_API_TOKEN", ""),
+            grant_ttl_seconds=_env_int(
+                "AEGIS_EXECUTOR_GRANT_TTL_SECONDS", DEFAULT_GRANT_TTL_SECONDS
             ),
         )
 

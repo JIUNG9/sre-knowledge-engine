@@ -34,6 +34,7 @@ func newWebhookApp() *fiber.App {
 	app := fiber.New(fiber.Config{DisableStartupMessage: true})
 	app.Post("/webhooks/signoz", h.HandleSigNoz)
 	app.Post("/webhooks/prometheus", h.HandlePrometheus)
+	app.Post("/webhooks/datadog", h.HandleDatadog)
 	return app
 }
 
@@ -279,5 +280,121 @@ func TestGenerateFingerprint_IsStableAndLabelSensitive(t *testing.T) {
 	// Plain concatenation would make these collide: {"a":"b=c"} vs {"a=b":"c"}.
 	if generateFingerprint(map[string]string{"a": "b=c"}) == generateFingerprint(map[string]string{"a=b": "c"}) {
 		t.Error("fingerprint collides when a label value contains '='")
+	}
+}
+
+func TestHandleDatadog_MapsPriorityAndTags(t *testing.T) {
+	resetAlertStore(t)
+	app := newWebhookApp()
+
+	status, _ := postJSON(t, app, "/webhooks/datadog", `{
+		"id": "9001", "title": "High p99 latency", "body": "p99 above 2s",
+		"priority": "P1", "alert_type": "warning",
+		"tags": "service:checkout, env:prod,url:http://x/y,oncall"
+	}`)
+	if status != 200 {
+		t.Fatalf("status = %d, want 200", status)
+	}
+
+	alerts := storedAlerts()
+	if len(alerts) != 1 {
+		t.Fatalf("stored %d alerts, want 1", len(alerts))
+	}
+	a := alerts[0]
+	if a.Severity != models.SeverityCritical {
+		t.Errorf("severity = %q, want critical (P1 beats alert_type warning)", a.Severity)
+	}
+	if a.Service != "checkout" {
+		t.Errorf("service = %q, want checkout", a.Service)
+	}
+	want := map[string]string{"service": "checkout", "env": "prod", "url": "http://x/y", "oncall": "true"}
+	if len(a.Labels) != len(want) {
+		t.Errorf("labels = %v, want %v", a.Labels, want)
+	}
+	for k, v := range want {
+		if a.Labels[k] != v {
+			t.Errorf("label %q = %q, want %q", k, a.Labels[k], v)
+		}
+	}
+	if _, ok := a.Labels["raw_tags"]; ok {
+		t.Error("raw_tags label should no longer be set")
+	}
+}
+
+func TestHandleDatadog_NumericPriorityAndTagArray(t *testing.T) {
+	resetAlertStore(t)
+	app := newWebhookApp()
+
+	postJSON(t, app, "/webhooks/datadog",
+		`{"id": "9002", "priority": 4, "tags": ["service:search", "env:prod"]}`)
+
+	alerts := storedAlerts()
+	if len(alerts) != 1 {
+		t.Fatalf("stored %d alerts, want 1", len(alerts))
+	}
+	if alerts[0].Severity != models.SeverityLow {
+		t.Errorf("severity = %q, want low (priority 4)", alerts[0].Severity)
+	}
+	if alerts[0].Service != "search" || alerts[0].Labels["env"] != "prod" {
+		t.Errorf("service/labels = %q/%v", alerts[0].Service, alerts[0].Labels)
+	}
+}
+
+func TestHandleDatadog_NoPriorityOrTagsDefaultsToMedium(t *testing.T) {
+	resetAlertStore(t)
+	app := newWebhookApp()
+
+	postJSON(t, app, "/webhooks/datadog", `{"id": "9003"}`)
+
+	alerts := storedAlerts()
+	if len(alerts) != 1 {
+		t.Fatalf("stored %d alerts, want 1", len(alerts))
+	}
+	if alerts[0].Severity != models.SeverityMedium {
+		t.Errorf("severity = %q, want medium", alerts[0].Severity)
+	}
+	if len(alerts[0].Labels) != 0 {
+		t.Errorf("labels = %v, want none", alerts[0].Labels)
+	}
+}
+
+func TestDatadogSeverity(t *testing.T) {
+	cases := []struct {
+		priority, alertType string
+		want                models.Severity
+	}{
+		{"P1", "", models.SeverityCritical},
+		{" p2 ", "info", models.SeverityHigh},
+		{"P3", "error", models.SeverityMedium},
+		{"normal", "", models.SeverityMedium},
+		{"P4", "error", models.SeverityLow},
+		{"P5", "", models.SeverityLow},
+		{"low", "", models.SeverityLow},
+		{"", "error", models.SeverityHigh},
+		{"", "WARNING", models.SeverityMedium},
+		{"", "success", models.SeverityLow},
+		{"P9", "snapshot", models.SeverityMedium},
+		{"", "", models.SeverityMedium},
+	}
+	for _, c := range cases {
+		if got := datadogSeverity(c.priority, c.alertType); got != c.want {
+			t.Errorf("datadogSeverity(%q, %q) = %q, want %q", c.priority, c.alertType, got, c.want)
+		}
+	}
+}
+
+func TestDatadogTags_FirstValueWinsAndSkipsEmpty(t *testing.T) {
+	got := datadogTags("env:a,, env:b ,:novalue,team: core")
+	want := map[string]string{"env": "a", "team": "core"}
+	if len(got) != len(want) {
+		t.Fatalf("labels = %v, want %v", got, want)
+	}
+	for k, v := range want {
+		if got[k] != v {
+			t.Errorf("label %q = %q, want %q", k, got[k], v)
+		}
+	}
+	if n := len(datadogTags(nil)); n != 0 {
+		t.Errorf("nil tags gave %d labels, want 0", n)
 	}
 }

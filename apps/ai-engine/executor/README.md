@@ -4,7 +4,7 @@ The executor is the keystone of Phase 2: it turns Aegis from an *advisory* AI SR
 
 ## The five gates, in execution order
 
-When `Executor.execute(action, decision)` is called, every action passes through these gates in order. If any gate refuses, the action does not run and an audit record is written.
+Over HTTP the caller never sends a decision. It sends the action and a `grant_id` (see [Approval grants](#approval-grants)); the executor rebuilds the decision from the grant it stored. In-process, when `Executor.execute(action, decision)` is called, every action passes through these gates in order. If any gate refuses, the action does not run and an audit record is written.
 
 1. **Config gate.** If `ExecutorConfig.enabled=False`, refuse with `executor_disabled`.
 2. **Tier gate.** Only `decision.tier == "EXECUTE"` proceeds. SUGGEST / DRAFT / PROPOSE all refuse with `not_approved_for_execution`.
@@ -16,6 +16,23 @@ When `Executor.execute(action, decision)` is called, every action passes through
 5. **Kill switch gate (last defense).** Even after every other gate has cleared, the kill switch is checked one final time at the moment of dispatch. This is intentional: the kill switch is the *last-mile* safety, not the first.
 
 Only after all five gates clear does the executor invoke the wrapper.
+
+## Approval grants
+
+The code that runs the real approval gate (Slack, GitHub, CLI) calls `Executor.issue_grant(action, decision)` in-process. The executor checks the decision would clear the tier and approval gates, then stores a grant and returns its id. That id is all an HTTP caller gets.
+
+Not wired yet: nothing in this repo calls `issue_grant` today, so `/execute` refuses every request with `grant_unknown_or_used`. Connecting the control tower's approval step (`control_tower/action.py`) to `issue_grant` is the next change.
+
+| Property | How it's enforced |
+|---|---|
+| Bound to one action | The grant stores a SHA-256 digest of name, verb, target, environment, category, blast radius, reversible and metadata. Change any of them (say `metadata.replicas` from 3 to 0) and the grant is refused with `grant_action_mismatch`. |
+| Short-lived | `AEGIS_EXECUTOR_GRANT_TTL_SECONDS`, default 900 (15 minutes). After that: `grant_expired`. |
+| Single use | A real run removes the grant under a lock. The second call gets `grant_unknown_or_used`. `/dry-run` checks the grant without using it, so the operator can preview and then execute. |
+| Distinct approvers | The same name twice counts once. |
+
+Grant refusals go through the normal refusal path, so each one is audited and traced (`aegis.executor.gate=grant`).
+
+The default `GrantStore` is in memory, which is right for one replica. Running several replicas needs a shared store with the same `issue` / `peek` / `consume` methods.
 
 ## Default verb allowlist
 
@@ -31,19 +48,22 @@ Disabled by default. Production deployments opt in:
 
 ```bash
 export AEGIS_EXECUTOR_ENABLED=1            # master switch
+export AEGIS_EXECUTOR_API_TOKEN=...        # required; from your secret store, not a literal
 export AEGIS_EXECUTOR_DRY_RUN=0            # turn OFF dry-run (default is on)
-export AEGIS_EXECUTOR_AUDIT_PATH=/var/log/aegis/executor-audit.jsonl
-export AEGIS_EXECUTOR_TERRAFORM_APPLY=1    # explicit opt-in for terraform apply
+export AEGIS_EXECUTOR_AUDIT_LOG=/var/log/aegis/executor-audit.jsonl
+export AEGIS_EXECUTOR_TF_APPLY_ALLOWED=1   # explicit opt-in for terraform apply
 ```
+
+Without `AEGIS_EXECUTOR_API_TOKEN` the executor is not attached and every route stays at 503.
 
 Even when `AEGIS_EXECUTOR_ENABLED=1`, dry-run is on by default — the wrapper reports the argv it WOULD have invoked but does not invoke the binary. Set `AEGIS_EXECUTOR_DRY_RUN=0` to flip to real execution. This staged rollout is on purpose.
 
 ## API
 
-`/api/v1/executor` — mounted unconditionally so OpenAPI surfaces the endpoints. The dependency returns 503 until the lifespan hook attaches a real `Executor` instance.
+`/api/v1/executor` — mounted unconditionally so OpenAPI surfaces the endpoints. The dependency returns 503 until the lifespan hook attaches a real `Executor` instance. Every route needs `Authorization: Bearer <AEGIS_EXECUTOR_API_TOKEN>`; otherwise 401.
 
-- `POST /api/v1/executor/execute` — body: `ExecuteRequest(investigation_id, action, decision)` → `ExecutionResult`
-- `POST /api/v1/executor/dry-run` — same as execute, but forces `dry_run=True` regardless of config
+- `POST /api/v1/executor/execute` — body: `ExecuteRequest(investigation_id, action, grant_id, dry_run)` → `ExecutionResult`. A body with a `decision` field is rejected (422). `dry_run: true` forces a preview; `dry_run: false` can't override `AEGIS_EXECUTOR_DRY_RUN=1`.
+- `POST /api/v1/executor/dry-run` — same as execute, but forces `dry_run=True` and leaves the grant usable
 - `GET /api/v1/executor/audit?since=ISO&limit=50` — paginated audit JSONL
 - `GET /api/v1/executor/config` — current allowed verbs / dry-run mode / two-approval floor
 
@@ -70,7 +90,7 @@ If an audit write fails, the execution is refused. We never run an unaudited com
 cd apps/ai-engine && pytest executor/tests
 ```
 
-25+ tests cover: tier refusals, approval refusals, kill-switch refusals, verb blocking, dry-run, exception isolation, audit append, idempotency, forbidden verbs (kubectl delete, terraform destroy, aws iam mutating). Tests do not invoke real subprocesses — they mock `subprocess.run` and assert argv shape.
+Tests cover: grant binding, expiry, single use under concurrency, bearer auth, the rejected client-supplied decision, tier refusals, approval refusals, kill-switch refusals, verb blocking, dry-run, exception isolation, audit append, idempotency, forbidden verbs (kubectl delete, terraform destroy, aws iam mutating). Tests that turn dry-run off use the `fake_binary` fixture, which replaces `subprocess.run`, so the suite never reaches a real cluster from a developer laptop.
 
 ## Related
 

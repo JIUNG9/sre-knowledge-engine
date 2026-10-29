@@ -64,10 +64,9 @@ def test_dry_run_does_not_invoke_subprocess(make_executor) -> None:
     assert result.stdout.startswith("kubectl ")
 
 
-def test_caller_can_force_dry_run_off_via_argument(make_executor) -> None:
-    """When the caller passes ``dry_run=False`` we honour it (subject
-    to wrappers — kubectl might not be on PATH in CI, in which case
-    the result is ``failed``, but it's NOT dry-run)."""
+def test_caller_can_force_dry_run_off_via_argument(make_executor, fake_binary) -> None:
+    """When the caller passes ``dry_run=False`` we honour it. The binary
+    is faked so a developer's real kubectl context is never used."""
     executor = make_executor(dry_run_default=True)
     action = FakeAction(verb="kubectl get", target="pods/all")
     decision = make_decision()
@@ -75,9 +74,9 @@ def test_caller_can_force_dry_run_off_via_argument(make_executor) -> None:
     result = executor.execute(action, decision, dry_run=False)
 
     assert result.dry_run is False
-    # outcome may be 'executed' or 'failed' depending on whether
-    # kubectl is on PATH; both are valid (gate did not refuse).
-    assert result.outcome in ("executed", "failed")
+    assert result.outcome == "executed"
+    assert len(fake_binary) == 1
+    assert fake_binary[0][:3] == ["kubectl", "get", "pods/all"]
 
 
 # --------------------------------------------------------------------------- #

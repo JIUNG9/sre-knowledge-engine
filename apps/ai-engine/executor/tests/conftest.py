@@ -146,3 +146,21 @@ def make_executor(audit_path: Path, killswitch_clear: Any):
 def executor(make_executor) -> Executor:
     """Default executor: enabled, dry-run on, kill switch clear."""
     return make_executor()
+
+
+@pytest.fixture
+def fake_binary(monkeypatch):
+    """Stand in for kubectl so a real run never touches a cluster."""
+    import subprocess
+
+    from executor.wrappers import base
+
+    calls: list[list[str]] = []
+
+    def fake_run(argv, **_kwargs):
+        calls.append(list(argv))
+        return subprocess.CompletedProcess(argv, 0, stdout="ok", stderr="")
+
+    monkeypatch.setattr(base.shutil, "which", lambda _name: "/usr/bin/fake")
+    monkeypatch.setattr(base.subprocess, "run", fake_run)
+    return calls

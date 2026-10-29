@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -149,7 +150,87 @@ func (h *WebhookHandlers) HandleSigNoz(c *fiber.Ctx) error {
 	})
 }
 
-// HandleDatadog receives webhooks from Datadog.
+// datadogTags turns Datadog tags into labels. Tags arrive either as the
+// comma-separated string from the webhook's $TAGS variable or as a JSON array.
+// "key:value" becomes a label; a bare tag becomes a label with value "true".
+// Only the first colon splits, so "url:http://x" keeps its value. When a key
+// repeats ("env:a,env:b") the first value wins.
+func datadogTags(v interface{}) map[string]string {
+	var list []string
+	switch t := v.(type) {
+	case string:
+		list = strings.Split(t, ",")
+	case []interface{}:
+		for _, e := range t {
+			if s, ok := e.(string); ok {
+				list = append(list, s)
+			}
+		}
+	}
+
+	labels := map[string]string{}
+	for _, tag := range list {
+		tag = strings.TrimSpace(tag)
+		if tag == "" {
+			continue
+		}
+		key, val, found := strings.Cut(tag, ":")
+		key = strings.TrimSpace(key)
+		if key == "" {
+			continue
+		}
+		if !found {
+			val = "true"
+		}
+		if _, exists := labels[key]; !exists {
+			labels[key] = strings.TrimSpace(val)
+		}
+	}
+	return labels
+}
+
+// datadogSeverity maps a Datadog payload to a severity. The monitor priority
+// (P1-P5, or 1-5) wins over alert_type, since priority is set by the team and
+// alert_type only says whether the monitor is in alert or warn. Unknown or
+// missing values give medium.
+func datadogSeverity(priority, alertType string) models.Severity {
+	switch strings.ToLower(strings.TrimSpace(priority)) {
+	case "p1", "1":
+		return models.SeverityCritical
+	case "p2", "2":
+		return models.SeverityHigh
+	case "p3", "3", "normal":
+		return models.SeverityMedium
+	case "p4", "4", "p5", "5", "low":
+		return models.SeverityLow
+	}
+	switch strings.ToLower(strings.TrimSpace(alertType)) {
+	case "error":
+		return models.SeverityHigh
+	case "warning":
+		return models.SeverityMedium
+	case "info", "success":
+		return models.SeverityLow
+	}
+	return models.SeverityMedium
+}
+
+// datadogString reads a payload field that may be a string or a number, since
+// webhook templates quote $PRIORITY in some setups and not in others.
+func datadogString(raw map[string]interface{}, key string) string {
+	switch v := raw[key].(type) {
+	case string:
+		return v
+	case float64:
+		return strconv.FormatFloat(v, 'f', -1, 64)
+	}
+	return ""
+}
+
+// HandleDatadog receives webhooks from Datadog. The payload is whatever the
+// webhook integration's template produces; this reads title, body, id, tags,
+// priority and alert_type (map them to $EVENT_TITLE, $EVENT_MSG, $ID, $TAGS,
+// $ALERT_PRIORITY and $ALERT_TYPE).
 func (h *WebhookHandlers) HandleDatadog(c *fiber.Ctx) error {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(c.Body(), &raw); err != nil {
@@ -175,17 +256,14 @@ func (h *WebhookHandlers) HandleDatadog(c *fiber.Ctx) error {
 		alertID = uuid.New().String()[:8]
 	}
 
-	tags := map[string]string{}
-	if tagList, ok := raw["tags"].(string); ok && tagList != "" {
-		tags["raw_tags"] = tagList
-	}
+	tags := datadogTags(raw["tags"])
 
 	alert := models.Alert{
 		ID:          fmt.Sprintf("ALT-%s", alertID),
 		Source:      models.AlertSourceDatadog,
 		Title:       title,
 		Description: body,
-		Severity:    models.SeverityMedium,
+		Severity:    datadogSeverity(datadogString(raw, "priority"), datadogString(raw, "alert_type")),
 		Service:     serviceFromLabels(tags),
 		Status:      models.AlertStatusFiring,
 		Labels:      tags,

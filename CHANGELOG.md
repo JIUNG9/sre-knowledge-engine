@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Datadog webhook (`/webhooks/datadog`): severity was always medium and tags were stored as
+  one `raw_tags` label. Severity now comes from `priority` (P1 critical, P2 high, P3 and
+  `normal` medium, P4, P5 and `low` low), then from `alert_type` (`error` high, `warning`
+  medium, `info` and `success` low), and defaults to medium. `tags` (a comma-separated
+  string or a JSON array) become labels, so `service:checkout` sets the alert's service.
+  The `raw_tags` label is no longer set.
 - Alertmanager webhooks (`/webhooks/prometheus`, `/webhooks/signoz`): the fingerprint derived
   from labels when Alertmanager sends none could collide for different label sets whose
   keys or values contain `=`, merging two alerts into one. Keys and values are now quoted

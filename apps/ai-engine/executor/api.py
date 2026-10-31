@@ -3,10 +3,11 @@
 Endpoints under ``/api/v1/executor``:
 
 * ``POST /api/v1/executor/execute`` — body: investigation_id + the
-  ProposedAction + the GuardrailDecision (as a dict). Runs through
-  every gate and returns an :class:`ExecutionResult`.
+  ProposedAction + a ``grant_id``. The grant was issued in-process by
+  :meth:`Executor.issue_grant` after the real approval gate ran, and is
+  bound to this exact action. A real run uses the grant up.
 * ``POST /api/v1/executor/dry-run`` — same as ``/execute`` but with
-  ``dry_run`` forced to True.
+  ``dry_run`` forced to True. Checks the grant without using it.
 * ``GET  /api/v1/executor/audit`` — paginated audit rows.
 * ``GET  /api/v1/executor/config`` — current config snapshot
   (allowed verbs, dry-run mode, terraform-apply gate state).
@@ -15,14 +16,25 @@ Like the scheduler and control-tower routers, the dependency
 ``get_executor`` returns 503 by default — ``main.py`` overrides it
 once the lifespan hook builds an :class:`Executor`. This keeps the
 router import-safe.
+
+Callers never send an approval decision. An earlier version accepted
+``decision`` in the body, which let any caller claim ``approved: true``;
+a body that still carries ``decision`` now fails validation (422).
+
+Every route requires ``Authorization: Bearer <AEGIS_EXECUTOR_API_TOKEN>``.
+
+Nothing in this repo issues grants yet. Wiring the control tower's
+approval step to :meth:`Executor.issue_grant` is the follow-up; until
+then ``/execute`` refuses every call, which is the safe direction.
 """
 
 from __future__ import annotations
 
+import hmac
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
 
 from .executor import Executor
@@ -52,6 +64,30 @@ def get_executor() -> Executor:
     )
 
 
+def require_token(
+    authorization: str | None = Header(default=None),
+    executor: Executor = Depends(get_executor),
+) -> Executor:
+    """Check the bearer token, then hand back the executor.
+
+    An executor with no token configured refuses every call, so a
+    misconfigured deploy fails closed.
+    """
+    expected = executor.config.api_token
+    if not expected:
+        raise HTTPException(status_code=503, detail="executor API token not set")
+    scheme, _, supplied = (authorization or "").partition(" ")
+    if scheme.lower() != "bearer" or not hmac.compare_digest(
+        supplied.encode("utf-8"), expected.encode("utf-8")
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="invalid or missing bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return executor
+
+
 # --------------------------------------------------------------------------- #
 # Request / response models
 # --------------------------------------------------------------------------- #
@@ -72,50 +108,14 @@ class ActionPayload(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
-class ApprovalPayload(BaseModel):
-    """Mirror of guardrails.approval.ApprovalResult — only the fields
-    the executor actually consults.
-    """
-
-    model_config = ConfigDict(extra="ignore")
-
-    approved: bool = False
-    approvers: list[str] = Field(default_factory=list)
-    backend: str = "none"
-    reason: str | None = None
-
-
-class PolicyPayload(BaseModel):
-    """Mirror of guardrails.policy.PolicyDecision — only the fields
-    the executor reads.
-    """
-
-    model_config = ConfigDict(extra="ignore")
-
-    required_approvals: int = 0
-    approver_groups: list[str] = Field(default_factory=list)
-
-
-class DecisionPayload(BaseModel):
-    """The Layer 4 decision, as accepted over the wire."""
-
-    model_config = ConfigDict(extra="ignore")
-
-    tier: str = "SUGGEST"
-    approved: bool = False
-    approval: ApprovalPayload | None = None
-    policy: PolicyPayload | None = None
-    reasons: list[str] = Field(default_factory=list)
-
-
 class ExecuteRequest(BaseModel):
     """Body for ``POST /api/v1/executor/execute``."""
 
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="forbid")
 
     investigation_id: str | None = None
     action: ActionPayload
-    decision: DecisionPayload
+    grant_id: str = Field(min_length=1, max_length=128)
     dry_run: bool | None = None
 
 
@@ -134,9 +134,8 @@ class ConfigView(BaseModel):
 
 
 # --------------------------------------------------------------------------- #
-# Adapters — translate Pydantic payloads into the duck-typed shape the
-# executor consumes (mirroring control_tower.investigation.ProposedAction
-# + guardrails.engine.GuardrailDecision).
+# Adapter — translate the Pydantic payload into the duck-typed shape the
+# executor consumes (mirroring control_tower.investigation.ProposedAction).
 # --------------------------------------------------------------------------- #
 
 
@@ -154,44 +153,6 @@ class _ActionAdapter:
         self.metadata = dict(payload.metadata)
 
 
-class _TierAdapter:
-    def __init__(self, name: str) -> None:
-        self.name = name
-
-
-class _ApprovalAdapter:
-    def __init__(self, payload: ApprovalPayload | None) -> None:
-        if payload is None:
-            self.approved = False
-            self.approvers = ()
-            self.backend = "none"
-            self.reason = None
-        else:
-            self.approved = payload.approved
-            self.approvers = tuple(payload.approvers)
-            self.backend = payload.backend
-            self.reason = payload.reason
-
-
-class _PolicyAdapter:
-    def __init__(self, payload: PolicyPayload | None) -> None:
-        if payload is None:
-            self.required_approvals = 0
-            self.approver_groups = ()
-        else:
-            self.required_approvals = payload.required_approvals
-            self.approver_groups = tuple(payload.approver_groups)
-
-
-class _DecisionAdapter:
-    def __init__(self, payload: DecisionPayload) -> None:
-        self.tier = _TierAdapter(payload.tier)
-        self.approved = payload.approved
-        self.approval = _ApprovalAdapter(payload.approval)
-        self.policy = _PolicyAdapter(payload.policy)
-        self.reasons = tuple(payload.reasons)
-
-
 # --------------------------------------------------------------------------- #
 # Routes
 # --------------------------------------------------------------------------- #
@@ -204,14 +165,18 @@ class _DecisionAdapter:
 )
 def post_execute(
     body: ExecuteRequest,
-    executor: Executor = Depends(get_executor),
+    executor: Executor = Depends(require_token),
 ) -> ExecutionResult:
-    """Run the full executor pipeline. May refuse, fail, or execute."""
-    return executor.execute(
+    """Run the full executor pipeline. May refuse, fail, or execute.
+
+    ``dry_run`` in the body can only force a preview. It can't turn
+    dry-run off when the operator left ``AEGIS_EXECUTOR_DRY_RUN`` on.
+    """
+    return executor.execute_with_grant(
         _ActionAdapter(body.action),
-        _DecisionAdapter(body.decision),
+        body.grant_id,
         investigation_id=body.investigation_id,
-        dry_run=body.dry_run,
+        dry_run=True if body.dry_run else None,
     )
 
 
@@ -222,12 +187,12 @@ def post_execute(
 )
 def post_dry_run(
     body: ExecuteRequest,
-    executor: Executor = Depends(get_executor),
+    executor: Executor = Depends(require_token),
 ) -> ExecutionResult:
     """Identical to ``/execute`` but ``dry_run`` is forced True."""
-    return executor.execute(
+    return executor.execute_with_grant(
         _ActionAdapter(body.action),
-        _DecisionAdapter(body.decision),
+        body.grant_id,
         investigation_id=body.investigation_id,
         dry_run=True,
     )
@@ -238,7 +203,7 @@ def post_dry_run(
     summary="Recent executor audit rows (newest first)",
 )
 def get_audit(
-    executor: Executor = Depends(get_executor),
+    executor: Executor = Depends(require_token),
     since: str | None = Query(default=None, description="ISO timestamp lower bound"),
     limit: int = Query(default=50, ge=1, le=500),
 ) -> list[dict[str, Any]]:
@@ -260,7 +225,7 @@ def get_audit(
     response_model=ConfigView,
     summary="Current executor configuration",
 )
-def get_config(executor: Executor = Depends(get_executor)) -> ConfigView:
+def get_config(executor: Executor = Depends(require_token)) -> ConfigView:
     """Return the live ExecutorConfig snapshot, plus per-wrapper blocks."""
     blocked = {
         name: sorted(w.blocked_verbs) for name, w in executor.wrappers.items()

@@ -398,3 +398,68 @@ func TestDatadogTags_FirstValueWinsAndSkipsEmpty(t *testing.T) {
 		t.Errorf("nil tags gave %d labels, want 0", n)
 	}
 }
+
+func TestHandleDatadog_RecoveryResolvesTheSameAlert(t *testing.T) {
+	resetAlertStore(t)
+	app := newWebhookApp()
+
+	postJSON(t, app, "/webhooks/datadog", `{"id": "m-77", "title": "[Triggered] High error rate",
+		"alert_type": "error", "alert_transition": "Triggered", "tags": "service:checkout"}`)
+	if got := storedAlerts(); len(got) != 1 || got[0].Status != models.AlertStatusFiring {
+		t.Fatalf("after trigger got %+v, want one firing alert", got)
+	}
+
+	postJSON(t, app, "/webhooks/datadog", `{"id": "m-77", "title": "[Recovered] High error rate",
+		"alert_type": "success", "alert_transition": "Recovered", "tags": "service:checkout"}`)
+	alerts := storedAlerts()
+	if len(alerts) != 1 {
+		t.Fatalf("after recovery stored %d alerts, want 1", len(alerts))
+	}
+	if alerts[0].Status != models.AlertStatusResolved {
+		t.Errorf("status = %q, want resolved", alerts[0].Status)
+	}
+	if alerts[0].EndsAt == nil {
+		t.Error("EndsAt is nil, want the recovery time")
+	}
+
+	// The monitor triggering again reopens it and clears the end time.
+	postJSON(t, app, "/webhooks/datadog", `{"id": "m-77", "title": "[Triggered] High error rate",
+		"alert_transition": "Triggered"}`)
+	alerts = storedAlerts()
+	if len(alerts) != 1 || alerts[0].Status != models.AlertStatusFiring || alerts[0].EndsAt != nil {
+		t.Errorf("after re-trigger got %+v, want one firing alert with no EndsAt", alerts)
+	}
+}
+
+func TestHandleDatadog_RecoveryFromTitleAloneWithoutTransition(t *testing.T) {
+	resetAlertStore(t)
+	app := newWebhookApp()
+
+	postJSON(t, app, "/webhooks/datadog", `{"id": "m-8", "title": "Disk full"}`)
+	postJSON(t, app, "/webhooks/datadog", `{"id": "m-8", "title": "[Recovered] Disk full"}`)
+	alerts := storedAlerts()
+	if len(alerts) != 1 || alerts[0].Status != models.AlertStatusResolved {
+		t.Errorf("got %+v, want one resolved alert", alerts)
+	}
+}
+
+func TestDatadogRecovered(t *testing.T) {
+	cases := []struct {
+		transition, title string
+		want              bool
+	}{
+		{"Recovered", "x", true},
+		{" recovered ", "x", true},
+		{"", "[Recovered] disk", true},
+		{"", " [recovered] disk", true},
+		{"Triggered", "[Triggered] disk", false},
+		{"Warn", "[Warn] disk", false},
+		{"", "disk recovered later", false},
+		{"", "", false},
+	}
+	for _, c := range cases {
+		if got := datadogRecovered(c.transition, c.title); got != c.want {
+			t.Errorf("datadogRecovered(%q, %q) = %v, want %v", c.transition, c.title, got, c.want)
+		}
+	}
+}

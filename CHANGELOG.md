@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Datadog webhook (`/webhooks/datadog`): a recovery now resolves the stored alert and sets its
+  end time instead of being stored as firing. A payload is a recovery when `alert_transition`
+  is `Recovered` or the title starts with `[Recovered]`. Map `$ALERT_TRANSITION` to
+  `alert_transition`, and `$ALERT_ID` (the monitor id) to `id`: `$ID` is the event id, which
+  differs between the trigger and the recovery, so the two would not match.
 - Datadog webhook (`/webhooks/datadog`): severity was always medium and tags were stored as
   one `raw_tags` label. Severity now comes from `priority` (P1 critical, P2 high, P3 and
   `normal` medium, P4, P5 and `low` low), then from `alert_type` (`error` high, `warning`

@@ -227,10 +227,23 @@ func datadogString(raw map[string]interface{}, key string) string {
 	return ""
 }
 
+// datadogRecovered reports whether a Datadog payload is a recovery. It checks
+// alert_transition ($ALERT_TRANSITION, "Recovered") first, then the
+// "[Recovered]" prefix Datadog puts on monitor event titles.
+func datadogRecovered(transition, title string) bool {
+	if strings.EqualFold(strings.TrimSpace(transition), "recovered") {
+		return true
+	}
+	return strings.HasPrefix(strings.ToLower(strings.TrimSpace(title)), "[recovered]")
+}
+
 // HandleDatadog receives webhooks from Datadog. The payload is whatever the
 // webhook integration's template produces; this reads title, body, id, tags,
-// priority and alert_type (map them to $EVENT_TITLE, $EVENT_MSG, $ID, $TAGS,
-// $ALERT_PRIORITY and $ALERT_TYPE).
+// priority, alert_type and alert_transition (map them to $EVENT_TITLE,
+// $EVENT_MSG, $ALERT_ID, $TAGS, $ALERT_PRIORITY, $ALERT_TYPE and
+// $ALERT_TRANSITION). Use $ALERT_ID, the monitor id, for id: $ID is the event
+// id and differs between the trigger and the recovery, so they would not match.
+// A recovery resolves the stored alert that has the same id.
 func (h *WebhookHandlers) HandleDatadog(c *fiber.Ctx) error {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(c.Body(), &raw); err != nil {
@@ -258,6 +271,14 @@ func (h *WebhookHandlers) HandleDatadog(c *fiber.Ctx) error {
 
 	tags := datadogTags(raw["tags"])
 
+	status := models.AlertStatusFiring
+	var endsAt *time.Time
+	if datadogRecovered(datadogString(raw, "alert_transition"), title) {
+		status = models.AlertStatusResolved
+		now := time.Now().UTC()
+		endsAt = &now
+	}
+
 	alert := models.Alert{
 		ID:          fmt.Sprintf("ALT-%s", alertID),
 		Source:      models.AlertSourceDatadog,
@@ -265,9 +286,10 @@ func (h *WebhookHandlers) HandleDatadog(c *fiber.Ctx) error {
 		Description: body,
 		Severity:    datadogSeverity(datadogString(raw, "priority"), datadogString(raw, "alert_type")),
 		Service:     serviceFromLabels(tags),
-		Status:      models.AlertStatusFiring,
+		Status:      status,
 		Labels:      tags,
 		StartsAt:    time.Now().UTC(),
+		EndsAt:      endsAt,
 		Fingerprint: fmt.Sprintf("dd-%s", alertID),
 	}
 

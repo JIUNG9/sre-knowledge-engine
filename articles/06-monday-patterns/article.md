@@ -387,9 +387,10 @@ Once you've read all six layer pieces, the next horizon is making the agent self
 - The v4.0 plan (Layer 1-5 roadmap) is in the repo
 - Issues and PRs welcome — especially if you have pattern data you've analyzed
 
-If you run an SRE team and want to compare notes on time-of-week patterns in your own data, I'm open to trading observations. I'll bet 80% of you have a Monday 9 AM problem too.
+I'll bet 80% of you have a Monday 9 AM problem too.
 
 ---
 
 **Tags:** SRE, Observability, AI, Pattern Recognition, DevOps, FinOps
 
+*Written by June Gu, a Site Reliability Engineer; previously ran observability and SRE for 1M+ daily commerce transactions. Follow for more on AI-native DevSecOps.*

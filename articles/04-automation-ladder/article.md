@@ -329,5 +329,6 @@ Once you've read all six layer pieces (Safety, Wiki, SigNoz, Control Tower, Guar
 
 ---
 
+*June Gu is a Site Reliability Engineer in Seoul. He's building [Aegis](https://github.com/JIUNG9/aegis) — an open-source AI-native DevSecOps command center — on evenings and weekends.*
 
 **Tags:** AI, SRE, DevOps, Automation, Safety

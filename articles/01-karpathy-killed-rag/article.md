@@ -216,5 +216,6 @@ If you run this and it helps, tell me. If it doesn't, tell me louder — I will 
 
 ---
 
+*Written by June Gu, a Site Reliability Engineer.*
 
 **Tags:** AI, RAG, SRE, Knowledge Management, LLM, DevOps, Open Source

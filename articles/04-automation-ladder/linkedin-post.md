@@ -38,6 +38,7 @@ This matches how I think about trust generally. You do not give a new hire prod 
 
 It is the opposite of the "agentic" pitch that is everywhere right now. Slower to ship. Easier to defend at 3 AM.
 
+I work as an SRE.
 
 Full article: <medium-link-placeholder>
 

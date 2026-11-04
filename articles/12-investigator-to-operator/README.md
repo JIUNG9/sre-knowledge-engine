@@ -40,3 +40,4 @@ The shape:
 
 ## Why this is the natural capstone of Phase 2
 
+Phase 1 (the original 6 layers) gave us a system that *understands* infrastructure. Phase 2 gives us a system that *acts* on it under safety constraints. The article is the moment that distinction clicks for the reader.

@@ -4,6 +4,7 @@
 
 The Obsidian-centric companion piece to Article 02. Where Article 02 was about reconciliation (defensive), Article 03 is about auto-maintenance (generative). Shows the vault architecture (entities/concepts/runbooks/incidents), the auto-sync loops from SigNoz and Confluence, the living `overview.md` fence pattern, and freshness + orphan detection.
 
+Closes with the career angle: the sanitized public mirror at `github.com/JIUNG9/aegis-wiki` as a portfolio artifact.
 
 References real built code: `signoz_sync.py`, `confluence_sync.py`, `synthesizer.py`, `staleness.py`, `publisher.py` — all in `apps/ai-engine/wiki/`.
 

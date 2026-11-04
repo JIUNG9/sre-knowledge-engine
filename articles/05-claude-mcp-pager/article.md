@@ -334,5 +334,6 @@ The short version: if you already own your observability stack, adding an AI Con
 
 ---
 
+*June Gu is a Site Reliability Engineer in Seoul. He's building [Aegis](https://github.com/JIUNG9/aegis) — an open-source AI-native DevSecOps command center — on evenings and weekends.*
 
 **Tags:** AI, Claude API, MCP, Incident Management, SRE

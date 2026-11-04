@@ -257,6 +257,7 @@
 
 <p>When a new incident resolves in SigNoz, the knowledge base writes the postmortem into the right runbook. When Confluence adds a page, the knowledge base merges the new knowledge into the existing topic. When a document hasn't been touched in 180 days, the knowledge base quietly moves it to <code>_archive/</code> and stops serving it to AI agents. The <code>overview.md</code> file at the vault root — the one index that ties everything together — rebuilds itself after every sync, preserving my manual notes above a fence and synthesizing everything else below.</p>
 
+<p>This isn't a thought experiment. It's what I run on my own machine today, and a sanitized mirror of it lives in public at <a href="https://github.com/JIUNG9/aegis-wiki">github.com/JIUNG9/aegis-wiki</a>.</p>
 
 <blockquote><p>Runbooks rot not because anyone is lazy. Runbooks rot because nobody owns them, and ops teams are too busy keeping production alive to curate prose.</p></blockquote>
 
@@ -564,6 +565,7 @@ flowchart TB
 
 <p>The same vault that keeps my team's operational knowledge fresh is also my most compelling job-search artifact. <a href="https://github.com/JIUNG9/aegis-wiki">github.com/JIUNG9/aegis-wiki</a> is the public mirror — a sanitized version of my real operational vault, auto-published through the <a href="https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/publisher.py"><code>publisher.py</code></a> module, with all internal identifiers and account IDs scrubbed by the redaction pass.</p>
 
+<p>They see:</p>
 
 <ul>
 <li>A live-looking SRE knowledge base for a fictional-but-realistic production environment.</li>
@@ -634,6 +636,7 @@ poetry run aegis-wiki publish  # pushes sanitized mirror</code></pre>
 
 <p>Next article: <strong>"The Automation Ladder — 5 Levels of SRE Automation, From Grep to MCP-Driven Agents."</strong> That one walks through the pattern language I use to decide what to automate, how far to take it, and where humans belong in the loop. It's the mental model that made all of this coherent instead of a pile of scripts.</p>
 
+<p class="footer-note">June Gu is a Site Reliability Engineer. The sanitized public vault lives at <a href="https://github.com/JIUNG9/aegis-wiki">github.com/JIUNG9/aegis-wiki</a>.</p>
 
 <div class="tags">
   <span>Obsidian</span><span>Knowledge Management</span><span>AI</span><span>SRE</span><span>Open Source</span><span>Career</span>

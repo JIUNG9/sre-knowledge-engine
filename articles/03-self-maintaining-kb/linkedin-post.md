@@ -30,7 +30,7 @@ The vault at github.com/JIUNG9/aegis-wiki is a live Obsidian directory of SRE en
 
 Why build it this way? Two reasons.
 
-One — every SRE hiring manager wants to see the same three things. Do you operate production? Can you write a runbook? Can you build systems, not just run them? The vault answers all three.
+Do you operate production? Can you write a runbook? Can you build systems, not just run them? The vault answers all three.
 
 Two — the engine solves a real problem I lived with for years. Runbooks rot. Confluence dies. The AI agents pointed at those docs answer from fossils. The LLM Wiki pattern fixes it.
 

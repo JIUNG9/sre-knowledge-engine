@@ -19,6 +19,7 @@ Two to three articles per month. Start with the two articles that are strongest 
 | 7 | #7 Multi-Account Guardrails | AWS-focused, deepest technical piece. Targets infra managers. |
 | 8 | #9 PII Proxy for Claude | Opens the Layer 0 safety arc. Technical + unique (nobody's published this pattern). |
 | 9 | #10 Honey Tokens + Kill Switches | Middle of the safety arc. Builds on #9. |
+| 10 | #11 PIPA Case Study (Tier C Deployment) | Closes the safety arc. Pin for 2 weeks. |
 | 11 | #8 Open-Sourcing Aegis | Capstone of the architecture story. |
 | 12 | #12 From Investigator to Operator — Wiring the Self-Healing Executor | Phase 2 capstone. The leap from "agent describes the fix" to "agent runs the fix under the 4-stage ladder." Documents Layer 4 executor (P2.5). |
 
@@ -197,7 +198,6 @@ Each article ships with three LinkedIn variants in `articles/0X-<slug>/linkedin-
 | Variant | Audience | When to use |
 |---------|----------|-------------|
 | A — Technical | Senior engineers, SREs, platform leads | Default for articles with heavy architecture (#1, #2, #4, #5, #7) |
-| B — Career | Recruiters, hiring managers, managers | Use when you want to drive inbound recruiter messages (#3, #6, #8) |
 | C — Hot take | Broad reach, algorithm-friendly | Use when an article is slow on Medium and you want a fresh spike. Limit to two Variant C posts per quarter to avoid brand drift. |
 
 Only post one variant per article on the day of publish. Hold the other two for a four-to-six-week "re-run" if the article needs a second spike, or for reposting on adjacent topics.

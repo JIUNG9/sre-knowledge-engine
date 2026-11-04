@@ -1,5 +1,6 @@
 # LinkedIn Announcement — Article #11
 
+Three variants.
 
 ---
 

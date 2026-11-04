@@ -38,6 +38,7 @@ The fix was boring: a Python module that aggregates resolved incidents by hour o
 
 The lesson is not "build an analyzer." The lesson is that SRE work is full of latent patterns your intuition will miss because you only see each individual incident, never the population.
 
+I run SRE in production by day. Aegis is my side project that turns day-job lessons into open source.
 
 Full article: <medium-link-placeholder>
 

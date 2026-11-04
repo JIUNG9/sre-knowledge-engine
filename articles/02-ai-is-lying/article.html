@@ -289,6 +289,7 @@
 
 <p>This article is about what we built to stop that from happening again — at my day job, across four AWS accounts, 49 PostgreSQL instances, and a knowledge surface area that spans Confluence, three GitHub repos, Google Docs, and pinned Slack threads older than most of our services.</p>
 
+<p>We called it the document reconciliation engine. The Layer 1 Obsidian-backed wiki is live in the repo today. The Layer 5 MCP reconciliation tools are on the roadmap — I'll mark what's built vs. planned as we go.</p>
 
 <h2>The scattered-docs reality</h2>
 
@@ -623,6 +624,7 @@ poetry run aegis-wiki reconcile</code></pre>
 
 <p>Next article: <strong>"I Built a Self-Maintaining SRE Knowledge Base — It Finds Stale Docs Automatically"</strong> — the Obsidian vault side of this story, showing how <code>signoz_sync.py</code> and <code>confluence_sync.py</code> turn resolved incidents into runbook pages, how the <code>overview.md</code> stays living, and why I'm auto-publishing a sanitized version of all this to <a href="https://github.com/JIUNG9/aegis-wiki"><code>github.com/JIUNG9/aegis-wiki</code></a> as a portable portfolio.</p>
 
+<p class="footer-note">June Gu is a Site Reliability Engineer.</p>
 
 <div class="tags">
   <span>AI</span><span>DevOps</span><span>Documentation</span><span>MCP</span><span>SRE</span>

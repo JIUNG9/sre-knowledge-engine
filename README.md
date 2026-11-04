@@ -196,7 +196,6 @@ The design decisions, trade-offs, and implementation details behind Aegis are do
 | 5 | [Claude + MCP Replaced Our 3 AM Pager](articles/05-claude-mcp-pager/article.md) | A full investigation loop for fifteen dollars a month. |
 | 6 | [80% of Incidents on Monday 9 AM](articles/06-monday-patterns/article.md) | Time-based pattern analysis that pre-positions recommendations. |
 | 7 | [Production Guardrails Across 4 AWS Accounts](articles/07-multi-account-guardrails/article.md) | Risk tiers, dry-run, rollback-first, SOC2-ready audit trail. |
-| 8 | [Open-Sourcing Aegis](articles/08-open-sourcing-capstone/article.md) | The career capstone: SRE by day, platform author by night. |
 | 9 | [PII-Redacting Proxy for Claude](articles/09-pii-proxy-for-claude/article.md) | Layer 0.1 — stopping real prod data from crossing to Anthropic's servers. |
 | 10 | [Honey Tokens + Kill Switches](articles/10-honey-tokens-killswitches/article.md) | Layer 0.3 + 0.6 — tripwires that catch LLM leaks + an `aegis panic` CLI. |
 | 11 | [Deploying AI in a Regulated Enterprise (PIPA Case Study)](articles/11-pipa-case-study/article.md) | Layer 0.4 + Tier C — how Aegis stays on the right side of Korean PIPA. |
@@ -253,6 +252,7 @@ Budget guardrails in `apps/web/src/app/(dashboard)/settings/` auto-downgrade to 
 
 ## About the Author
 
+**June Gu** (Jiung Gu), Site Reliability Engineer. Aegis is a nights-and-weekends project built while operating multi-account AWS infrastructure, EKS clusters, and PostgreSQL fleets at day-job scale.
 
 - Medium: [medium.com/@June-Gu](https://medium.com/@June-Gu)
 - GitHub: [github.com/JIUNG9](https://github.com/JIUNG9)

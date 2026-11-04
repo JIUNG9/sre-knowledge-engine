@@ -537,7 +537,7 @@ Every layer is now shipped and pushed to `origin/main`. The Layer 4 guardrails p
 
 Once you've read all six layer pieces, the next horizon is making the agent self-heal — turning proposed actions into actually-run commands. That's the topic of the upcoming **Article #12: "From Investigator to Operator"** — the executor that bridges guardrails-approved proposals and real kubectl/aws execution. Guardrails decide *whether* the AI can act; the executor is what makes it actually act.
 
-If you're a hiring manager reading this — hi. If you're an SRE reading this and thinking "I should build something like this" — do it. It's the highest-leverage portfolio piece I've ever worked on.
+If you're an SRE reading this and thinking "I should build something like this" — do it. It's the highest-leverage portfolio piece I've ever worked on.
 
 ---
 
@@ -553,3 +553,4 @@ If you're running AI agents in production across multiple AWS accounts, I'd love
 
 **Tags:** AI, Security, AWS, SRE, DevSecOps, Compliance
 
+*Written by June Gu, a Site Reliability Engineer; previously ran observability and SRE for 1M+ daily commerce transactions. Follow for more on AI-native DevSecOps.*

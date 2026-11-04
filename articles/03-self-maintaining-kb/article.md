@@ -8,6 +8,7 @@
 
 When a new incident resolves in SigNoz, the knowledge base writes the postmortem into the right runbook. When Confluence adds a page, the knowledge base merges the new knowledge into the existing topic. When a document hasn't been touched in 180 days, the knowledge base quietly moves it to `_archive/` and stops serving it to AI agents. The `overview.md` file at the vault root — the one index that ties everything together — rebuilds itself after every sync, preserving my manual notes above a fence and synthesizing everything else below.
 
+This isn't a thought experiment. It's what I run on my own machine today, and a sanitized mirror of it lives in public at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki).
 
 > Runbooks rot not because anyone is lazy. Runbooks rot because nobody owns them, and ops teams are too busy keeping production alive to curate prose.
 
@@ -382,6 +383,7 @@ Here's the part I don't see anyone else doing.
 
 The same vault that keeps my team's operational knowledge fresh is also my most compelling job-search artifact. [`github.com/JIUNG9/aegis-wiki`](https://github.com/JIUNG9/aegis-wiki) is the public mirror — a sanitized version of my real operational vault, auto-published through the [`publisher.py`](https://github.com/JIUNG9/aegis/blob/main/apps/ai-engine/wiki/publisher.py) module, with all internal identifiers and account IDs scrubbed by the redaction pass.
 
+They see:
 
 - A live-looking SRE knowledge base for a fictional-but-realistic production environment.
 - Entity pages for services, databases, clusters — each with dependencies, runbooks, and incident history.
@@ -453,5 +455,6 @@ The series as a whole is documenting how I'm building [Aegis](https://github.com
 
 ---
 
+*June Gu is a Site Reliability Engineer. The sanitized public vault lives at [github.com/JIUNG9/aegis-wiki](https://github.com/JIUNG9/aegis-wiki).*
 
 **Tags**: Obsidian, Knowledge Management, AI, SRE, Open Source, Career

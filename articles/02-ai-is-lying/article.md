@@ -28,6 +28,7 @@ Confidence won. The AI was lying with a straight face.
 
 This article is about what we built to stop that from happening again — at my day job, across four AWS accounts, 49 PostgreSQL instances, and a knowledge surface area that spans Confluence, three GitHub repos, Google Docs, and pinned Slack threads older than most of our services.
 
+We called it the document reconciliation engine. The Layer 1 Obsidian-backed wiki is live in the repo today. The Layer 5 MCP reconciliation tools are on the roadmap — I'll mark what's built vs. planned as we go.
 
 ---
 
@@ -396,5 +397,6 @@ The series is building toward something bigger: a full AI-native DevSecOps comma
 
 ---
 
+*June Gu is a Site Reliability Engineer.*
 
 **Tags**: AI, DevOps, Documentation, MCP, SRE
